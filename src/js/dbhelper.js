@@ -9,9 +9,9 @@ class DBHelper {
    * Database URL.
    * Change this to restaurants.json file location on your server.
    */
-  static get DATABASE_URL() {
+  static getDbUrl(params = '') {
     const port = 1337 // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+    return `http://localhost:${port}/${params}`;
   }
 
   /**
@@ -19,7 +19,7 @@ class DBHelper {
    */
   static fetchRestaurants () {
     
-    return fetchRestaurantsData || fetch(DBHelper.DATABASE_URL)
+    return fetchRestaurantsData || fetch(DBHelper.getDbUrl('restaurants'))
       .then((response) => response.json())
       .then((restaurants) => {
           fetchRestaurantsData = Promise.resolve(restaurants)
@@ -28,19 +28,6 @@ class DBHelper {
       .catch((error) => {
         console.log(error);
       });
-
-    // let xhr = new XMLHttpRequest();
-    // xhr.open('GET', DBHelper.DATABASE_URL);
-    // xhr.onload = () => {
-      // if (xhr.status === 200) { // Got a success response from server!
-        // const restaurants = JSON.parse(xhr.responseText); 
-        // callback(null, restaurants);
-      // } else { // Oops!. Got an error from server.
-        // const error = (`Request failed. Returned status of ${xhr.status}`);
-        // callback(error, null);
-      // }
-    // };
-    // xhr.send();
   }
 
   /**
@@ -172,6 +159,18 @@ class DBHelper {
     );
     return marker;
   } */
+
+  /**
+   * Fetch reviews by restaurant ID.
+   */
+  static fetchReviewsByRestaurantId(id) {
+    return fetch(DBHelper.getDbUrl(`reviews/?restaurant_id=${id}`))
+      .then((response) => response.json())
+      .then((reviews) => reviews.filter(r => r.restaurant_id == id))
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
 }
 

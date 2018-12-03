@@ -98,7 +98,7 @@ const fillRestaurantHTML = (restaurant = self.restaurant) => {
     fillRestaurantHoursHTML();
   }
   // fill reviews
-  fillReviewsHTML();
+  fetchReviewsFromURL();
 }
 
 /**
@@ -122,9 +122,27 @@ const fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hour
 }
 
 /**
+ * Get current reviews from restaurant page URL.
+ */
+const fetchReviewsFromURL = () => {
+  if (self.reviews) { // reviews already fetched!
+    return self.reviews;
+  }
+  const id = getParameterByName('id');
+  if (!id) { // no id found in URL
+    return Promise.reject('No restaurant id in URL');
+  } else {
+    return DBHelper.fetchReviewsByRestaurantId(id).then((reviews) => {
+      if (reviews) fillReviewsHTML(reviews);
+      return reviews;
+    });
+  }
+}
+
+/**
  * Create all reviews HTML and add them to the webpage.
  */
-const fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+const fillReviewsHTML = (reviews) => {
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
@@ -132,14 +150,20 @@ const fillReviewsHTML = (reviews = self.restaurant.reviews) => {
 
   if (!reviews) {
     const noReviews = document.createElement('p');
-    noReviews.innerHTML = 'No reviews yet!';
+    noReviews.innerHTML = 'No reviews yet. Be the first one to write a review.';
     container.appendChild(noReviews);
     return;
   }
   const ul = document.getElementById('reviews-list');
-  reviews.forEach(review => {
-    ul.appendChild(createReviewHTML(review));
-  });
+  if (reviews.length > 1) {
+    reviews.forEach(review => {
+      ul.appendChild(createReviewHTML(review));
+    });
+  }
+  else {
+     ul.appendChild(createReviewHTML(reviews));
+  }
+
   container.appendChild(ul);
 }
 
@@ -158,7 +182,13 @@ const createReviewHTML = (review) => {
   reviewHeader.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  // format: October 26, 2016
+  var dateOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  };
+  date.innerHTML = new Date(review.updatedAt).toLocaleDateString('en-US', dateOptions);
   date.className = 'date'
   reviewHeader.appendChild(date);
 

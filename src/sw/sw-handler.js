@@ -70,7 +70,7 @@ self.addEventListener('fetch', function (event) {
 
       // RespondWith idbResponse fun if we call our server
       if (requestUrl.port === '1337') {
-        event.respondWith(idbResponse(request));
+        event.respondWith(idbResponse(request, requestUrl.pathname.replace(/^\/+|\/+$/g, '')));
         return;
       }
 
@@ -78,10 +78,6 @@ self.addEventListener('fetch', function (event) {
       if (requestUrl.href.includes('chrome-extension') ||
         requestUrl.pathname === '/browser-sync/socket.io/' ||
         requestUrl.href.includes('browser-sync/browser-sync-client.js')) return
-
-      // const customResponse = '/restaurant.html';
-      // if (requestUrl.pathname.startsWith(customResponse))
-      //   request = customResponse;
 
       //  console.log('fetch', requestUrl);
 
@@ -126,45 +122,68 @@ self.addEventListener('message', (event) => {
 const dbPromise = idb.open('restaurant-store', 1, upgradeDB => {
   switch (upgradeDB.oldVersion) {
     case 0:
-      upgradeDB.createObjectStore('restaurants')
+      upgradeDB.createObjectStore('restaurants', {
+        keyPath: 'id'
+      })
+    case 1:
+      upgradeDB.createObjectStore('reviews', {
+        keyPath: ['id', 'restaurant_id']
+      })
   }
 })
 
 /**
- * Response from NET, save data in DB, respond data from DB if offline
- * @param {Request object} req 
+ * save Data To Idb
+ * @param {Object} data 
+ * @param {String} dbStoreName 
  */
-function idbResponse(req) {
+function saveDataToIdb(data, dbStoreName) {
+  return dbPromise.then(db => {
+    if (!db) return;
+    const tx = db.transaction(dbStoreName, 'readwrite');
+    const store = tx.objectStore(dbStoreName);
+    for (const row of data) {
+      store.put(row);
+    }
+  }).catch(error => console.log('idb error: ', error));
+}
+
+/**
+ * get Data From Idb
+ * @param {String} dbStoreName 
+ * @param {String} fetchError 
+ */
+function getDataFromIdb(dbStoreName, fetchError) {
+  return dbPromise.then(db => {
+    if (!db) throw ('DB undefined');
+    const tx = db.transaction(dbStoreName);
+    const store = tx.objectStore(dbStoreName);
+    return store.getAll().then(data => {
+      if (data.length === 0) throw ('DB: data is empty');
+      console.log('Data served from DB');
+      return new Response(JSON.stringify(data))
+    }).catch((error) => error);
+
+  }).catch(dbError => {
+    console.log(fetchError + dbError);
+    return Promise.reject(fetchError + dbError);
+  });
+}
+
+/**
+ * Response from NET, save data in DB, respond data from DB if offline
+ * @param {Request object} req
+ * @param {String} dbStoreName
+ */
+function idbResponse(req, dbStoreName) {
 
   return fetch(req)
     .then((response) => response.json())
-    .then((restaurants) => {
-      dbPromise.then(db => {
-        if (!db) return;
-        const tx = db.transaction('restaurants', 'readwrite');
-        const store = tx.objectStore('restaurants');
-        for (const restaurant of restaurants) {
-          store.put(restaurant, restaurant.id);
-        }
-      }).catch(error => console.log('idb error: ', error));
-
-      return new Response(JSON.stringify(restaurants))
+    .then((data) => {
+      saveDataToIdb(data, dbStoreName)
+      return new Response(JSON.stringify(data))
     })
     .catch((fetchError) => {
-      return dbPromise.then(db => {
-        if (!db) throw ('DB undefined');
-        const tx = db.transaction('restaurants');
-        const store = tx.objectStore('restaurants');
-        return store.getAll().then(restaurants => {
-          if (restaurants.length === 0) throw ('DB data is empty');
-          console.log('Data served from DB');
-          return new Response(JSON.stringify(restaurants))
-        }).catch((error) => error);
-
-      }).catch(dbError => {
-        console.log(fetchError + dbError);
-        return Promise.reject(fetchError + dbError);
-      });
-
+      return getDataFromIdb(dbStoreName, fetchError)
     })
 }
