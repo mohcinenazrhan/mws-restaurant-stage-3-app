@@ -16,7 +16,9 @@ function serviceWorkerRegistration() {
     })
 
     navigator.serviceWorker
-        .register('./service-worker.js')
+        .register('sw/service-worker.js', {
+            scope: '/'
+        })
         .then((reg) => {
             console.log('Service Worker Registered');
 

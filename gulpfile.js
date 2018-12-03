@@ -20,30 +20,63 @@ const gulp         = require('gulp'),
       runSequence  = require('run-sequence'),
       rev          = require('gulp-rev'),
       fs           = require('fs'),
-      file         = require('gulp-file');
-      
+      file         = require('gulp-file'),
+      path         = require('path'),
+      swPrecache   = require('sw-precache');
+
 const reload = browserSync.reload,
     $ = gulpLoadPlugins();
 
-let dev = true;
-
+let dev = true,
+rootDir = dev ? '.temp' : 'dist';
 /////////////////////////////// Watch Mode : .temp ///////////////////////////////
 
-gulp.task('watch', ['scripts', 'styles', 'html', 'moveSW'], function () {
+gulp.task('serve-only', function () {
 
     browserSync.init({
-        server: "./.temp"
+        open: false,
+        server: {
+            baseDir: './.temp',
+            middleware: [{
+                route: '/sw/service-worker.js',
+                handle: function (req, res, next) {
+                    res.setHeader('Service-Worker-Allowed', '/');
+                    next();
+                }
+            }]
+        }
     });
 
-    gulp.watch("src/sass/*.scss", ['styles']);
-    gulp.watch("src/js/*.js", ['scripts']);
-    gulp.watch("src/js/service-worker.js", ['moveSW']);
-    gulp.watch("src/*.html", ['html']).on('change', reload);
+    gulp.watch('src/sass/*.scss', ['styles']);
+    gulp.watch('src/js/*.js', ['scripts']);
+    gulp.watch('src/sw/sw-handler.js', ['service-worker']);
+    gulp.watch('src/*.html', ['html']).on('change', reload);
+});
+
+gulp.task('watch', ['scripts', 'styles', 'html'], function () {
+
+    browserSync.init({
+        server: {
+            baseDir: './.temp',
+            middleware: [{
+                route: '/sw/service-worker.js',
+                handle: function (req, res, next) {
+                    res.setHeader('Service-Worker-Allowed', '/');
+                    next();
+                }
+            }]
+        }
+    });
+
+    gulp.watch('src/sass/*.scss', ['styles']);
+    gulp.watch('src/js/*.js', ['scripts']);
+    gulp.watch('src/sw/sw-handler.js', ['service-worker']);
+    gulp.watch('src/*.html', ['html']).on('change', reload);
 });
 
 // styles .scss
 gulp.task('styles', function () {
-    return gulp.src("src/sass/*.scss")
+    return gulp.src('src/sass/*.scss')
         .pipe($.if(dev, $.sourcemaps.init()))
         .pipe(sass({
             includePaths: require('node-normalize-scss').includePaths
@@ -103,23 +136,6 @@ gulp.task('scripts', ['lint'], function () {
 
 });
 
-// Move Service Worker to .temp
-gulp.task('moveSW', ['lint'], function () {
-
-    const bundler = browserify('src/js/service-worker.js', {debug: true}); // ['1.js', '2.js']
-
-    return bundler
-        .transform(babelify, {
-            presets: ["babel-preset-env"],
-            sourceMaps: dev ? true : false
-        }) // required for 'import'
-        .bundle()
-        .pipe(source('service-worker.js')) // get text stream w/ destination filename
-        .pipe(buffer()) // required to use stream w/ other plugins
-        .pipe($.if(!dev, uglify()))
-        .pipe($.if(dev, gulp.dest('.temp/'), gulp.dest('dist/')))
-})
-
 // Copy html files
 gulp.task('html', function () {
     return gulp.src('src/*.html')
@@ -142,7 +158,7 @@ gulp.task('html', function () {
 
 // Generates responsive images
 gulp.task('res-images', function () {
-    return gulp.src('src/imgs/*.{png,jpg}')
+    return gulp.src('src/img/*.{png,jpg}')
         .pipe(responsive({
             '*.jpg': [{
                 width: 300,
@@ -194,17 +210,34 @@ gulp.task('clean', function () {
     return gulp.src(dev ? '.temp' : 'dist', {
         read: false
     }).pipe(clean())
-    // .pipe($.if(!dev, file('rev-manifest.json', '')))
-    // .pipe($.if(!dev, gulp.dest('dist/')))
 });
 
 gulp.task('serve', () => {
-    runSequence(['clean'], ['watch', 'res-images', 'pwafiles'])
+    runSequence(['clean'], ['watch', 'res-images', 'pwafiles'], ['service-worker'])
 })
 
 /////////////////////////////// Build for Prod : Dist ///////////////////////////////
 
-gulp.task('build', ['scripts', 'styles', 'html', 'moveSW', 'res-images', 'pwafiles'], () => {
+gulp.task('serve-prod', function () {
+
+    browserSync.init({
+        open: false,
+        port: 8080,
+        server: {
+            baseDir: './dist',
+            middleware: [{
+                route: '/sw/service-worker.js',
+                handle: function (req, res, next) {
+                    res.setHeader('Service-Worker-Allowed', '/');
+                    next();
+                }
+            }]
+        }
+    });
+});
+
+
+gulp.task('build', ['scripts', 'styles', 'html', 'res-images', 'pwafiles'], () => {
     return gulp.src('dist/**/*').pipe($.size({
         title: 'build',
         gzip: true
@@ -223,10 +256,10 @@ gulp.task('bundles', function () {
         .pipe(gulp.dest('dist/'))
 });
 
-gulp.task('fixbundles', ['bundles'], function () {
+gulp.task('fixbundles', function () {
 
     const revs = JSON.parse(fs.readFileSync('dist/rev-manifest.json'));
-    let src = gulp.src(['dist/service-worker.js', 'dist/*.html'])
+    let src = gulp.src(['dist/*.html'])
     for (const rev in revs) {
         src.pipe(replace(rev, revs[rev]))
     }
@@ -236,11 +269,49 @@ gulp.task('fixbundles', ['bundles'], function () {
         fs.unlink(`dist/${rev}`)
     }
     
+    fs.unlink('dist/rev-manifest.json')
 });
 
 gulp.task('default', () => {
     return new Promise(resolve => {
         dev = false;
-        runSequence('clean', 'build', 'fixbundles', resolve);
+        rootDir = dev ? '.temp' : 'dist';
+        runSequence('clean', 'build', 'bundles', 'fixbundles', 'service-worker', resolve);
     });
 });
+
+
+////////////////////////////////// Service Worker //////////////////////////////////
+
+gulp.task('generate-service-worker', function (callback) {
+    swPrecache.write(`${rootDir}/sw/service-worker.js`, {
+        staticFileGlobs: [rootDir + '/**/*.{js,html,css,png,jpg,gif,svg,eot,ttf,woff}'],
+        stripPrefix: rootDir,
+        handleFetch: false
+    }, callback);
+});
+
+gulp.task('prepare-sw', ['generate-service-worker'], function () {
+    return gulp.src([`${rootDir}/sw/service-worker.js`, 'src/sw/sw-handler.js'])
+        .pipe(plumber())
+        .pipe(concat('service-worker.js'))
+        .pipe($.if(dev, gulp.dest('.temp/sw'), gulp.dest('dist/sw')))
+})
+
+gulp.task('service-worker', ['prepare-sw'], function () {
+    const bundler = browserify(`${rootDir}/sw/service-worker.js`, {
+        debug: true
+    }); // ['1.js', '2.js']
+
+    return bundler
+        .transform(babelify, {
+            presets: ['babel-preset-env'],
+            sourceMaps: dev ? true : false
+        }) // required for 'import'
+        .bundle()
+        .pipe(source('service-worker.js')) // get text stream w/ destination filename
+        .pipe(buffer()) // required to use stream w/ other plugins
+        .pipe($.if(!dev, uglify()))
+        .pipe($.if(dev, gulp.dest('.temp/sw'), gulp.dest('dist/sw')))
+
+})

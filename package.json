@@ -1,5 +1,5 @@
 {
-  "name": "stage2-app",
+  "name": "stage3-app",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -36,6 +36,7 @@
     "gulp-uglifycss": "^1.1.0",
     "node-normalize-scss": "^8.0.0",
     "run-sequence": "^2.2.1",
+    "sw-precache": "^5.2.1",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0"
   },
