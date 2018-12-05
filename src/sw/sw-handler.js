@@ -1,12 +1,13 @@
 import idb from 'idb';
 
 var ignoreUrlParametersMatching = [/^utm_/];
+let isOffline = false,
+    isVisible = false;
 
 self.addEventListener('fetch', function (event) {
-  if (event.request.method === 'GET') {
-    let request = event.request,
+  let request = event.request,
       requestUrl = new URL(request.url);
-
+  if (request.method === 'GET') {
     // Should we call event.respondWith() inside this fetch event handler?
     // This needs to be determined synchronously, which will give other fetch
     // handlers a chance to handle the request if need be.
@@ -106,13 +107,8 @@ self.addEventListener('fetch', function (event) {
       );
     }
   }
-});
-
-// listen for the "message" event, and call
-// skipWaiting if you get the appropriate message
-self.addEventListener('message', (event) => {
-  if (event.data.action == 'skipWaiting') {
-    self.skipWaiting();
+  else if (request.method === 'POST' && requestUrl.pathname === '/reviews/' && isOffline) {
+    return postReview(event);
   }
 });
 
@@ -127,8 +123,12 @@ const dbPromise = idb.open('restaurant-store', 1, upgradeDB => {
       })
     case 1:
       upgradeDB.createObjectStore('reviews', {
-        keyPath: ['id', 'restaurant_id']
+        keyPath: 'id'
       })
+    case 2:
+      upgradeDB.createObjectStore('requests', {
+        keyPath: 'id'
+      });
   }
 })
 
@@ -138,13 +138,20 @@ const dbPromise = idb.open('restaurant-store', 1, upgradeDB => {
  * @param {String} dbStoreName 
  */
 function saveDataToIdb(data, dbStoreName) {
+  console.log('saveDataToIdb', dbStoreName);
+  
   return dbPromise.then(db => {
     if (!db) return;
     const tx = db.transaction(dbStoreName, 'readwrite');
     const store = tx.objectStore(dbStoreName);
-    for (const row of data) {
-      store.put(row);
+    if (Array.isArray(data)) {
+      for (const row of data) {
+        store.put(row);
+      }
+    } else {
+      store.put(data);
     }
+    return;
   }).catch(error => console.log('idb error: ', error));
 }
 
@@ -153,7 +160,7 @@ function saveDataToIdb(data, dbStoreName) {
  * @param {String} dbStoreName 
  * @param {String} fetchError 
  */
-function getDataFromIdb(dbStoreName, fetchError) {
+function getDataFromIdb(dbStoreName, fetchError = '') {
   return dbPromise.then(db => {
     if (!db) throw ('DB undefined');
     const tx = db.transaction(dbStoreName);
@@ -168,6 +175,31 @@ function getDataFromIdb(dbStoreName, fetchError) {
     console.log(fetchError + dbError);
     return Promise.reject(fetchError + dbError);
   });
+}
+
+/**
+ * delete Data From Idb
+ * @param {Number} id 
+ * @param {String | Array} dbStoresName 
+ */
+function deleteDataFromIdb(id, dbStoresName) {
+  let storesName = []
+  if (!Array.isArray(dbStoresName)) {
+    storesName.push(dbStoresName)
+  } else {
+    storesName = dbStoresName
+  }
+  
+  return storesName.map((storeName) => {
+    return dbPromise.then(db => {
+    if (!db) return;
+      const tx = db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      return store.delete(id).complete;
+    })
+    .catch(error => console.log('idb error: ', error));
+  })
+  
 }
 
 /**
@@ -186,4 +218,169 @@ function idbResponse(req, dbStoreName) {
     .catch((fetchError) => {
       return getDataFromIdb(dbStoreName, fetchError)
     })
+}
+
+/* ------------------------Background Sync------------------------ */
+
+/**
+ * sync Manager
+ */
+function syncManager() {
+  let registration = self.registration;
+  if (!registration) {
+    try {
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        registration = reg
+      })
+    } catch (e) {}
+  }
+  return registration.sync;
+}
+
+function trigger(tagName = 'review-sync') {
+  return syncManager().register(tagName);
+}
+
+function serializeRequest(request, body) {
+  return {
+    url: request.url,
+    headers: Array.from(request.headers),
+    method: request.method,
+    credentials: request.credentials,
+    referrer: request.referrer,
+    mode: request.mode === 'navigate' ? 'same-origin' : request.mode,
+    body: JSON.stringify(body)
+  };
+}
+
+function deserializeRequest(obj) {
+  return new Request(obj.url, obj);
+}
+
+function generateUID() {
+  return `${Date.now()}-${performance.now()}`;
+}
+
+/**
+ * Save request and data to submit and serve it later
+ */
+function enqueue(event) {
+  const tempID = generateUID()
+  return event.request.json().then((data) => {
+    let request = serializeRequest(event.request, data);
+
+    request = Object.assign(request, {
+      id: tempID
+    })
+    data.id = tempID
+    return (saveDataToIdb(request, 'requests') && saveDataToIdb(data, 'reviews'))
+  })
+}
+
+/**
+ * Post Review
+ * @param {*} event 
+ */
+function postReview(event) {
+  if (!'SyncManager' in self) return;
+
+  event.waitUntil(
+    (function () {
+      event.respondWith(new Response(null, { status: 302 }));
+      enqueue(event).then(() => {
+        trigger();
+        send_message_to_all_clients('MsgSyncReviews');
+      })
+    })()
+  )
+}
+
+/**
+ * Listener sync
+ */
+self.addEventListener('sync', function (event) {
+  if (event.tag == 'review-sync') {
+    event.waitUntil(
+      (function () {
+        return getDataFromIdb('requests')
+        .then((res) => res)
+        .then((data) => data.json())
+        .then((requests) => {
+          return requests.map((obj) => ({
+            request: deserializeRequest(obj),
+            id: obj.id
+          }))
+        })
+        .then((reqs) => {
+          return Promise.all(
+            reqs.map((req) => {
+              try {
+                fetch(req.request).then((res) => {
+                  return deleteDataFromIdb(req.id, ['requests', 'reviews'])
+                })
+              } catch (e) {
+                console.log(e);
+              }
+            })
+          )
+        })
+        .then(() => {
+          send_message_to_all_clients('reloadThePageForMAJ')
+        })
+      })()
+    );
+  }
+});
+
+// listen for the "message" event, and call
+// skipWaiting if you get the appropriate message
+self.addEventListener('message', (event) => {
+  if (event.data.action == 'skipWaiting') {
+    self.skipWaiting();
+  } else if (event.data.action == 'updateNetworkState') {
+    isOffline = event.data.value
+  } else if (event.data.action == 'saveDataToIdb') {
+    saveDataToIdb(event.data.value, event.data.store)
+  } else {
+    console.log('SW Received Message: ' + event.data);
+    event.ports[0].postMessage('SW Says Hello back!');
+  }
+});
+
+/**
+ * send message to client
+ * @param {*} client 
+ * @param {*} msg 
+ */
+function send_message_to_client(client, msg) {
+  return new Promise(function (resolve, reject) {
+    const msg_chan = new MessageChannel();
+
+    msg_chan.port1.onmessage = function (event) {
+      if (event.data.error) {
+        reject(event.data.error);
+      } else {
+        resolve(event.data);
+      }
+    };
+    client.postMessage(msg, [msg_chan.port2]);
+  });
+}
+
+/**
+ * send message to all clients
+ * @param {*} msg 
+ */
+function send_message_to_all_clients(msg) {
+  return clients
+    .matchAll()
+    .then((clients) => {
+      return Promise.all(clients.map((client) => send_message_to_client(client, msg)));
+    })
+    .then((res) => {
+      // Response from client for sw request
+      if (msg === 'isVisible') return isVisible = res[0];
+      else if (msg === 'isOffline') return isOffline = res[0];
+      else return res || new Promise.resolve('Done');
+    });
 }

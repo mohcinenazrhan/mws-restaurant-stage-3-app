@@ -147,14 +147,18 @@ const fillReviewsHTML = (reviews) => {
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
   container.appendChild(title);
+  const ul = document.getElementById('reviews-list');
 
-  if (!reviews) {
-    const noReviews = document.createElement('p');
-    noReviews.innerHTML = 'No reviews yet. Be the first one to write a review.';
-    container.appendChild(noReviews);
+  if (!reviews || reviews.length === 0) {
+    const reviewsMsgContainer = document.createElement('p');
+    const reviewsMsg = navigator.onLine === false ? 'No reviews available offline. You can post offline ,your reviews will saved offline & auto-submit when you\'re online' : 'No reviews yet. Be the first one to write a review.';
+    reviewsMsgContainer.innerHTML = reviewsMsg;
+    reviewsMsgContainer.id = 'reviewsMsgContainer'
+    container.appendChild(reviewsMsgContainer);
+    container.appendChild(ul);
     return;
   }
-  const ul = document.getElementById('reviews-list');
+
   if (reviews.length > 1) {
     reviews.forEach(review => {
       ul.appendChild(createReviewHTML(review));
@@ -171,6 +175,12 @@ const fillReviewsHTML = (reviews) => {
  * Create review HTML and add it to the webpage.
  */
 const createReviewHTML = (review) => {
+  const reviewsMsgContainer = document.getElementById('reviewsMsgContainer')
+  if (navigator.onLine === false && reviewsMsgContainer !== null) {
+    const reviewsMsg = 'You can post offline ,your reviews will saved offline & auto-submit when you\'re online';
+    reviewsMsgContainer.innerHTML = reviewsMsg;
+  }
+
   const li = document.createElement('li');
 
   const reviewHeader = document.createElement('div');
@@ -182,14 +192,20 @@ const createReviewHTML = (review) => {
   reviewHeader.appendChild(name);
 
   const date = document.createElement('p');
-  // format: October 26, 2016
-  var dateOptions = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  };
-  date.innerHTML = new Date(review.updatedAt).toLocaleDateString('en-US', dateOptions);
-  date.className = 'date'
+  if (review.storageLocal) {
+    date.innerHTML = 'Stored locally';
+    date.className = 'date'
+  } else {
+    // format: October 26, 2016
+    var dateOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    date.innerHTML = new Date(review.updatedAt).toLocaleDateString('en-US', dateOptions);
+    date.className = 'date'
+  }
+
   reviewHeader.appendChild(date);
 
   li.appendChild(reviewHeader);
@@ -205,6 +221,50 @@ const createReviewHTML = (review) => {
   li.appendChild(comments);
 
   return li;
+}
+
+/**
+ * Post Review
+ */
+const postReview = () => {
+  const review = {
+    'restaurant_id': self.restaurant.id,
+    'name': document.getElementById('fname').value,
+    'rating': document.getElementById('frating').value,
+    'comments': document.getElementById('fcomment').value
+  }
+  let options = {
+    method: 'POST',
+    body: JSON.stringify(review)
+  }
+
+  if (navigator.onLine === false) {
+    options.mode = 'no-cors'
+  }
+
+  fetch(DBHelper.getDbUrl('reviews/'), options)
+  .then((res) => {
+    if (res.status === 201) {
+      return res.json()
+    } else if (res.status === 302) {
+      review.storageLocal = true
+      return review
+    }
+  })
+  .then((review) => {
+    document.getElementById('reviews-list').appendChild(createReviewHTML(review));
+    if (!review.storageLocal) {
+      send_message_to_sw({
+        action: 'saveDataToIdb',
+        store: 'reviews',
+        value: review
+      })
+    }
+    document.getElementById('fname').value = ''
+    document.getElementById('frating').value = 5
+    document.getElementById('fcomment').value = ''
+  })
+  .catch((error) => console.log(error))
 }
 
 /**

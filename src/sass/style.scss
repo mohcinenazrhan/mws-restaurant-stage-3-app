@@ -318,13 +318,15 @@ nav a {
 }
 
 #restaurant-container,
-#reviews-container {
+#reviews-container,
+#add-reviews-container {
     border-bottom: 1px solid #d9d9d9;
     border-top: 1px solid #fff;
     padding: 10px 40px;
 }
 
-#reviews-container h2 {
+#reviews-container h2,
+#add-reviews-container h2 {
     color: #125b8a;
     *font-size: 24pt;
     font-weight: 300;
@@ -412,7 +414,73 @@ nav a {
     }
 
     #restaurant-container,
-    #reviews-container {
+    #reviews-container,
+    #add-reviews-container {
         width: 50%;
     }
+}
+
+/* ====================== Add review Form ====================== */
+
+#add-reviews-container form {
+    margin: 30px auto;
+    max-width: 510px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.required {
+    color: rgb(170, 0, 0)
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+button[type="submit"] {
+    display: inline-block;
+    text-align: center;
+    border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,
+    background-color .15s ease-in-out,
+    border-color .15s ease-in-out,
+    box-shadow .15s ease-in-out;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+    0 3px 1px -2px rgba(0, 0, 0, 0.12),
+    0 1px 5px 0 rgba(0, 0, 0, 0.2);
+    color: #fff;
+    border: 2px solid #125b8a;
+    background-color: rgb(37, 40, 49);
+    font-weight: bold;
+}
+
+button[type="submit"]:hover {
+    background-color: #125b8a
 }
