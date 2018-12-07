@@ -10,8 +10,16 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   static getDbUrl(params = '') {
-    const port = 1337 // Change this to your server port
-    return `http://localhost:${port}/${params}`;
+    /**
+     * Local Mode
+     */
+    // const port = 1337 // Change this to your server port
+    // return `http://localhost:${port}/${params}`;
+
+    /**
+     * Deploy Mode
+     */
+    return `https://mnaz-restaurant-reviews-api.herokuapp.com/${params}`;
   }
 
   /**
@@ -172,5 +180,27 @@ class DBHelper {
       });
   }
 
-}
+  /**
+   * 
+   * @param {Number} id 
+   * @param {Boolean} newState
+   */
+  static toggleFavoriteRestaurant(id, newState) {
+    return fetch(DBHelper.getDbUrl(`restaurants/${id}/`), {
+        method: 'PUT',
+        body: JSON.stringify({is_favorite: newState}),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then((res) => {
+        if (res.status === 302) throw 'fallback'
+        else if (res.status === 200 || res.status === 304) return res.json()
+      })
+      .catch((error) => {
+        console.log('Request failed', error)
+        return Promise.reject(error)
+      })
+  }
 
+}

@@ -233,11 +233,11 @@ function setSwMsgContianer() {
  */
 function updateNetworkState() {
     if (navigator.onLine) {
-        hideMsg();
         _isOffline = false;
+        hideMsg();
     } else {
-        showMsg(_msgOffline);
         _isOffline = true;
+        showMsg();
     }
     
     send_message_to_sw({
@@ -296,6 +296,7 @@ document.addEventListener('visibilitychange', handleVisibilityChange, false);
  * @param {*} msg 
  */
 function send_message_to_sw(msg) {
+    if (!navigator.serviceWorker.controller) return
     return new Promise(function (resolve, reject) {
         // Create a Message Channel
         var msg_chan = new MessageChannel();
@@ -317,10 +318,6 @@ function send_message_to_sw(msg) {
 function sendMsgChecksToSw() {
     window.addEventListener('load', function () {
         updateNetworkState()
-
-        // if (navigator.serviceWorker.controller) send_message_to_sw('checkUpdate');
-        // // if offline show msg to tell user that the data is saved for future online
-        // if (_isOffline) send_message_to_sw('checkMsgSyncLoad');
     });
 }
 
@@ -331,16 +328,19 @@ navigator.serviceWorker.addEventListener('message', function (event) {
     if (event.data === 'reloadThePageForMAJ') showMsg(_msgWhenUpdate);
     if (event.data === 'isVisible') event.ports[0].postMessage(_isVisible);
     if (event.data === 'isOffline') event.ports[0].postMessage(_isOffline);
-    if (event.data === 'MsgSyncReviews') showMsg(` - ${_msgSync}`, true);
+    if (event.data === 'NotifyUserReqSaved') showMsg(` - ${_msgSync}`);
 
     // console.log('Client 1 Received Message: ' + event.data);
     // event.ports[0].postMessage("Client 1 Says 'Hello back!'");
 });
 
 // Helpers
-function showMsg(msg, addTo = false) {
-    if (addTo) document.getElementById('msgOffline').innerHTML += msg;
-    else document.getElementById('msgOffline').innerHTML = msg;
+function showMsg(msg = '') {
+    let fullMsg = ''
+    if (_isOffline) fullMsg += _msgOffline
+    if (msg !== '') fullMsg += msg
+    
+    document.getElementById('msgOffline').innerHTML = fullMsg;
     document.body.classList.add('state-offline');
 }
 
@@ -359,7 +359,7 @@ function hideMsg() {
         msgOffline: "You're currently offline",
         msgWhenUpdate: `The contents of this page have been updated. Please <a href="javascript:location.reload()">reload</a>`,
         askUserWhenSwUpdated: false,
-        msgSync: "Your review is saved and will auto-submit when you're online",
+        msgSync: "Your submit is saved and will auto-submit when you're online",
         msgWhenSwUpdated: 'New version available online. Do you want to update? ',
         preCache: 'onReload' // strategy for pre-caching assets : onReload | onAnalyzePage | precacheConfig
     };

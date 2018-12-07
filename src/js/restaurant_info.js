@@ -90,6 +90,15 @@ const fillRestaurantHTML = (restaurant = self.restaurant) => {
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
   image.sizes = '(max-width: 380px) 300px, (max-width: 480px) 400px, (max-width: 680px) 600px, (max-width: 768px) 800px, (max-width: 960px) 400px, (max-width: 1360px) 600px';
 
+  const restaurantImgContainer = document.getElementById('restaurant-img-container')
+  const btnFavorite = document.createElement('button');
+  btnFavorite.title = 'Favorite'
+  btnFavorite.setAttribute('id', `fav-${restaurant.id}`);
+  btnFavorite.classList.add('favorite-icon');
+  btnFavorite.classList.add(`favorite-icon--${restaurant.is_favorite.toString() === 'true' ? 'on' : 'off'}`);
+  restaurantImgContainer.append(btnFavorite);
+  favoriteClickListener()
+
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
 
@@ -149,7 +158,7 @@ const fillReviewsHTML = (reviews) => {
   container.appendChild(title);
   const ul = document.getElementById('reviews-list');
 
-  if (!reviews || reviews.length === 0) {
+  if (reviews.length === 0 || !reviews) {
     const reviewsMsgContainer = document.createElement('p');
     const reviewsMsg = navigator.onLine === false ? 'No reviews available offline. You can post offline ,your reviews will saved offline & auto-submit when you\'re online' : 'No reviews yet. Be the first one to write a review.';
     reviewsMsgContainer.innerHTML = reviewsMsg;
@@ -202,7 +211,7 @@ const createReviewHTML = (review) => {
       month: 'long',
       day: 'numeric'
     };
-    date.innerHTML = new Date(review.updatedAt).toLocaleDateString('en-US', dateOptions);
+    date.innerHTML = review.updatedAt ? new Date(review.updatedAt).toLocaleDateString('en-US', dateOptions) : 'Stored locally';
     date.className = 'date'
   }
 
@@ -238,9 +247,7 @@ const postReview = () => {
     body: JSON.stringify(review)
   }
 
-  if (navigator.onLine === false) {
-    options.mode = 'no-cors'
-  }
+  if (navigator.onLine === false) options.mode = 'no-cors'
 
   fetch(DBHelper.getDbUrl('reviews/'), options)
   .then((res) => {

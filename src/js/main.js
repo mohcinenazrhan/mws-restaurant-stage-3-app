@@ -136,6 +136,7 @@ const fillRestaurantsHTML = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     ul.append(createRestaurantHTML(restaurant));
   });
+  favoriteClickListener();
   addMarkersToMap();
 }
 
@@ -155,6 +156,13 @@ const createRestaurantHTML = (restaurant) => {
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
   image.srcset = DBHelper.srcsetImageUrlForIndex(restaurant);
   item.append(image);
+
+  const btnFavorite = document.createElement('button');
+  btnFavorite.title = 'Favorite'
+  btnFavorite.setAttribute('id', `fav-${restaurant.id}`);
+  btnFavorite.classList.add('favorite-icon');
+  btnFavorite.classList.add(`favorite-icon--${restaurant.is_favorite.toString() === 'true' ? 'on' : 'off'}`);
+  item.append(btnFavorite);
 
   const contentWrapper = document.createElement('div');
   contentWrapper.className = 'content-wrapper';

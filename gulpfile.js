@@ -117,6 +117,7 @@ gulp.task('scripts', ['lint'], function () {
     return files.map((file) => {
         gulp.src([
                 'src/js/dbhelper.js',
+                'src/js/functions.js',
                 `src/js/${file}.js`,
                 'src/js/sw-registration.js'
             ])
