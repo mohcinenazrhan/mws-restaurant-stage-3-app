@@ -13,13 +13,8 @@ class DBHelper {
     /**
      * Local Mode
      */
-    // const port = 1337 // Change this to your server port
-    // return `http://localhost:${port}/${params}`;
-
-    /**
-     * Deploy Mode
-     */
-    return `https://mnaz-restaurant-reviews-api.herokuapp.com/${params}`;
+    const port = 1337 // Change this to your server port
+    return `http://localhost:${port}/${params}`;
   }
 
   /**
