@@ -226,4 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initMap()
   .then(() => fetchNeighborhoods())
   .then(() => fetchCuisines())
+  .then(() => showMainContent())
+
 });

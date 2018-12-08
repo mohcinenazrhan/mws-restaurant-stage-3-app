@@ -6,13 +6,14 @@ let restaurant,
  */
 document.addEventListener('DOMContentLoaded', (event) => {  
   initMap();
+  checkedRatingListener();
 });
 
 /**
  * Initialize leaflet map
  */
 const initMap = () => {
-  fetchRestaurantFromURL().then((restaurant) => {
+  return fetchRestaurantFromURL().then((restaurant) => {
       if (!restaurant || restaurant.length === 0) {
         console.log('No restaurant found');
         return
@@ -178,6 +179,7 @@ const fillReviewsHTML = (reviews) => {
   }
 
   container.appendChild(ul);
+  showMainContent();
 }
 
 /**
@@ -191,7 +193,8 @@ const createReviewHTML = (review) => {
   }
 
   const li = document.createElement('li');
-
+  li.classList.add('fadein')
+  
   const reviewHeader = document.createElement('div');
   reviewHeader.className = 'review-header'
 
@@ -219,10 +222,15 @@ const createReviewHTML = (review) => {
 
   li.appendChild(reviewHeader);
 
-  const rating = document.createElement('span');
-  rating.innerHTML = `Rating: ${review.rating}`;
-  rating.className = 'rating'
-  li.appendChild(rating);
+  let ratingContainer = document.createElement('div');
+  ratingContainer.className = 'rating'
+  for (let i = 1; i <= 5; i++) {
+      const rating = document.createElement('span');
+      rating.innerHTML = '★';
+      rating.className = review.rating >= i ? 'icon--active' : 'icon'
+      ratingContainer.appendChild(rating);
+  }
+  li.appendChild(ratingContainer);
 
   const comments = document.createElement('p');
   comments.innerHTML = review.comments;
@@ -235,13 +243,21 @@ const createReviewHTML = (review) => {
 /**
  * Post Review
  */
-const postReview = () => {
+const postReview = () => {  
+  let rating;
+  const ratingRadioList = document.querySelectorAll('#frating input[name="rating"]');
+  
+  ratingRadioList.forEach(ratingRadio => {
+    if (ratingRadio.checked) rating = ratingRadio.value;
+  });
+
   const review = {
     'restaurant_id': self.restaurant.id,
     'name': document.getElementById('fname').value,
-    'rating': document.getElementById('frating').value,
+    'rating': rating,
     'comments': document.getElementById('fcomment').value
   }
+  
   let options = {
     method: 'POST',
     body: JSON.stringify(review)
@@ -268,7 +284,7 @@ const postReview = () => {
       })
     }
     document.getElementById('fname').value = ''
-    document.getElementById('frating').value = 5
+    document.getElementsByName('rating')[4].checked = true
     document.getElementById('fcomment').value = ''
   })
   .catch((error) => console.log(error))

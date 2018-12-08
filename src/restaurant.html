@@ -47,7 +47,7 @@
   <!-- End header -->
 
   <!-- Beginning main -->
-  <main id="maincontent" role="main">
+  <main id="maincontent" role="main" class="visibility-hidden">
     <!-- Beginning map -->
     <section id="map-container" role="application" aria-label="Mapbox">
       <div id="map" tabindex="-1"></div>
@@ -70,14 +70,30 @@
     </section>
     <section id="add-reviews-container" role="form" aria-labelledby="add-reviews-label">
       <h2 id="add-reviews-label">Add Review</h2>
-      <form aria-label="Add a review" name="formComments" action="#" method="POST" onsubmit="postReview();return false;">
+      <form aria-label="Add a review" action="#" method="POST" onsubmit="postReview();return false;">
+        <div class="form-group">
+          <fieldset class="starability-checkmark" id="frating">
+            <legend>Rating <span class="required">*</span></legend>
+
+            <input type="radio" id="checkmark-rate5" name="rating" value="5">
+            <label for="checkmark-rate5" title="Amazing">5 stars</label>
+
+            <input type="radio" id="checkmark-rate4" name="rating" value="4">
+            <label for="checkmark-rate4" title="Very good">4 stars</label>
+
+            <input type="radio" id="checkmark-rate3" name="rating" value="3">
+            <label for="checkmark-rate3" title="Average">3 stars</label>
+
+            <input type="radio" id="checkmark-rate2" name="rating" value="2">
+            <label for="checkmark-rate2" title="Not good">2 stars</label>
+
+            <input type="radio" id="checkmark-rate1" checked name="rating" value="1">
+            <label for="checkmark-rate1" title="Terrible">1 star</label>
+          </fieldset>
+        </div>
         <div class="form-group">
           <label for="fname">Name <span class="required">*</span></label>
           <input type="text" class="form-control" name="name" required aria-required="true" id="fname">
-        </div>
-        <div class="form-group">
-          <label for="frating">Rating <span class="required">*</span></label>
-          <input type="number" class="form-control" min="1" max="5" value="5" name="rating" required aria-required="true" id="frating">
         </div>
         <div class="form-group">
           <label for="fcomment">Review <span class="required">*</span></label>
@@ -91,10 +107,19 @@
   <!-- End main -->
 
   <!-- Beginning footer -->
-  <footer id="footer" role="contentinfo">
-    Copyright (c) 2017 <a href="/"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
+  <footer id="footer" class="fixed-bottom" role="contentinfo">
+    Copyright (c) 2018 <a href="/"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
   </footer>
   <!-- End footer -->
+  
+  <!-- Beginning loader -->
+  <div class="loader">
+    <p>It may take a while to response, the api may be asleep</p>
+    <svg viewBox="0 0 32 32" width="32" height="32">
+      <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
+    </svg>
+  </div>
+  <!-- End loader -->
 
   <!-- Beginning scripts -->
   <!-- leaflet -->

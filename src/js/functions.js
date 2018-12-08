@@ -31,3 +31,26 @@ const favoriteClickListener = () => {
         favoriteBtn.addEventListener('click', favoriteOnClick);
     });
 }
+
+/**
+ * checked Rating Listener
+ */
+const checkedRatingListener = () => {
+    const ratingRadioList = document.querySelectorAll('#frating input[name="rating"]');
+    if (ratingRadioList.length === 0) return
+    Array.from(ratingRadioList).forEach(function (ratingRadio) {
+        ratingRadio.addEventListener('click', function () {
+            this.checked = true
+        })
+    });
+}
+
+/**
+ * show Main Content
+ */
+function showMainContent() {
+    document.getElementById('maincontent').classList.remove('visibility-hidden');
+    document.getElementById('maincontent').classList.add('fadein');
+    document.getElementById('footer').classList.remove('fixed-bottom');
+    document.querySelector('.loader').setAttribute('hidden', true);
+}
