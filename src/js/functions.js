@@ -4,7 +4,7 @@
 const favoriteOnClick = function () {
     this.disabled = true
     const classPrefix = 'favorite-icon'
-    const id = this.id.replace('fav-', '');
+    const id = parseInt(this.id.replace('fav-', ''));
     const currentState = this.classList.contains(`${classPrefix}--on`) ? true : false;
     const currentStateClass = this.classList.contains(`${classPrefix}--on`) ? 'on' : 'off';
     this.classList.remove(`${classPrefix}--${currentStateClass}`);

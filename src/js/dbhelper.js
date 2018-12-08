@@ -180,12 +180,39 @@ class DBHelper {
       });
   }
 
+
+  /**
+   * update Local RestaurantData
+   * @param {Number} id 
+   * @param {Object} newRestaurant 
+   */
+  static updateLocalRestaurantData(id, newRestaurant) {
+    return fetchRestaurantsData
+            .then((res) => {
+              return res.map((restaurant) => {
+                if (restaurant.id === id) {
+                  return Object.assign(restaurant, newRestaurant)
+                }
+                  
+                return restaurant
+              })
+            })
+            .then((newRestaurantsData) => {
+              fetchRestaurantsData = Promise.resolve(newRestaurantsData)
+              return;
+            })
+  }
+
   /**
    * 
    * @param {Number} id 
    * @param {Boolean} newState
    */
   static toggleFavoriteRestaurant(id, newState) {
+    DBHelper.updateLocalRestaurantData(id, {
+      is_favorite: newState
+    })
+
     return fetch(DBHelper.getDbUrl(`restaurants/${id}/`), {
         method: 'PUT',
         body: JSON.stringify({is_favorite: newState}),

@@ -324,15 +324,17 @@ function sendMsgChecksToSw() {
 /**
  * Handler for messages coming from the service worker
  */
-navigator.serviceWorker.addEventListener('message', function (event) {
-    if (event.data === 'reloadThePageForMAJ') showMsg(_msgWhenUpdate);
-    if (event.data === 'isVisible') event.ports[0].postMessage(_isVisible);
-    if (event.data === 'isOffline') event.ports[0].postMessage(_isOffline);
-    if (event.data === 'NotifyUserReqSaved') showMsg(` - ${_msgSync}`);
+function listenToMessages() {
+    navigator.serviceWorker.addEventListener('message', function (event) {
+        if (event.data === 'reloadThePageForMAJ') showMsg(_msgWhenUpdate);
+        if (event.data === 'isVisible') event.ports[0].postMessage(_isVisible);
+        if (event.data === 'isOffline') event.ports[0].postMessage(_isOffline);
+        if (event.data === 'NotifyUserReqSaved') showMsg(` - ${_msgSync}`);
 
-    // console.log('Client 1 Received Message: ' + event.data);
-    // event.ports[0].postMessage("Client 1 Says 'Hello back!'");
-});
+        // console.log('Client 1 Received Message: ' + event.data);
+        // event.ports[0].postMessage("Client 1 Says 'Hello back!'");
+    });
+}
 
 // Helpers
 function showMsg(msg = '') {
@@ -365,6 +367,7 @@ function hideMsg() {
     };
     initConfig(config);
     serviceWorkerRegistration().then(() => {
+        listenToMessages();
         setStyleSw();
         setSwMsgContianer();
         sendMsgChecksToSw();
