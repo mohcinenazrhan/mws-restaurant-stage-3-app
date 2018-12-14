@@ -116,6 +116,7 @@ gulp.task('scripts', ['lint'], function () {
     let files = ['main', 'restaurant_info']
     return files.map((file) => {
         gulp.src([
+                'tokens.js',
                 'src/js/dbhelper.js',
                 'src/js/functions.js',
                 `src/js/${file}.js`,

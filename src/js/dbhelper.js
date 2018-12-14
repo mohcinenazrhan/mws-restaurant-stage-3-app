@@ -18,6 +18,14 @@ class DBHelper {
   }
 
   /**
+   * get MAPBOX Token from tokens.js
+   * TODO: fetch it from db
+   */
+  static fetchMAPBOXToken() {
+    return atob(tokens.MAPBOX_TOKEN)
+  }
+
+  /**
    * Fetch all restaurants.
    */
   static fetchRestaurants () {
