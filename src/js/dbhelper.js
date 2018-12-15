@@ -13,8 +13,8 @@ class DBHelper {
     /**
      * Local Mode
      */
-    const port = 1337 // Change this to your server port
-    return `http://localhost:${port}/${params}`;
+    const API_ORIGIN = 'APIORIGIN';
+    return `${API_ORIGIN}/${params}`;
   }
 
   /**

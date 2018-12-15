@@ -22,7 +22,7 @@ const TAG_TO_STORE = {
 const navigateFallbackWhitelist = [/^\/restaurant/];
 const navigateFallback = '/404.html'; // Just to test this feature
 
-const BACKEND_API_ORIGIN = 'https://mnaz-restaurant-reviews-api.herokuapp.com';
+const BACKEND_API_ORIGIN = 'APIORIGIN';
 
 const neverCacheUrls = [/mapbox/, /maps/];
 // Check if current url is in the neverCacheUrls list

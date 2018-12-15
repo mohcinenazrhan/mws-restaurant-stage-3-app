@@ -25,10 +25,13 @@ const gulp         = require('gulp'),
       swPrecache   = require('sw-precache');
 
 const reload = browserSync.reload,
-    $ = gulpLoadPlugins();
+    $ = gulpLoadPlugins(),
+    devAPIOrigin = 'http://localhost:1337',
+    prodAPIOrigin = 'https://mnaz-restaurant-reviews-api.herokuapp.com';
 
 let dev = true,
 rootDir = dev ? '.temp' : 'dist';
+
 /////////////////////////////// Watch Mode : .temp ///////////////////////////////
 
 gulp.task('serve-only', function () {
@@ -128,6 +131,7 @@ gulp.task('scripts', ['lint'], function () {
             .pipe(babel({
                 presets: ['env']
             }))
+            .pipe($.if(dev, replace('APIORIGIN', devAPIOrigin), replace('APIORIGIN', prodAPIOrigin)))
             .pipe($.if(dev, sourcemaps.write()))
             .pipe($.if(!dev, uglify()))
             .pipe($.if(dev, gulp.dest('.temp/js'), gulp.dest('dist/js')))
@@ -313,6 +317,7 @@ gulp.task('service-worker', ['prepare-sw'], function () {
         .bundle()
         .pipe(source('service-worker.js')) // get text stream w/ destination filename
         .pipe(buffer()) // required to use stream w/ other plugins
+        .pipe($.if(dev, replace('APIORIGIN', devAPIOrigin), replace('APIORIGIN', prodAPIOrigin)))
         .pipe($.if(!dev, uglify()))
         .pipe($.if(dev, gulp.dest('.temp/sw'), gulp.dest('dist/sw')))
 
