@@ -226,7 +226,7 @@ const createReviewHTML = (review) => {
   ratingContainer.className = 'rating'
   for (let i = 1; i <= 5; i++) {
       const rating = document.createElement('span');
-      rating.innerHTML = '★';
+      rating.innerHTML = review.rating >= i ? '★' : '☆';
       rating.className = review.rating >= i ? 'icon--active' : 'icon'
       ratingContainer.appendChild(rating);
   }
