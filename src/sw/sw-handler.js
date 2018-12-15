@@ -6,8 +6,7 @@
 import idb from 'idb';
 
 var ignoreUrlParametersMatching = [/^utm_/];
-let isOffline = false,
-    isVisible = false;
+let isVisible = false;
 
 const TAG_TO_STORE = {
   'trigger-sync': {
@@ -59,7 +58,7 @@ self.addEventListener('fetch', function (event) {
   const store = urlParams[0];
   const methods = ['POST', 'PUT'];
 
-  if (isOffline && methods.includes(request.method)) {
+  if (navigator.onLine === false && methods.includes(request.method)) {
     if (request.method === 'POST' && store === 'reviews') {
       return saveReqForBgSync({
         event,
@@ -491,8 +490,6 @@ function reSubmitRequests(reqStore, dataStore = null) {
 self.addEventListener('message', (event) => {
   if (event.data.action == 'skipWaiting') {
     self.skipWaiting();
-  } else if (event.data.action == 'updateNetworkState') {
-    isOffline = event.data.value
   } else if (event.data.action == 'saveDataToIdb') {
     saveDataToIdb(event.data.value, event.data.store)
   } else {
@@ -534,7 +531,6 @@ function send_message_to_all_clients(msg) {
     .then((res) => {
       // Response from client for sw request
       if (msg === 'isVisible') return isVisible = res[0];
-      else if (msg === 'isOffline') return isOffline = res[0];
       else return res || new Promise.resolve('Done');
     });
 }

@@ -239,11 +239,6 @@ function updateNetworkState() {
         _isOffline = true;
         showMsg();
     }
-    
-    send_message_to_sw({
-        action: 'updateNetworkState',
-        value: _isOffline
-    })
 }
 
 /**
@@ -315,12 +310,6 @@ function send_message_to_sw(msg) {
     });
 }
 
-function sendMsgChecksToSw() {
-    window.addEventListener('load', function () {
-        updateNetworkState()
-    });
-}
-
 /**
  * Handler for messages coming from the service worker
  */
@@ -328,11 +317,7 @@ function listenToMessages() {
     navigator.serviceWorker.addEventListener('message', function (event) {
         if (event.data === 'reloadThePageForMAJ') showMsg(_msgWhenUpdate);
         if (event.data === 'isVisible') event.ports[0].postMessage(_isVisible);
-        if (event.data === 'isOffline') event.ports[0].postMessage(_isOffline);
         if (event.data === 'NotifyUserReqSaved') showMsg(` - ${_msgSync}`);
-
-        // console.log('Client 1 Received Message: ' + event.data);
-        // event.ports[0].postMessage("Client 1 Says 'Hello back!'");
     });
 }
 
@@ -370,7 +355,6 @@ function hideMsg() {
         listenToMessages();
         setStyleSw();
         setSwMsgContianer();
-        sendMsgChecksToSw();
     })
 
 })();
