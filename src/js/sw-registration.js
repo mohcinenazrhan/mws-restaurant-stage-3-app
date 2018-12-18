@@ -355,6 +355,7 @@ function hideMsg() {
         listenToMessages();
         setStyleSw();
         setSwMsgContianer();
+        updateNetworkState();
     })
 
 })();
