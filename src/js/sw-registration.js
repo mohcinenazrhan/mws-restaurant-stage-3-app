@@ -348,13 +348,14 @@ function hideMsg() {
         askUserWhenSwUpdated: false,
         msgSync: "Your submit is saved and will auto-submit when you're online",
         msgWhenSwUpdated: 'New version available online. Do you want to update? ',
-        preCache: 'onReload' // strategy for pre-caching assets : onReload | onAnalyzePage | precacheConfig
+        preCache: 'precacheConfig' // strategy for pre-caching assets : onReload | onAnalyzePage | precacheConfig
     };
     initConfig(config);
     serviceWorkerRegistration().then(() => {
         listenToMessages();
         setStyleSw();
         setSwMsgContianer();
+        updateNetworkState();
     })
 
 })();

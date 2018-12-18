@@ -146,7 +146,7 @@ self.addEventListener('fetch', function (event) {
         })
       );
     } else {
-
+        
       // Return if the current request url is in the never cache list
       if (!neverCacheUrls.every(checkNeverCacheList, request.url)) {
         // console.log('MNAZ-PWA: Current request is excluded from cache.');
@@ -156,6 +156,11 @@ self.addEventListener('fetch', function (event) {
       // RespondWith idbResponse fun if we call our server
       if (requestUrl.origin === BACKEND_API_ORIGIN) {
         event.respondWith(idbResponse(request, store));
+        return;
+      }
+
+      // Return if request url is from an external domain.
+      if (requestUrl.origin !== location.origin) {
         return;
       }
 
