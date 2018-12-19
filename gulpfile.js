@@ -116,9 +116,9 @@ gulp.task('lint', function () {
 
 // scripts .js
 gulp.task('scripts', ['lint'], function () {
-    let files = ['main', 'restaurant_info']
+    const files = ['main', 'restaurant_info']
     return files.map((file) => {
-        gulp.src([
+        return gulp.src([
                 'tokens.js',
                 'src/js/dbhelper.js',
                 'src/js/functions.js',
@@ -129,7 +129,7 @@ gulp.task('scripts', ['lint'], function () {
             .pipe(plumber())
             .pipe(concat(`${file}.js`))
             .pipe(babel({
-                presets: ['env']
+                presets: ['@babel/preset-env']
             }))
             .pipe($.if(dev, replace('APIORIGIN', devAPIOrigin), replace('APIORIGIN', prodAPIOrigin)))
             .pipe($.if(dev, sourcemaps.write()))
@@ -139,7 +139,6 @@ gulp.task('scripts', ['lint'], function () {
                 stream: true
             }))
     })
-
 });
 
 // Copy html files
@@ -311,7 +310,7 @@ gulp.task('service-worker', ['prepare-sw'], function () {
 
     return bundler
         .transform(babelify, {
-            presets: ['babel-preset-env'],
+            presets: ['@babel/preset-env'],
             sourceMaps: dev ? true : false
         }) // required for 'import'
         .bundle()
