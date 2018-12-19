@@ -48,10 +48,10 @@
     <section aria-label="Restaurants Review">
       <div class="filter-options" role="region" aria-labelledby="filter-label">
         <h2 id="filter-label">Filter Results</h2>
-        <select id="neighborhoods-select" name="neighborhoods" onchange="updateRestaurants()" aria-label="Neighborhoods" role="search">
+        <select id="neighborhoods-select" name="neighborhoods" onchange="controler.updateRestaurants()" aria-label="Neighborhoods" role="search">
           <option value="all">All Neighborhoods</option>
         </select>
-        <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()" aria-label="Cuisines" role="search">
+        <select id="cuisines-select" name="cuisines" onchange="controler.updateRestaurants()" aria-label="Cuisines" role="search">
           <option value="all">All Cuisines</option>
         </select>
       </div>
