@@ -10,7 +10,6 @@ let model = {
 const controler = {
 
   init: function () {
-    this.initMap();
     this.updateRestaurants()
         .then(() => {
           this.fetchNeighborhoods();
@@ -75,7 +74,7 @@ const controler = {
     return DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood)
       .then((restaurants) => {
         this.resetRestaurants(restaurants);
-        this.fillRestaurantsHTML(restaurants);
+        view.fillRestaurantsHTML(restaurants);
       }).catch((error) => {
         console.log(error);
       })
@@ -89,33 +88,6 @@ const controler = {
     const ul = document.getElementById('restaurants-list');
     ul.innerHTML = '';
     model.restaurants = restaurants;
-  },
-  /**
-   * Create all restaurants HTML and add them to the webpage.
-   */
-  fillRestaurantsHTML: function (restaurants) {
-    const ul = document.getElementById('restaurants-list');
-    restaurants.forEach(restaurant => {
-      ul.append(view.createRestaurantHTML(restaurant));
-    });
-    favoriteClickListener();
-    this.addMarkersToMap(restaurants);
-  },
-  /**
-   * Add markers for current restaurants to the map.
-   */
-  addMarkersToMap: function (restaurants) {
-    if (typeof L !== 'undefined') {
-      restaurants.forEach(restaurant => {
-        // Add marker to the map
-        const marker = DBHelper.mapMarkerForRestaurant(restaurant, model.newMap);
-        marker.on('click', onClick);
-
-        function onClick() {
-          window.location.href = marker.options.url;
-        }
-      });
-    }
   }
 };
 
@@ -198,13 +170,40 @@ const view = {
     li.append(item);
 
     return li;
+  },
+  /**
+   * Create all restaurants HTML and add them to the webpage.
+   */
+  fillRestaurantsHTML: function (restaurants) {
+    const ul = document.getElementById('restaurants-list');
+    restaurants.forEach(restaurant => {
+      ul.append(this.createRestaurantHTML(restaurant));
+    });
+    favoriteClickListener();
+    this.addMarkersToMap(restaurants);
+  },
+  /**
+   * Add markers for current restaurants to the map.
+   */
+  addMarkersToMap: function (restaurants) {
+    if (typeof L !== 'undefined') {
+      restaurants.forEach(restaurant => {
+        // Add marker to the map
+        const marker = DBHelper.mapMarkerForRestaurant(restaurant, model.newMap);
+        marker.on('click', onClick);
+
+        function onClick() {
+          window.location.href = marker.options.url;
+        }
+      });
+    }
   }
 };
 
 /* ======= Fire ======= */
-/**
- * Fetch neighborhoods and cuisines as soon as the page is loaded.
- */
+controler.initMap();
+
+// Fetch neighborhoods and cuisines as soon as the page is loaded.
 document.addEventListener('DOMContentLoaded', () => {
   controler.init()
 });
