@@ -253,7 +253,8 @@ function getDataFromIdb(dbStoreName, fetchError = '') {
     const tx = db.transaction(dbStoreName);
     const store = tx.objectStore(dbStoreName);
     return store.getAll().then(data => {
-      if (data.length === 0) throw ('DB: data is empty');
+      // if (data.length === 0) throw ('DB: data is empty');
+      if (data.length === 0) console.log('DB: data is empty');
       console.log('Data served from DB');
       return new Response(JSON.stringify(data))
     }).catch((error) => error);
