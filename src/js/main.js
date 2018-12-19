@@ -1,7 +1,8 @@
 /* ======= Model ======= */
 let model = {
   restaurants: null,
-  newMap: null
+  newMap: null,
+  markers: []
 };
 
 
@@ -87,6 +88,11 @@ const controler = {
     model.restaurants = [];
     const ul = document.getElementById('restaurants-list');
     ul.innerHTML = '';
+    // Remove all map markers
+    if (model.markers) {
+      model.markers.forEach(marker => marker.remove());
+    }
+    model.markers = [];
     model.restaurants = restaurants;
   }
 };
@@ -195,6 +201,8 @@ const view = {
         function onClick() {
           window.location.href = marker.options.url;
         }
+
+        model.markers.push(marker);
       });
     }
   }
