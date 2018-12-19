@@ -111,6 +111,7 @@ const fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
+  showMainContent();
   // fill reviews
   fetchReviewsFromURL();
 }
@@ -183,7 +184,6 @@ const fillReviewsHTML = (reviews) => {
   }
 
   container.appendChild(ul);
-  showMainContent();
 }
 
 /**
