@@ -215,3 +215,13 @@ controler.initMap();
 document.addEventListener('DOMContentLoaded', () => {
   controler.init()
 });
+
+/* listen for select elements and update Restaurants */
+document
+  .querySelector('.filter-options')
+  .addEventListener('change', e => {
+    if (e.target.id.includes('-select')) {
+      controler.updateRestaurants();
+      e.stopPropagation();
+    }
+  });
