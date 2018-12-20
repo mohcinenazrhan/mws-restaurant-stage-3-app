@@ -100,7 +100,6 @@ const controler = {
   resetRestaurants: function (restaurants) {
     // Remove all restaurants
     model.restaurants = [];
-    view.initContent();
     // Remove all map markers
     if (model.markers) {
       model.markers.forEach(marker => marker.remove());
@@ -155,6 +154,8 @@ const view = {
    */
   createRestaurantHTML: function (restaurant) {
     const li = document.createElement('li');
+    li.id = `listitem-${restaurant.id}`;
+    li.className = 'fadein';
 
     const item = document.createElement('div');
     item.className = 'listitem';
@@ -205,6 +206,18 @@ const view = {
    * Create all restaurants HTML and add them to the webpage.
    */
   fillRestaurantsHTML: function (restaurants) {
+    
+    const resElementList = view.restaurantsList.getElementsByTagName('li')
+    if (resElementList.length > 1) {
+      const restaurantsListIds = restaurants.map(res => `listitem-${res.id}`);
+      for (let item of resElementList) {
+        if (restaurantsListIds.includes(item.id)) item.className = 'fadein'
+        else item.className = 'fadeout'
+      }
+      
+      return;
+    }
+
     restaurants.forEach(restaurant => {
       this.restaurantsList.append(this.createRestaurantHTML(restaurant));
     });
