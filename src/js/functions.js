@@ -33,19 +33,6 @@ const favoriteClickListener = () => {
 }
 
 /**
- * checked Rating Listener
- */
-const checkedRatingListener = () => {
-    const ratingRadioList = document.querySelectorAll('#frating input[name="rating"]');
-    if (ratingRadioList.length === 0) return
-    Array.from(ratingRadioList).forEach(function (ratingRadio) {
-        ratingRadio.addEventListener('click', function () {
-            this.checked = true
-        })
-    });
-}
-
-/**
  * show Main Content
  */
 function showMainContent() {

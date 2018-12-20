@@ -37,7 +37,7 @@ const controler = {
           })
 
       // Listener for rating stars
-      checkedRatingListener();
+      this.checkedRatingListener();
     });
   },
   /**
@@ -86,6 +86,18 @@ const controler = {
         return reviews;
       });
     }
+  },
+  /**
+   * checked Rating Listener
+   */
+  checkedRatingListener: function () {
+    const ratingRadioList = document.querySelectorAll('#frating input[name="rating"]');
+    if (ratingRadioList.length === 0) return
+    Array.from(ratingRadioList).forEach(function (ratingRadio) {
+      ratingRadio.addEventListener('click', function () {
+        this.checked = true
+      })
+    });
   },
   /**
    * Post Review
