@@ -7,12 +7,11 @@ let model = {
 
 
 /* ======= Controler ======= */
-
 const controler = {
 
   init: function () {
     this.initMap();
-
+    view.init();
     // Fetch neighborhoods and cuisines as soon as the page is loaded.
     document.addEventListener('DOMContentLoaded', () => {
       this.updateRestaurants()
@@ -83,15 +82,9 @@ const controler = {
    * Update page and map for current restaurants.
    */
   updateRestaurants: function () {
-    const cSelect = document.getElementById('cuisines-select');
-    const nSelect = document.getElementById('neighborhoods-select');
-
-    const cIndex = cSelect.selectedIndex;
-    const nIndex = nSelect.selectedIndex;
-
-    const cuisine = cSelect[cIndex].value;
-    const neighborhood = nSelect[nIndex].value;
-
+    const cuisine = view.getSelectValue('cuisines');
+    const neighborhood = view.getSelectValue('neighborhoods');
+    
     return DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood)
       .then((restaurants) => {
         this.resetRestaurants(restaurants);
@@ -107,8 +100,7 @@ const controler = {
   resetRestaurants: function (restaurants) {
     // Remove all restaurants
     model.restaurants = [];
-    const ul = document.getElementById('restaurants-list');
-    ul.innerHTML = '';
+    view.initContent();
     // Remove all map markers
     if (model.markers) {
       model.markers.forEach(marker => marker.remove());
@@ -122,29 +114,40 @@ const controler = {
 const view = {
 
   init: function () {
+    this.restaurantsList = document.getElementById('restaurants-list');
+    this.cuisinesSelect = document.getElementById('cuisines-select');
+    this.neighborhoodsSelect = document.getElementById('neighborhoods-select');
+  },
+  initContent: function () {
+    this.restaurantsList.innerHTML = '';
+  },
+  getSelectValue: function (selectName) {
+    if (selectName === 'cuisines') {
+      return this.cuisinesSelect[this.cuisinesSelect.selectedIndex].value;
+    } else if (selectName === 'neighborhoods') {
+      return this.neighborhoodsSelect[this.neighborhoodsSelect.selectedIndex].value;
+    }
   },
   /**
    * Set neighborhoods HTML.
    */
   fillNeighborhoodsHTML: function (neighborhoods) {
-    const select = document.getElementById('neighborhoods-select');
     neighborhoods.forEach(neighborhood => {
       const option = document.createElement('option');
       option.innerHTML = neighborhood;
       option.value = neighborhood;
-      select.append(option);
+      this.neighborhoodsSelect.append(option);
     });
   },
   /**
    * Set cuisines HTML.
    */
   fillCuisinesHTML: function (cuisines) {
-    const select = document.getElementById('cuisines-select');
     cuisines.forEach(cuisine => {
       const option = document.createElement('option');
       option.innerHTML = cuisine;
       option.value = cuisine;
-      select.append(option);
+      this.cuisinesSelect.append(option);
     });
   },
   /**
@@ -202,9 +205,8 @@ const view = {
    * Create all restaurants HTML and add them to the webpage.
    */
   fillRestaurantsHTML: function (restaurants) {
-    const ul = document.getElementById('restaurants-list');
     restaurants.forEach(restaurant => {
-      ul.append(this.createRestaurantHTML(restaurant));
+      this.restaurantsList.append(this.createRestaurantHTML(restaurant));
     });
   },
   /**
