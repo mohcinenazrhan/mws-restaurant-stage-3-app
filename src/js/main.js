@@ -11,12 +11,32 @@ let model = {
 const controler = {
 
   init: function () {
-    this.updateRestaurants()
-        .then(() => {
-          this.fetchNeighborhoods();
-          this.fetchCuisines();
-          showMainContent()
-        })
+    this.initMap();
+
+    // Fetch neighborhoods and cuisines as soon as the page is loaded.
+    document.addEventListener('DOMContentLoaded', () => {
+      this.updateRestaurants()
+          .then(() => {
+            this.fetchNeighborhoods();
+            this.fetchCuisines();
+            this.listenerOnFilterChange();
+            showMainContent();
+            favoriteClickListener();
+          })
+    });
+  },
+  /**
+   * Listen for select elements and update Restaurants
+   */
+  listenerOnFilterChange: function () {
+    document
+      .querySelector('.filter-options')
+      .addEventListener('change', e => {
+        if (e.target.id.includes('-select')) {
+          controler.updateRestaurants();
+          e.stopPropagation();
+        }
+      });
   },
   /**
    * Fetch all neighborhoods and set their HTML.
@@ -76,6 +96,7 @@ const controler = {
       .then((restaurants) => {
         this.resetRestaurants(restaurants);
         view.fillRestaurantsHTML(restaurants);
+        view.addMarkersToMap(restaurants);
       }).catch((error) => {
         console.log(error);
       })
@@ -185,8 +206,6 @@ const view = {
     restaurants.forEach(restaurant => {
       ul.append(this.createRestaurantHTML(restaurant));
     });
-    favoriteClickListener();
-    this.addMarkersToMap(restaurants);
   },
   /**
    * Add markers for current restaurants to the map.
@@ -209,19 +228,4 @@ const view = {
 };
 
 /* ======= Fire ======= */
-controler.initMap();
-
-// Fetch neighborhoods and cuisines as soon as the page is loaded.
-document.addEventListener('DOMContentLoaded', () => {
-  controler.init()
-});
-
-/* listen for select elements and update Restaurants */
-document
-  .querySelector('.filter-options')
-  .addEventListener('change', e => {
-    if (e.target.id.includes('-select')) {
-      controler.updateRestaurants();
-      e.stopPropagation();
-    }
-  });
+controler.init();
