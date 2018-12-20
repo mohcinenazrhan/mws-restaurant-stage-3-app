@@ -731,8 +731,36 @@ screen and (-webkit-min-device-pixel-ratio:2) {
     visibility: hidden
 }
 
+@-webkit-keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.fadeout {
+    visibility: hidden;
+    display: none;
+    -webkit-animation: fadeOut 1s;
+    animation: fadeOut 1s;
+}
+
 .fadein {
     visibility: visible;
+    display: initial;
     -webkit-animation: fadein 1s;
     /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 1s;

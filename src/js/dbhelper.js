@@ -150,12 +150,13 @@ class DBHelper {
   /**
    * Map marker for a restaurant.
    */
-   static mapMarkerForRestaurant(restaurant, map) {
+   static mapMarkerForRestaurant(restaurant, newMap) {
     // https://leafletjs.com/reference-1.3.0.html#marker  
     const marker = new L.marker([restaurant.latlng.lat, restaurant.latlng.lng],
       {title: restaurant.name,
       alt: `Localisation of ${restaurant.name} restaurant`,
-      url: DBHelper.urlForRestaurant(restaurant)
+      url: DBHelper.urlForRestaurant(restaurant),
+      id: `marker-${restaurant.id}`
       })
       marker.addTo(newMap);
     return marker;
