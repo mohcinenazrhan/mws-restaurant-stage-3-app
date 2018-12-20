@@ -10,7 +10,32 @@ const controler = {
      * Initialize map as soon as the page is loaded.
      */
     document.addEventListener('DOMContentLoaded', () => {
-      this.initMap();
+      // fill restaurant content
+      this.fetchRestaurantFromURL()
+          .then((restaurant) => {
+            if (!restaurant || restaurant.length === 0) {
+              console.log('No restaurant found');
+              return
+            }
+
+            this.initMap(restaurant);
+            view.fillBreadcrumb(restaurant.name);
+            view.fillRestaurantHTML(restaurant);
+              showMainContent();
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+
+      // fill reviews content
+      this.fetchReviewsFromURL()
+          .then((reviews) => {
+            view.fillReviewsHTML(reviews);
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+
       // Listener for rating stars
       checkedRatingListener();
     });
@@ -18,35 +43,23 @@ const controler = {
   /**
    * Initialize leaflet map
    */
-  initMap: function () {
-    return this.fetchRestaurantFromURL().then((restaurant) => {
-        if (!restaurant || restaurant.length === 0) {
-          console.log('No restaurant found');
-          return
-        }
-        if (typeof L !== 'undefined') {
-          const newMap = L.map('map', {
-            center: [restaurant.latlng.lat, restaurant.latlng.lng],
-            zoom: 16,
-            scrollWheelZoom: false
-          });
-          L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
-            mapboxToken: DBHelper.fetchMAPBOXToken(),
-            maxZoom: 18,
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-              '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-              'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-            id: 'mapbox.streets'
-          }).addTo(newMap);
-
-          DBHelper.mapMarkerForRestaurant(restaurant, newMap);
-        }
-
-        view.fillBreadcrumb(restaurant);
-      })
-      .catch((error) => {
-        console.log(error);
-      })
+  initMap: function (restaurant) {
+    if (typeof L !== 'undefined') {
+      const newMap = L.map('map', {
+        center: [restaurant.latlng.lat, restaurant.latlng.lng],
+        zoom: 16,
+        scrollWheelZoom: false
+      });
+      L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
+        mapboxToken: DBHelper.fetchMAPBOXToken(),
+        maxZoom: 18,
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+          '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+          'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        id: 'mapbox.streets'
+      }).addTo(newMap);
+      DBHelper.mapMarkerForRestaurant(restaurant, newMap);
+    }
   },
   /**
    * Get current restaurant from page URL.
@@ -57,7 +70,6 @@ const controler = {
       return Promise.reject('No restaurant id in URL');
     } else {
       return DBHelper.fetchRestaurantById(id).then((restaurant) => {
-        if (restaurant) view.fillRestaurantHTML(restaurant);
         return restaurant;
       });
     }
@@ -71,7 +83,6 @@ const controler = {
       return Promise.reject('No restaurant id in URL');
     } else {
       return DBHelper.fetchReviewsByRestaurantId(id).then((reviews) => {
-        if (reviews) view.fillReviewsHTML(reviews);
         return reviews;
       });
     }
@@ -146,10 +157,6 @@ const controler = {
 const view = {
 
   init: function () {
-
-  },
-  initContent: function () {
-
   },
   /**
    * Create restaurant HTML and add it to the webpage
@@ -184,9 +191,7 @@ const view = {
     if (restaurant.operating_hours) {
       this.fillRestaurantHoursHTML(restaurant.operating_hours);
     }
-    showMainContent();
-    // fill reviews
-    controler.fetchReviewsFromURL();
+
   },
   /**
    * Create restaurant operating hours HTML table and add it to the webpage.
@@ -297,10 +302,10 @@ const view = {
   /**
    * Add restaurant name to the breadcrumb navigation menu
    */
-  fillBreadcrumb: function (restaurant) {
+  fillBreadcrumb: function (restaurantName) {
     const breadcrumb = document.getElementById('breadcrumb');
     const li = document.createElement('li');
-    li.innerHTML = restaurant.name;
+    li.innerHTML = restaurantName;
     breadcrumb.appendChild(li);
   }
 };
