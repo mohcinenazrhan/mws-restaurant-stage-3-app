@@ -155,7 +155,8 @@ class DBHelper {
     const marker = new L.marker([restaurant.latlng.lat, restaurant.latlng.lng],
       {title: restaurant.name,
       alt: `Localisation of ${restaurant.name} restaurant`,
-      url: DBHelper.urlForRestaurant(restaurant)
+      url: DBHelper.urlForRestaurant(restaurant),
+      id: `marker-${restaurant.id}`
       })
       marker.addTo(newMap);
     return marker;

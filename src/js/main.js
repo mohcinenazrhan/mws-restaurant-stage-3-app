@@ -101,10 +101,10 @@ const controler = {
     // Remove all restaurants
     model.restaurants = [];
     // Remove all map markers
-    if (model.markers) {
-      model.markers.forEach(marker => marker.remove());
-    }
-    model.markers = [];
+    // if (model.markers) {
+    //   model.markers.forEach(marker => marker.remove());
+    // }
+    // model.markers = [];
     model.restaurants = restaurants;
   }
 };
@@ -227,6 +227,16 @@ const view = {
    */
   addMarkersToMap: function (restaurants) {
     if (typeof L !== 'undefined') {
+
+      if (model.markers.length > 0) {
+        const restaurantsListIds = restaurants.map(res => `marker-${res.id}`);
+        model.markers.forEach(marker => {
+          if (!restaurantsListIds.includes(marker.options.id)) marker.remove()
+          else marker.addTo(model.newMap)
+        });
+        return
+      }
+
       restaurants.forEach(restaurant => {
         // Add marker to the map
         const marker = DBHelper.mapMarkerForRestaurant(restaurant, model.newMap);
