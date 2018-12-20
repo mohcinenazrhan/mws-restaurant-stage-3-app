@@ -1,9 +1,5 @@
 /* ======= Model ======= */
-let model = {
-  restaurant: null,
-  reviews: null,
-  newMap: null
-};
+let model = {};
 
 
 /* ======= Controler ======= */
@@ -29,7 +25,7 @@ const controler = {
           return
         }
         if (typeof L !== 'undefined') {
-          model.newMap = L.map('map', {
+          const newMap = L.map('map', {
             center: [restaurant.latlng.lat, restaurant.latlng.lng],
             zoom: 16,
             scrollWheelZoom: false
@@ -41,12 +37,12 @@ const controler = {
               '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
               'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
             id: 'mapbox.streets'
-          }).addTo(model.newMap);
+          }).addTo(newMap);
 
-          DBHelper.mapMarkerForRestaurant(model.restaurant, model.newMap);
+          DBHelper.mapMarkerForRestaurant(restaurant, newMap);
         }
 
-        view.fillBreadcrumb();
+        view.fillBreadcrumb(restaurant);
       })
       .catch((error) => {
         console.log(error);
@@ -56,16 +52,12 @@ const controler = {
    * Get current restaurant from page URL.
    */
   fetchRestaurantFromURL: function () {
-    if (model.restaurant) { // restaurant already fetched!
-      return self.restaurant;
-    }
     const id = this.getParameterByName('id');
     if (!id) { // no id found in URL
       return Promise.reject('No restaurant id in URL');
     } else {
       return DBHelper.fetchRestaurantById(id).then((restaurant) => {
-        model.restaurant = restaurant;
-        if (restaurant) view.fillRestaurantHTML();
+        if (restaurant) view.fillRestaurantHTML(restaurant);
         return restaurant;
       });
     }
@@ -74,9 +66,6 @@ const controler = {
    * Get current reviews from restaurant page URL.
    */
   fetchReviewsFromURL: function () {
-    if (model.reviews) { // reviews already fetched!
-      return model.reviews;
-    }
     const id = this.getParameterByName('id');
     if (!id) { // no id found in URL
       return Promise.reject('No restaurant id in URL');
@@ -165,7 +154,7 @@ const view = {
   /**
    * Create restaurant HTML and add it to the webpage
    */
-  fillRestaurantHTML: function (restaurant = model.restaurant) {
+  fillRestaurantHTML: function (restaurant) {
     const name = document.getElementById('restaurant-name');
     name.innerHTML = restaurant.name;
 
@@ -193,7 +182,7 @@ const view = {
 
     // fill operating hours
     if (restaurant.operating_hours) {
-      this.fillRestaurantHoursHTML();
+      this.fillRestaurantHoursHTML(restaurant.operating_hours);
     }
     showMainContent();
     // fill reviews
@@ -202,7 +191,7 @@ const view = {
   /**
    * Create restaurant operating hours HTML table and add it to the webpage.
    */
-  fillRestaurantHoursHTML: function (operatingHours = model.restaurant.operating_hours) {
+  fillRestaurantHoursHTML: function (operatingHours) {
     const hours = document.getElementById('restaurant-hours');
     for (let key in operatingHours) {
       const row = document.createElement('tr');
@@ -308,10 +297,10 @@ const view = {
   /**
    * Add restaurant name to the breadcrumb navigation menu
    */
-  fillBreadcrumb: function (restaurant = self.restaurant) {
+  fillBreadcrumb: function (restaurant) {
     const breadcrumb = document.getElementById('breadcrumb');
     const li = document.createElement('li');
-    li.innerHTML = model.restaurant.name;
+    li.innerHTML = restaurant.name;
     breadcrumb.appendChild(li);
   }
 };
