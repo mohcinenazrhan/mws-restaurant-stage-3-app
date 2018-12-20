@@ -65,7 +65,7 @@ const controler = {
    * Get current restaurant from page URL.
    */
   fetchRestaurantFromURL: function () {
-    const id = this.getParameterByName('id');
+    const id = getParameterByName('id');
     if (!id) { // no id found in URL
       return Promise.reject('No restaurant id in URL');
     } else {
@@ -78,7 +78,7 @@ const controler = {
    * Get current reviews from restaurant page URL.
    */
   fetchReviewsFromURL: function () {
-    const id = this.getParameterByName('id');
+    const id = getParameterByName('id');
     if (!id) { // no id found in URL
       return Promise.reject('No restaurant id in URL');
     } else {
@@ -135,21 +135,6 @@ const controler = {
         document.getElementById('fcomment').value = ''
       })
       .catch((error) => console.log(error))
-  },
-  /**
-   * Get a parameter by name from page URL.
-   */
-  getParameterByName: function (name, url) {
-    if (!url)
-      url = window.location.href;
-    name = name.replace(/[\[\]]/g, '\\$&');
-    const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
-      results = regex.exec(url);
-    if (!results)
-      return null;
-    if (!results[2])
-      return '';
-    return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
 };
 
