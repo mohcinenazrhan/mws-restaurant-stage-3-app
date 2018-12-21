@@ -12,7 +12,7 @@ const msgSwToClients = {
    * @param {*} client 
    * @param {String} msg 
    */
-  send_message_to_client: function(client, msg) {
+  send_message_to_client: function (client, msg) {
     return new Promise(function (resolve, reject) {
       const msg_chan = new MessageChannel();
 
@@ -43,7 +43,7 @@ const msgSwToClients = {
         else return res || new Promise.resolve('Done');
       });
   },
-  send: function(msg) {
+  send: function (msg) {
     return this.send_message_to_all_clients(msg);
   }
 }
@@ -107,7 +107,7 @@ function getUrlParameter(search, sParam) {
  */
 self.addEventListener('fetch', function (event) {
   let request = event.request,
-      requestUrl = new URL(request.url);
+    requestUrl = new URL(request.url);
   const urlParams = requestUrl.pathname.replace(/^\/+|\/+$/g, '').split('/')
   const store = urlParams[0];
   const methods = ['POST', 'PUT'];
@@ -119,16 +119,14 @@ self.addEventListener('fetch', function (event) {
       id: parseInt(urlParams[1]),
       syncTagName: (`${store}-sync` in TAG_TO_STORE) ? `${store}-sync` : 'trigger-sync'
     });
-  }
-  else if (methods.includes(request.method)) {
+  } else if (methods.includes(request.method)) {
     event.respondWith(fetch(request)
       .then((response) => response.json())
       .then((data) => {
         IDBHelper.saveDataToIdb(data, store);
         return new Response(JSON.stringify(data))
       }))
-  }
-  else if(request.method === 'GET') {
+  } else if (request.method === 'GET') {
     // Should we call event.respondWith() inside this fetch event handler?
     // This needs to be determined synchronously, which will give other fetch
     // handlers a chance to handle the request if need be.
@@ -154,7 +152,7 @@ self.addEventListener('fetch', function (event) {
     const resId = getUrlParameter(requestUrl.search, 'id')
     if (!shouldRespond && customResponse) {
       if (requestUrl.pathname.startsWith(customResponse) &&
-       resId !== '' && !isNaN(resId)) {
+        resId !== '' && !isNaN(resId)) {
         // remove params from url
         url = requestUrl.href.replace(requestUrl.search, '');
         shouldRespond = urlsToCacheKeys.has(url);
@@ -190,7 +188,7 @@ self.addEventListener('fetch', function (event) {
         })
       );
     } else {
-        
+
       // Return if the current request url is in the never cache list
       if (!neverCacheUrls.every(checkNeverCacheList, request.url)) {
         // console.log('MNAZ-PWA: Current request is excluded from cache.');
