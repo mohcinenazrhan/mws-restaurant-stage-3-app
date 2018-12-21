@@ -1,5 +1,7 @@
 /* ======= Model ======= */
-let model = {};
+let model = {
+  restaurantId: null
+};
 
 
 /* ======= Controler ======= */
@@ -38,6 +40,8 @@ const controler = {
 
       // Listener for rating stars
       this.checkedRatingListener();
+      // Listener for submit review
+      this.submitReviewListener();
     });
   },
   /**
@@ -70,6 +74,7 @@ const controler = {
       return Promise.reject('No restaurant id in URL');
     } else {
       return DBHelper.fetchRestaurantById(id).then((restaurant) => {
+        model.restaurantId = restaurant.id;
         return restaurant;
       });
     }
@@ -99,6 +104,12 @@ const controler = {
       })
     });
   },
+  submitReviewListener: function () {
+    document.querySelector('#form-review').addEventListener('submit', (e) => {
+      e.preventDefault();    //stop form from submitting
+      this.postReview();
+    });
+  },
   /**
    * Post Review
    */
@@ -111,7 +122,7 @@ const controler = {
     });
 
     const review = {
-      'restaurant_id': self.restaurant.id,
+      'restaurant_id': model.restaurantId,
       'name': document.getElementById('fname').value,
       'rating': rating,
       'comments': document.getElementById('fcomment').value
@@ -134,7 +145,7 @@ const controler = {
         }
       })
       .then((review) => {
-        document.getElementById('reviews-list').appendChild(createReviewHTML(review));
+        document.getElementById('reviews-list').appendChild(view.createReviewHTML(review));
         if (!review.storageLocal) {
           send_message_to_sw({
             action: 'saveDataToIdb',
