@@ -122,80 +122,6 @@ function trackingprogressInstalled(worker) {
 }
 
 /**
- * set style css for SW messaage
- */
-function setStyleSw() {
-    const css = `body.state-offline .offline-indicator, body.state-offline .offline-indicator--top {
-        -webkit-transform: translateY(0);
-        -moz-transform: translateY(0);
-        -ms-transform: translateY(0);
-        -o-transform: translateY(0);
-        transform: translateY(0);
-    }
-    .offline-indicator {
-        background-color: rgba(0, 0, 0, 0.8);
-        color: #fff;
-        padding: .9rem;
-        position: fixed;
-        z-index: 9999999999999999;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        -webkit-transform: translateY(100%);
-        -moz-transform: translateY(100%);
-        -ms-transform: translateY(100%);
-        -o-transform: translateY(100%);
-        transform: translateY(100%);
-        will-change: transform;
-        -webkit-transition: -webkit-transform 200ms ease-in-out;
-        -webkit-transition-delay: 0s;
-        -moz-transition: -moz-transform 200ms ease-in-out;
-        -o-transition: -o-transform 200ms ease-in-out;
-        transition: transform 200ms ease-in-out false;
-    }
-    .offline-indicator p {
-        margin: 0 40px 0 0;
-        color: #fff;
-        text-align: center;
-    }
-    .offline-indicator .close-indicator {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 45px;
-        height: 100%;
-        padding: 0;
-        background: #000;
-        border: none;
-        font-size: 27px;
-        font-weight: normal;
-        border-radius: 0;
-        color: #FFF;
-    }
-    .offline-indicator .close-indicator:hover,
-    .offline-indicator .close-indicator:focus {
-        background: #575757;
-    }
-    .offline-indicator a {
-        color: #FFF;
-        font-weight: bold;
-        text-decoration: underline;
-    }`,
-        head = document.head || document.getElementsByTagName('head')[0],
-        style = document.createElement('style');
-
-    style.type = 'text/css';
-    if (style.styleSheet) {
-        // This is required for IE8 and below.
-        style.styleSheet.cssText = css;
-    } else {
-        style.appendChild(document.createTextNode(css));
-    }
-
-    head.appendChild(style);
-}
-
-/**
  * set contianer html to show sw message for user
  */
 function setSwMsgContianer() {
@@ -353,7 +279,6 @@ function hideMsg() {
     initConfig(config);
     serviceWorkerRegistration().then(() => {
         listenToMessages();
-        setStyleSw();
         setSwMsgContianer();
         updateNetworkState();
     })
