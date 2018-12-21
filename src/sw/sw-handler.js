@@ -282,10 +282,5 @@ self.addEventListener('message', (event) => {
   if (event.data.action == 'skipWaiting') {
     // skipWaiting if you get the appropriate message
     self.skipWaiting();
-  } else if (event.data.action == 'saveDataToIdb') {
-    IDBHelper.saveDataToIdb(event.data.value, event.data.store)
-  } else {
-    console.log('SW Received Message: ' + event.data);
-    event.ports[0].postMessage('SW Says Hello back!');
   }
 });
