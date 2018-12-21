@@ -52,17 +52,6 @@ function serviceWorkerRegistration() {
             console.log('Service Worker Registered');
             console.log('MNPWA service worker ready');
 
-            // Send the urls array to the service worker
-            if (_preCache === 'onAnalyzePage') {
-                if (reg.installing) {
-                    // console.log('preCache: onAnalyzePage');
-                    reg.installing.postMessage({
-                        action: 'set-preCache',
-                        urls: getAllCssJsImgFromPage()
-                    });
-                }
-            }
-
             // if there's no controller, this page wasn't loaded
             // via a service worker, so they're looking at the latest version.
             // In that case, exit early
@@ -144,10 +133,6 @@ function setSwMsgContianer() {
     button.appendChild(span);
     container.appendChild(button);
 
-    // <button type="button" "class"="close" aria-label="Close">
-    // 	<span>&times;</span>
-    // </button>
-
     document.body.appendChild(container);
 
     window.addEventListener('online', updateNetworkState);
@@ -165,37 +150,6 @@ function updateNetworkState() {
         _isOffline = true;
         showMsg();
     }
-}
-
-/**
- * get All Css Js Img From Page for precache assets
- */
-function getAllCssJsImgFromPage() {
-    let arr = [];
-
-    // Get all CSSStyleSheet
-    for (CSSStyleSheet of document.styleSheets) {
-        if (CSSStyleSheet.href !== null && CSSStyleSheet.href.match(/^(http|https):\/\//i))
-            arr.push(CSSStyleSheet.href);
-    }
-
-    // Get all Images
-    for (image of document.images) {
-        if (image.src !== null && image.src.match(/^(http|https):\/\//i)) arr.push(image.src);
-    }
-
-    // Get all scripts
-    for (script of document.scripts) {
-        if (
-            script.src !== null &&
-            script.tagName === 'SCRIPT' &&
-            script.src !== '' &&
-            script.src.match(/^(http|https):\/\//i)
-        )
-            arr.push(script.src);
-    }
-
-    return arr;
 }
 
 /**
@@ -274,7 +228,7 @@ function hideMsg() {
         askUserWhenSwUpdated: false,
         msgSync: "Your submit is saved and will auto-submit when you're online",
         msgWhenSwUpdated: 'New version available online. Do you want to update? ',
-        preCache: 'precacheConfig' // strategy for pre-caching assets : onReload | onAnalyzePage | precacheConfig
+        preCache: 'precacheConfig' // strategy for pre-caching assets : onReload | precacheConfig
     };
     initConfig(config);
     serviceWorkerRegistration().then(() => {
