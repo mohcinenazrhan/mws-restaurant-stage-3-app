@@ -137,22 +137,15 @@ const controler = {
 
     fetch(DBHelper.getDbUrl('reviews/'), options)
       .then((res) => {
-        if (res.status === 201) {
+        if (res.status === 201 || res.status === 200) {
           return res.json()
         } else if (res.status === 302) {
           review.storageLocal = true
           return review
         }
       })
-      .then((review) => {
-        document.getElementById('reviews-list').appendChild(view.createReviewHTML(review));
-        if (!review.storageLocal) {
-          send_message_to_sw({
-            action: 'saveDataToIdb',
-            store: 'reviews',
-            value: review
-          })
-        }
+      .then((resReview) => {
+        document.getElementById('reviews-list').appendChild(view.createReviewHTML(resReview));
         document.getElementById('fname').value = ''
         document.getElementsByName('rating')[4].checked = true
         document.getElementById('fcomment').value = ''

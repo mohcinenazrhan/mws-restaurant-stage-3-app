@@ -130,7 +130,7 @@ self.addEventListener('fetch', function (event) {
       });
     }
   }
-  else if (request.method === 'PUT') {
+  else if (methods.includes(request.method)) {
     event.respondWith(fetch(request)
       .then((response) => response.json())
       .then((data) => {
