@@ -113,22 +113,12 @@ self.addEventListener('fetch', function (event) {
   const methods = ['POST', 'PUT'];
 
   if (navigator.onLine === false && methods.includes(request.method)) {
-    if (request.method === 'POST' && store === 'reviews') {
-      return _bgSyncManager.saveReqForBgSync({
-        event,
-        store,
-        syncTagName: 'reviews-sync'
-      });
-    }
-
-    if (request.method === 'PUT' && store === 'restaurants') {
-      return _bgSyncManager.saveReqForBgSync({
-        event,
-        store,
-        id: parseInt(urlParams[1]),
-        syncTagName: 'trigger-sync'
-      });
-    }
+    return _bgSyncManager.saveReqForBgSync({
+      event,
+      store,
+      id: parseInt(urlParams[1]),
+      syncTagName: (`${store}-sync` in TAG_TO_STORE) ? `${store}-sync` : 'trigger-sync'
+    });
   }
   else if (methods.includes(request.method)) {
     event.respondWith(fetch(request)
