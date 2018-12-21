@@ -3,10 +3,54 @@
 //! author  : MNAZ - Mohcine NAZRHAN
 //! support : Cache/Background Sync/IndexedDB
 
-import idb from 'idb';
+/**
+ * send msg from Sw To Clients and response promise Helper
+ */
+const msgSwToClients = {
+  /**
+   * send message to client
+   * @param {*} client 
+   * @param {String} msg 
+   */
+  send_message_to_client: function (client, msg) {
+    return new Promise(function (resolve, reject) {
+      const msg_chan = new MessageChannel();
 
-var ignoreUrlParametersMatching = [/^utm_/];
-let isVisible = false;
+      msg_chan.port1.onmessage = function (event) {
+        if (event.data.error) {
+          reject(event.data.error);
+        } else {
+          resolve(event.data);
+        }
+      };
+      client.postMessage(msg, [msg_chan.port2]);
+    });
+  },
+
+  /**
+   * send message to all clients
+   * @param {String} msg 
+   */
+  send_message_to_all_clients: function (msg) {
+    return clients
+      .matchAll()
+      .then((clients) => {
+        return Promise.all(clients.map((client) => this.send_message_to_client(client, msg)));
+      })
+      .then((res) => {
+        // Response from client for sw request
+        if (msg === 'isVisible') return isVisible = res[0];
+        else return res || new Promise.resolve('Done');
+      });
+  },
+  send: function (msg) {
+    return this.send_message_to_all_clients(msg);
+  }
+}
+
+// Import modules
+import IDBHelper from '../../src/sw/idbHelper'; // to adapte it to gulp task
+import BgSyncManager from '../../src/sw/bg-sync-manager'; // to adapte it to gulp task
 
 const TAG_TO_STORE = {
   'trigger-sync': {
@@ -17,6 +61,11 @@ const TAG_TO_STORE = {
     data: 'reviews'
   }
 };
+
+const _bgSyncManager = new BgSyncManager(TAG_TO_STORE, IDBHelper, msgSwToClients);
+
+var ignoreUrlParametersMatching = [/^utm_/];
+let isVisible = false;
 
 const navigateFallbackWhitelist = [/^\/restaurant/];
 const navigateFallback = '/404.html'; // Just to test this feature
@@ -51,40 +100,33 @@ function getUrlParameter(search, sParam) {
   }
 };
 
+/**
+ * Intercept all requests ans response with cache correspondence url data
+ * Fetch from Net and save the result in cache to serve it after
+ * Response to special request with optimise response
+ */
 self.addEventListener('fetch', function (event) {
   let request = event.request,
-      requestUrl = new URL(request.url);
+    requestUrl = new URL(request.url);
   const urlParams = requestUrl.pathname.replace(/^\/+|\/+$/g, '').split('/')
   const store = urlParams[0];
   const methods = ['POST', 'PUT'];
 
   if (navigator.onLine === false && methods.includes(request.method)) {
-    if (request.method === 'POST' && store === 'reviews') {
-      return saveReqForBgSync({
-        event,
-        store,
-        syncTagName: 'reviews-sync'
-      });
-    }
-
-    if (request.method === 'PUT' && store === 'restaurants') {
-      return saveReqForBgSync({
-        event,
-        store,
-        id: parseInt(urlParams[1]),
-        syncTagName: 'trigger-sync'
-      });
-    }
-  }
-  else if (request.method === 'PUT') {
+    return _bgSyncManager.saveReqForBgSync({
+      event,
+      store,
+      id: parseInt(urlParams[1]),
+      syncTagName: (`${store}-sync` in TAG_TO_STORE) ? `${store}-sync` : 'trigger-sync'
+    });
+  } else if (methods.includes(request.method)) {
     event.respondWith(fetch(request)
       .then((response) => response.json())
       .then((data) => {
-        saveDataToIdb(data, store);
+        IDBHelper.saveDataToIdb(data, store);
         return new Response(JSON.stringify(data))
       }))
-  }
-  else if(request.method === 'GET') {
+  } else if (request.method === 'GET') {
     // Should we call event.respondWith() inside this fetch event handler?
     // This needs to be determined synchronously, which will give other fetch
     // handlers a chance to handle the request if need be.
@@ -110,7 +152,7 @@ self.addEventListener('fetch', function (event) {
     const resId = getUrlParameter(requestUrl.search, 'id')
     if (!shouldRespond && customResponse) {
       if (requestUrl.pathname.startsWith(customResponse) &&
-       resId !== '' && !isNaN(resId)) {
+        resId !== '' && !isNaN(resId)) {
         // remove params from url
         url = requestUrl.href.replace(requestUrl.search, '');
         shouldRespond = urlsToCacheKeys.has(url);
@@ -146,7 +188,7 @@ self.addEventListener('fetch', function (event) {
         })
       );
     } else {
-        
+
       // Return if the current request url is in the never cache list
       if (!neverCacheUrls.every(checkNeverCacheList, request.url)) {
         // console.log('MNAZ-PWA: Current request is excluded from cache.');
@@ -198,129 +240,6 @@ self.addEventListener('fetch', function (event) {
   }
 });
 
-/** 
- * Create store in IndexedDb using idb library
- */
-const dbPromise = idb.open('restaurant-store', 1, upgradeDB => {
-  switch (upgradeDB.oldVersion) {
-    case 0:
-      upgradeDB.createObjectStore('restaurants', {
-        keyPath: 'id'
-      })
-      upgradeDB.createObjectStore('reviews', {
-        keyPath: 'id'
-      })
-      upgradeDB.createObjectStore('requests', {
-        keyPath: 'id'
-      });
-      upgradeDB.createObjectStore('post-requests', {
-        keyPath: 'id'
-      });
-  }
-})
-
-/**
- * save Data To Idb
- * @param {Object} data 
- * @param {String} dbStoreName 
- */
-function saveDataToIdb(data, dbStoreName) {
-  console.log('saveDataToIdb', dbStoreName);
-  
-  return dbPromise.then(db => {
-    if (!db) return;
-    const tx = db.transaction(dbStoreName, 'readwrite');
-    const store = tx.objectStore(dbStoreName);
-    if (Array.isArray(data)) {
-      for (const row of data) {
-        store.put(row);
-      }
-    } else {
-      store.put(data);
-    }
-    return tx.complete;
-  }).catch(error => console.log('idb error: ', error));
-}
-
-/**
- * get Data From Idb
- * @param {String} dbStoreName 
- * @param {String} fetchError 
- */
-function getDataFromIdb(dbStoreName, fetchError = '') {
-  return dbPromise.then(db => {
-    if (!db) throw ('DB undefined');
-    const tx = db.transaction(dbStoreName);
-    const store = tx.objectStore(dbStoreName);
-    return store.getAll().then(data => {
-      // if (data.length === 0) throw ('DB: data is empty');
-      if (data.length === 0) console.log('DB: data is empty');
-      console.log('Data served from DB');
-      return new Response(JSON.stringify(data))
-    }).catch((error) => error);
-
-  }).catch(dbError => {
-    console.log(fetchError + dbError);
-    return Promise.reject(fetchError + dbError);
-  });
-}
-
-/**
- * delete Data From Idb
- * @param {Number} id 
- * @param {String | Array} dbStoresName 
- */
-function deleteDataFromIdb(id, dbStoresName) {
-  let storesName = []
-  if (!Array.isArray(dbStoresName)) {
-    storesName.push(dbStoresName)
-  } else {
-    storesName = dbStoresName
-  }
-  
-  return storesName.map((storeName) => {
-    return dbPromise.then(db => {
-    if (!db) return;
-      const tx = db.transaction(storeName, 'readwrite');
-      const store = tx.objectStore(storeName);
-      return store.delete(id).complete;
-    })
-    .catch(error => console.log('idb error: ', error));
-  })
-  
-}
-
-/**
- * get Data From Idb By Id
- * @param {*} storeName 
- * @param {*} id 
- */
-function getDataFromIdbById(storeName, id) {
-  return dbPromise.then(db => {
-      if (!db) return;
-      const tx = db.transaction(storeName);
-      const store = tx.objectStore(storeName);
-      return store.get(id);
-    })
-    .catch(error => console.log('idb error: ', error));
-}
-
-/**
- * update Or Save Data in Idb
- * @param {*} newData 
- * @param {*} dbStoresName 
- */
-function updateOrSaveDatainIdb(newData, dbStoresName) {
-
-  return getDataFromIdbById(dbStoresName, newData.id)
-          .then((data) => {
-            if (data === undefined) data = newData
-            else data = Object.assign(data, newData)
-
-            return saveDataToIdb(data, dbStoresName);
-          })
-}
-
 /**
  * Response from NET, save data in DB, respond data from DB if offline
  * @param {Request object} req
@@ -331,92 +250,12 @@ function idbResponse(req, dbStoreName) {
   return fetch(req)
     .then((response) => response.json())
     .then((data) => {
-      saveDataToIdb(data, dbStoreName)
+      IDBHelper.saveDataToIdb(data, dbStoreName)
       return new Response(JSON.stringify(data))
     })
     .catch((fetchError) => {
-      return getDataFromIdb(dbStoreName, fetchError)
+      return IDBHelper.getDataFromIdb(dbStoreName, fetchError)
     })
-}
-
-/* ------------------------Background Sync------------------------ */
-
-/**
- * sync Manager
- */
-function syncManager() {
-  let registration = self.registration;
-  if (!registration) {
-    try {
-      navigator.serviceWorker.getRegistration().then((reg) => {
-        registration = reg
-      })
-    } catch (e) {}
-  }
-  return registration.sync;
-}
-
-function trigger(tagName) {
-  return syncManager().register(tagName);
-}
-
-function serializeRequest(request, body) {
-  return {
-    url: request.url,
-    headers: Array.from(request.headers),
-    method: request.method,
-    credentials: request.credentials,
-    referrer: request.referrer,
-    mode: request.mode === 'navigate' ? 'same-origin' : request.mode,
-    body: JSON.stringify(body)
-  };
-}
-
-function deserializeRequest(obj) {
-  return new Request(obj.url, obj);
-}
-
-function generateUID() {
-  return `${Date.now()}-${performance.now()}`;
-}
-
-/**
- * Save request and trigger Bg Sync
- * @param {*} event 
- */
-function saveReqForBgSync(params) {
-  if (!'SyncManager' in self) return;
-
-  params.event.waitUntil(
-    (function () {
-      params.event.respondWith(new Response(null, {
-        status: 302
-      }));
-      saveRequest(params).then(() => {
-        trigger(params.syncTagName);
-        send_message_to_all_clients('NotifyUserReqSaved');
-      })
-    })()
-  )
-}
-
-/**
- * Save request and data to submit and serve it later
- * @param {*} params 
- */
-function saveRequest(params) {
-  const ID = params.id || generateUID()
-  const request = params.event.request
-  return request.json().then((data) => {
-    let serRequest = serializeRequest(request, data);
-    serRequest = Object.assign(serRequest, {
-      id: ID
-    })
-    data = Object.assign(data, {
-      id: ID
-    })
-    return (saveDataToIdb(serRequest, TAG_TO_STORE[params.syncTagName].reqs) && updateOrSaveDatainIdb(data, params.store))
-  })
 }
 
 /**
@@ -427,7 +266,7 @@ self.addEventListener('sync', function (event) {
     case 'test-tag-from-devtools':
     case 'reviews-sync':
     case 'trigger-sync':
-      bgSyncProcess(event);
+      _bgSyncManager.bgSyncProcess(event);
       break;
     default:
       console.error(`Unknown background sync: ${event.tag}`);
@@ -435,108 +274,11 @@ self.addEventListener('sync', function (event) {
 });
 
 /**
- * bgSync Process
- * @param {*} event 
+ * listen for the "message" event, and call
  */
-function bgSyncProcess (event) {
-  event.waitUntil(
-    (function () {
-      if (!(event.tag in TAG_TO_STORE)) return;
-      const tagStore = TAG_TO_STORE[event.tag];
-
-      if (tagStore.data) {
-        return reSubmitRequests(tagStore.reqs, tagStore.data)
-          .then(() => {
-            send_message_to_all_clients('reloadThePageForMAJ')
-          })
-      }
-
-      return reSubmitRequests(tagStore.reqs)
-        .then(() => {
-          send_message_to_all_clients('reloadThePageForMAJ')
-        })
-      
-    })()
-  );
-};
-
-/**
- * reSubmit Requests
- * @param {String} reqStore 
- * @param {String} dataStore 
- */
-function reSubmitRequests(reqStore, dataStore = null) {
-  const storesDeleteFrom = dataStore ? [reqStore, dataStore] : reqStore
-  return getDataFromIdb(reqStore)
-    .then((res) => res)
-    .then((data) => data.json())
-    .then((requests) => {
-      return requests.map((obj) => ({
-        request: deserializeRequest(obj),
-        id: obj.id
-      }))
-    })
-    .then((reqs) => {
-      return Promise.all(
-        reqs.map((req) => {
-          try {
-            fetch(req.request).then((res) => {
-              return deleteDataFromIdb(req.id, storesDeleteFrom)
-            })
-          } catch (e) {
-            console.log(e);
-          }
-        })
-      )
-    })
-}
-
-// listen for the "message" event, and call
-// skipWaiting if you get the appropriate message
 self.addEventListener('message', (event) => {
   if (event.data.action == 'skipWaiting') {
+    // skipWaiting if you get the appropriate message
     self.skipWaiting();
-  } else if (event.data.action == 'saveDataToIdb') {
-    saveDataToIdb(event.data.value, event.data.store)
-  } else {
-    console.log('SW Received Message: ' + event.data);
-    event.ports[0].postMessage('SW Says Hello back!');
   }
 });
-
-/**
- * send message to client
- * @param {*} client 
- * @param {String} msg 
- */
-function send_message_to_client(client, msg) {
-  return new Promise(function (resolve, reject) {
-    const msg_chan = new MessageChannel();
-
-    msg_chan.port1.onmessage = function (event) {
-      if (event.data.error) {
-        reject(event.data.error);
-      } else {
-        resolve(event.data);
-      }
-    };
-    client.postMessage(msg, [msg_chan.port2]);
-  });
-}
-
-/**
- * send message to all clients
- * @param {String} msg 
- */
-function send_message_to_all_clients(msg) {
-  return clients
-    .matchAll()
-    .then((clients) => {
-      return Promise.all(clients.map((client) => send_message_to_client(client, msg)));
-    })
-    .then((res) => {
-      // Response from client for sw request
-      if (msg === 'isVisible') return isVisible = res[0];
-      else return res || new Promise.resolve('Done');
-    });
-}
