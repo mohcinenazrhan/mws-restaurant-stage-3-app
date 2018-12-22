@@ -201,15 +201,24 @@ nav a {
 }
 
 .filter-options select {
-    background-color: white;
-    border: 1px solid #fff;
     font-family: Arial, sans-serif;
     font-size: 11pt;
     height: 35px;
     letter-spacing: 0;
     margin: 10px;
-    padding: 0 10px;
     width: 200px;
+    display: inline-block;
+    padding: .375rem 1.75rem .375rem .75rem;
+    line-height: 1.5;
+    color: #495057;
+    vertical-align: middle;
+    background: #fff url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E") no-repeat right .75rem center;
+    background-size: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 /* ====================== Restaurant Listing ====================== */
@@ -407,6 +416,10 @@ nav a {
 
 #reviews-list .comment {
     margin-top: 10px;
+}
+
+#restaurant-hours {
+    width: 100%
 }
 
 #restaurant-hours td {
