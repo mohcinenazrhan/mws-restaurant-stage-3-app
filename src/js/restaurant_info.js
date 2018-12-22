@@ -206,7 +206,8 @@ const view = {
     const hours = document.getElementById('restaurant-hours');
     for (let key in operatingHours) {
       const row = document.createElement('tr');
-
+      row.setAttribute('tabindex', '0');
+      
       const day = document.createElement('td');
       day.innerHTML = key;
       row.appendChild(day);
@@ -259,12 +260,13 @@ const view = {
     }
 
     const li = document.createElement('li');
-    li.classList.add('fadein')
-
+    li.classList.add('fadein');
+    li.setAttribute('tabindex', '0');
     const reviewHeader = document.createElement('div');
     reviewHeader.className = 'review-header'
 
     const name = document.createElement('p');
+    name.setAttribute('tabindex', '0');
     name.innerHTML = review.name;
     name.className = 'name'
     reviewHeader.appendChild(name);
