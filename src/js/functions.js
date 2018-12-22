@@ -9,10 +9,12 @@ const favoriteOnClick = function () {
     const currentStateClass = this.classList.contains(`${classPrefix}--on`) ? 'on' : 'off';
     this.classList.remove(`${classPrefix}--${currentStateClass}`);
     this.classList.add(`${classPrefix}--${!currentState === true ? 'on' : 'off'}`);
+    this.setAttribute('aria-checked', !currentState);
     DBHelper.toggleFavoriteRestaurant(id, !currentState)
         .then((res) => {
             this.classList.remove(`${classPrefix}--${currentStateClass}`);
             this.classList.add(`${classPrefix}--${res.is_favorite.toString() === 'true' ? 'on' : 'off'}`);
+            this.setAttribute('aria-checked', res.is_favorite);
             this.disabled = false
         }).catch((error) => {
             console.log(error)

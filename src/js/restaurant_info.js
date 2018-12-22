@@ -178,10 +178,15 @@ const view = {
 
     const restaurantImgContainer = document.getElementById('restaurant-img-container')
     const btnFavorite = document.createElement('button');
+    const isFavorite = restaurant.is_favorite.toString() === 'true' ? true : false;
     btnFavorite.title = 'Favorite'
+    btnFavorite.setAttribute('tabindex', '0');
+    btnFavorite.setAttribute('aria-label', 'favorite restaurant');
+    btnFavorite.setAttribute('role', 'switch');
+    btnFavorite.setAttribute('aria-checked', isFavorite);
     btnFavorite.setAttribute('id', `fav-${restaurant.id}`);
     btnFavorite.classList.add('favorite-icon');
-    btnFavorite.classList.add(`favorite-icon--${restaurant.is_favorite.toString() === 'true' ? 'on' : 'off'}`);
+    btnFavorite.classList.add(`favorite-icon--${isFavorite ? 'on' : 'off'}`);
     restaurantImgContainer.append(btnFavorite);
     favoriteClickListener()
 
