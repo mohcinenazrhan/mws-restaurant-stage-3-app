@@ -126,22 +126,19 @@ const controler = {
       'comments': document.getElementById('fcomment').value
     }
 
+    // if offline mention that review will be Stored locally
+    if (navigator.onLine === false) review.storageLocal = 'Stored locally';
+
     let options = {
       method: 'POST',
       body: JSON.stringify(review)
     }
 
+    // if offline allow sw post request
     if (navigator.onLine === false) options.mode = 'no-cors'
 
     fetch(DBHelper.getDbUrl('reviews/'), options)
-      .then((res) => {
-        if (res.status === 201 || res.status === 200) {
-          return res.json()
-        } else if (res.status === 302) {
-          review.storageLocal = true
-          return review
-        }
-      })
+      .then((res) => res.json())
       .then((resReview) => {
         document.getElementById('reviews-list').appendChild(view.createReviewHTML(resReview));
         document.getElementById('fname').value = ''
@@ -269,24 +266,17 @@ const view = {
     reviewHeader.appendChild(name);
 
     const date = document.createElement('p');
-    if (review.storageLocal) {
-      date.innerHTML = 'Stored locally';
-      date.className = 'date'
-    } else {
-      // format: October 26, 2016
-      var dateOptions = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      };
-      date.innerHTML = review.updatedAt ? new Date(review.updatedAt).toLocaleDateString('en-US', dateOptions) : 'Stored locally';
-      date.className = 'date'
-    }
-
+    // format Exp: October 26, 2016
+    var dateOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    date.innerHTML = review.updatedAt ? new Date(review.updatedAt).toLocaleDateString('en-US', dateOptions) : review.storageLocal;
+    date.className = 'date'
     reviewHeader.appendChild(date);
 
     li.appendChild(reviewHeader);
-
     let ratingContainer = document.createElement('div');
     ratingContainer.className = 'rating'
     for (let i = 1; i <= 5; i++) {
