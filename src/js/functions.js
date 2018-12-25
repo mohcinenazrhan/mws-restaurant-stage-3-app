@@ -37,20 +37,10 @@ const favoriteOnClick = function () {
             this.disabled = false // re-enable the button
         }).catch((error) => {
             console.log(error)
-            if (error === 'fallback') {
-                // Update Local Restaurant Data favorite state
-                DBHelper.updateLocalRestaurantData(id, {
-                    is_favorite: newState
-                })
-            } 
             // rollback
-            else {
-                // remove all classes
-                this.classList.remove(`${btnClassName}--on`, `${btnClassName}--off`);
-                this.classList.add(`${btnClassName}--${currentStateClass}`)
-                this.setAttribute('aria-checked', currentState);
-            }
-
+            this.classList.remove(`${btnClassName}--on`, `${btnClassName}--off`);
+            this.classList.add(`${btnClassName}--${currentStateClass}`)
+            this.setAttribute('aria-checked', currentState);
             this.disabled = false // re-enable the button
         })
 };

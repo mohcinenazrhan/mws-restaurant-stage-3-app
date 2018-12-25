@@ -217,13 +217,10 @@ class DBHelper {
           'Content-Type': 'application/json'
         }
       })
-      .then((res) => {
-        if (res.status === 302) throw 'fallback'
-        else if (res.status === 200 || res.status === 304) return res.json()
-      })
+      .then((res) => res.json())
       .catch((error) => {
         console.log('Request failed', error)
-        return Promise.reject(error)
+        return Promise.reject('rollback')
       })
   }
 

@@ -50,16 +50,21 @@ class BgSyncManager {
      */
     saveReqForBgSync(params) {
         if (!'SyncManager' in self) return;
+        const event = params.event
 
-        params.event.waitUntil(
+        event.waitUntil(
             (() => {
-                params.event.respondWith(new Response(null, {
-                    status: 302
-                }));
-                this.saveRequest(params).then(() => {
-                    this.trigger(params.syncTagName);
-                    this.msgSwToClients.send('NotifyUserReqSaved');
+
+                event.request.json().then((data) => {
+                    event.respondWith(new Response(JSON.stringify(data), {
+                        status: 302
+                    }));
+                    this.saveRequest(params, data).then(() => {
+                        this.trigger(params.syncTagName);
+                        this.msgSwToClients.send('NotifyUserReqSaved');
+                    })
                 })
+
             })()
         )
     }
@@ -67,20 +72,21 @@ class BgSyncManager {
     /**
      * Save request and data to submit and serve it later
      * @param {*} params 
+     * @param {*} data 
      */
-    saveRequest(params) {
+    saveRequest(params, data) {
         const ID = params.id || this.generateUID()
         const request = params.event.request
-        return request.json().then((data) => {
-            let serRequest = this.serializeRequest(request, data);
-            serRequest = Object.assign(serRequest, {
-                id: ID
-            })
-            data = Object.assign(data, {
-                id: ID
-            })
-            return (this.IDBHelper.saveDataToIdb(serRequest, this.TAG_TO_STORE[params.syncTagName].reqs) && this.IDBHelper.updateOrSaveDatainIdb(data, params.store))
+
+        let serRequest = this.serializeRequest(request, data);
+        serRequest = Object.assign(serRequest, {
+            id: ID
         })
+        data = Object.assign(data, {
+            id: ID
+        })
+        
+        return (this.IDBHelper.saveDataToIdb(serRequest, this.TAG_TO_STORE[params.syncTagName].reqs) && this.IDBHelper.updateOrSaveDatainIdb(data, params.store))
     }
 
     /**
