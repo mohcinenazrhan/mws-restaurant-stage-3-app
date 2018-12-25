@@ -5,10 +5,8 @@ let model = {
   markers: []
 };
 
-
 /* ======= Controler ======= */
 const controler = {
-
   init: function () {
     this.initMap();
     view.init();
@@ -111,7 +109,6 @@ const controler = {
 
 /* ======= View ======= */
 const view = {
-
   init: function () {
     this.restaurantsList = document.getElementById('restaurants-list');
     this.cuisinesSelect = document.getElementById('cuisines-select');

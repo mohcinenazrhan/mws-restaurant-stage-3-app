@@ -10,10 +10,7 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   static getDbUrl(params = '') {
-    /**
-     * Local Mode
-     */
-    const API_ORIGIN = 'APIORIGIN';
+    const API_ORIGIN = 'APIORIGIN'; // injected by gulp
     return `${API_ORIGIN}/${params}`;
   }
 
@@ -213,10 +210,6 @@ class DBHelper {
    * @param {Boolean} newState
    */
   static toggleFavoriteRestaurant(id, newState) {
-    DBHelper.updateLocalRestaurantData(id, {
-      is_favorite: newState
-    })
-
     return fetch(DBHelper.getDbUrl(`restaurants/${id}/`), {
         method: 'PUT',
         body: JSON.stringify({is_favorite: newState}),
@@ -224,13 +217,10 @@ class DBHelper {
           'Content-Type': 'application/json'
         }
       })
-      .then((res) => {
-        if (res.status === 302) throw 'fallback'
-        else if (res.status === 200 || res.status === 304) return res.json()
-      })
+      .then((res) => res.json())
       .catch((error) => {
         console.log('Request failed', error)
-        return Promise.reject(error)
+        return Promise.reject('rollback')
       })
   }
 
