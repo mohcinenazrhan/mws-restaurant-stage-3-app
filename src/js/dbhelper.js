@@ -210,10 +210,6 @@ class DBHelper {
    * @param {Boolean} newState
    */
   static toggleFavoriteRestaurant(id, newState) {
-    DBHelper.updateLocalRestaurantData(id, {
-      is_favorite: newState
-    })
-
     return fetch(DBHelper.getDbUrl(`restaurants/${id}/`), {
         method: 'PUT',
         body: JSON.stringify({is_favorite: newState}),
