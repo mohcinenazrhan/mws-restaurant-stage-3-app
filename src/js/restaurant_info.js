@@ -3,10 +3,8 @@ let model = {
   restaurantId: null
 };
 
-
 /* ======= Controler ======= */
 const controler = {
-
   init: function () {
     /**
      * Initialize map as soon as the page is loaded.
@@ -156,7 +154,6 @@ const controler = {
 
 /* ======= View ======= */
 const view = {
-
   init: function () {
   },
   /**
