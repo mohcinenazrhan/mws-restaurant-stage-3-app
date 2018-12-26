@@ -59,7 +59,11 @@
                 // if there's no controller, this page wasn't loaded
                 // via a service worker, so they're looking at the latest version.
                 // In that case, exit early
-                if (!navigator.serviceWorker.controller) return;
+                if (!navigator.serviceWorker.controller) {
+                    console.log('Service Worker installed');
+                    showMsg('Service Worker installed! Pages you view are cached for offline use.');
+                    return
+                };
 
                 // if there's an updated worker already waiting, call
                 // _updateReady()
@@ -210,9 +214,9 @@
         preCache: 'precacheConfig' // strategy for pre-caching assets : onReload | precacheConfig
     };
     initConfig(config);
+    setSwMsgContianer();
     serviceWorkerRegistration().then(() => {
         listenToMessages();
-        setSwMsgContianer();
         updateNetworkState();
     })
 
