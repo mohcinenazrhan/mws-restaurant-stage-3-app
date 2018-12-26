@@ -850,19 +850,21 @@ body.state-offline .offline-indicator--top {
 }
 
 .offline-indicator {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgb(18, 18, 19);
     color: #fff;
-    padding: .9rem;
+    padding: 10px 48px 10px 10px;
     position: fixed;
     z-index: 9999999999999999;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    -webkit-transform: translateY(100%);
-    -moz-transform: translateY(100%);
-    -ms-transform: translateY(100%);
-    -o-transform: translateY(100%);
-    transform: translateY(100%);
+    left: 15px;
+    bottom: 15px;
+    border-radius: 5px;
+    max-width: 90%;
+    min-height: 48px;
+    -webkit-transform: translateY(150%);
+    -moz-transform: translateY(150%);
+    -ms-transform: translateY(150%);
+    -o-transform: translateY(150%);
+    transform: translateY(150%);
     will-change: transform;
     -webkit-transition: -webkit-transform 200ms ease-in-out;
     transition-delay: 0s;
@@ -888,7 +890,7 @@ body.state-offline .offline-indicator--top {
     border: none;
     font-size: 27px;
     font-weight: normal;
-    border-radius: 0;
+    border-radius: 0 5px 5px 0;
     color: #FFF;
 }
 
