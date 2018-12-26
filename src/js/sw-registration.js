@@ -182,11 +182,13 @@
     }
 
     // Helpers
-    function showMsg(msg = '') {
+    function showMsg(msg = '', timeToHide = 4500) {
         if (msg === '') return
 
         document.getElementById('msgOffline').innerHTML = msg;
         document.body.classList.add('state-offline');
+
+        if (timeToHide !== null) setTimeout(hideMsg, timeToHide);
     }
 
     function hideMsg() {
