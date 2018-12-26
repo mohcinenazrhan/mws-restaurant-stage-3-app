@@ -277,7 +277,7 @@ self.addEventListener('sync', function (event) {
  * listen for the "message" event, and call
  */
 self.addEventListener('message', (event) => {
-  if (event.data.action == 'skipWaiting') {
+  if (event.data.action === 'skipWaiting') {
     // skipWaiting if you get the appropriate message
     self.skipWaiting();
   }
