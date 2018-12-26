@@ -10,6 +10,7 @@
         _isOffline = false,
         _swUrl = '',
         _msgOffline = '',
+        _msgOnline = '',
         _msgWhenUpdate = '',
         _msgWhenSwUpdated = '',
         _msgSync = '',
@@ -22,6 +23,7 @@
     function initConfig(config) {
         _swUrl = config.swUrl;
         _msgOffline = config.msgOffline;
+        _msgOnline = config.msgOnline;
         _msgWhenUpdate = config.msgWhenUpdate;
         _msgWhenSwUpdated = config.msgWhenSwUpdated;
         _preCache = config.preCache;
@@ -146,11 +148,11 @@
      */
     function updateNetworkState() {
         if (navigator.onLine) {
+            if (_isOffline === true) showMsg(_msgOnline);
             _isOffline = false;
-            hideMsg();
         } else {
+            showMsg(_msgOffline);
             _isOffline = true;
-            showMsg();
         }
     }
 
@@ -175,17 +177,15 @@
         navigator.serviceWorker.addEventListener('message', function (event) {
             if (event.data === 'reloadThePageForMAJ') showMsg(_msgWhenUpdate);
             if (event.data === 'isVisible') event.ports[0].postMessage(_isVisible);
-            if (event.data === 'NotifyUserReqSaved') showMsg(` - ${_msgSync}`);
+            if (event.data === 'NotifyUserReqSaved') showMsg(_msgSync);
         });
     }
 
     // Helpers
     function showMsg(msg = '') {
-        let fullMsg = ''
-        if (_isOffline) fullMsg += _msgOffline
-        if (msg !== '') fullMsg += msg
+        if (msg === '') return
 
-        document.getElementById('msgOffline').innerHTML = fullMsg;
+        document.getElementById('msgOffline').innerHTML = msg;
         document.body.classList.add('state-offline');
     }
 
@@ -200,6 +200,7 @@
     const config = {
         swUrl: 'sw/service-worker.js',
         msgOffline: "You're currently offline",
+        msgOnline: "You're back online",
         msgWhenUpdate: `The contents of this page have been updated. Please <a href="javascript:location.reload()">reload</a>`,
         askUserWhenSwUpdated: false,
         msgSync: "Your submit is saved and will auto-submit when you're online",
