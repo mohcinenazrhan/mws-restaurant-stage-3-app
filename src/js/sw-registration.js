@@ -1,8 +1,6 @@
 /* eslint-env worker, serviceworker */
 /* eslint-disable indent, no-unused-vars, no-multiple-empty-lines, max-nested-callbacks, space-before-function-paren, quotes, comma-spacing */
-(function () {
 
-    'use strict';
     // Config variables & default values
     let _refreshing = false,
         _isVisible = true,
@@ -14,6 +12,7 @@
         _msgWhenUpdate = '',
         _msgWhenSwUpdated = '',
         _msgSync = '',
+        _worker = null,
         _preCache = '';
 
     /**
@@ -96,14 +95,24 @@
      * @param {Object} worker 
      */
     function updateReady(worker) {
-        let ok = true; // default value
-        if (_askUserWhenSwUpdated) ok = confirm(_msgWhenSwUpdated);
-
-        if (ok) {
-            worker.postMessage({
-                action: 'skipWaiting'
-            });
+        _worker = worker
+        if (_askUserWhenSwUpdated) {
+            showMsg(`${_msgWhenSwUpdated} <button class="btn-updatesw" onclick="updateSW()">Yes</button>`, null)
+            return
         }
+        // if _askUserWhenSwUpdated is false just apply to updateSW
+        updateSW()
+    }
+
+    /**
+     * update SW by send message to sw for skip waiting
+     */
+    function updateSW() {
+        _worker.postMessage({
+            action: 'skipWaiting'
+        });
+        // hide notification bar if the user click Yes
+        hideMsg();
     }
 
     /**
@@ -185,7 +194,11 @@
         });
     }
 
-    // Helpers
+    /**
+     * show the given message
+     * @param {*} msg 
+     * @param {*} timeToHide // in milliseconds
+     */
     function showMsg(msg = '', timeToHide = 4500) {
         if (msg === '') return
 
@@ -195,10 +208,16 @@
         if (timeToHide !== null) setTimeout(hideMsg, timeToHide);
     }
 
+    /**
+     * hide Msg bar
+     */
     function hideMsg() {
         document.body.classList.remove('state-offline');
     }
 
+(function () {
+
+    'use strict';
     /****************** Fire Service Worker script ******************/
 
     if (!('serviceWorker' in navigator)) return;
@@ -208,11 +227,12 @@
         msgOffline: "You're currently offline",
         msgOnline: "You're back online",
         msgWhenUpdate: `The contents of this page have been updated. Please <a href="javascript:location.reload()">reload</a>`,
-        askUserWhenSwUpdated: false,
+        askUserWhenSwUpdated: true,
         msgSync: "Your submit is saved and will auto-submit when you're online",
         msgWhenSwUpdated: 'New version available online. Do you want to update? ',
         preCache: 'precacheConfig' // strategy for pre-caching assets : onReload | precacheConfig
     };
+    
     initConfig(config);
     setSwMsgContianer();
     serviceWorkerRegistration().then(() => {
