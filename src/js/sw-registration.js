@@ -13,7 +13,8 @@
         _msgWhenSwUpdated = '',
         _msgSync = '',
         _worker = null,
-        _preCache = '';
+        _preCache = '',
+        _timeoutMsg = null;
 
     /**
      * Config Script
@@ -204,8 +205,9 @@
 
         document.getElementById('msgOffline').innerHTML = msg;
         document.body.classList.add('state-offline');
-
-        if (timeToHide !== null) setTimeout(hideMsg, timeToHide);
+        
+        if (_timeoutMsg !== null) clearTimeout(_timeoutMsg);
+        if (timeToHide !== null) _timeoutMsg = setTimeout(hideMsg, timeToHide);
     }
 
     /**
