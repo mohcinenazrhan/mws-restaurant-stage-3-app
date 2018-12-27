@@ -125,10 +125,10 @@ const controler = {
     // Remove all restaurants
     model.restaurants = [];
     // Remove all map markers
-    // if (model.markers) {
-    //   model.markers.forEach(marker => marker.remove());
-    // }
-    // model.markers = [];
+    if (model.markers) {
+      model.markers.forEach(marker => marker.remove());
+    }
+    model.markers = [];
     view.initContent();
     model.restaurants = restaurants;
   }
