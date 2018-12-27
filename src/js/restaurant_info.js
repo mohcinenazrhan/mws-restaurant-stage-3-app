@@ -202,12 +202,13 @@ const view = {
     image.src = controler.dbHelper.imageUrlForRestaurant(restaurant);
     image.sizes = '(max-width: 380px) 300px, (max-width: 480px) 400px, (max-width: 680px) 600px, (max-width: 768px) 800px, (max-width: 960px) 400px, (max-width: 1360px) 600px';
 
-
-    const btnFavorite = document.querySelector('.favorite-icon');
+    const btnClassName = 'favorite-icon'
+    const btnFavorite = document.querySelector(`.${btnClassName}`);
     const isFavorite = restaurant.is_favorite.toString() === 'true' ? true : false;
     btnFavorite.setAttribute('aria-checked', isFavorite);
     btnFavorite.setAttribute('id', `fav-${restaurant.id}`);
-    btnFavorite.classList.add(`favorite-icon--${isFavorite ? 'on' : 'off'}`);
+    btnFavorite.classList.remove(`${btnClassName}--on`, `${btnClassName}--off`);
+    btnFavorite.classList.add(`${btnClassName}--${isFavorite ? 'on' : 'off'}`);
 
     const cuisine = document.getElementById('restaurant-cuisine');
     cuisine.innerHTML = restaurant.cuisine_type;
