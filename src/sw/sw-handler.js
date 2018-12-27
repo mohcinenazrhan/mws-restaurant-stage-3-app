@@ -241,20 +241,34 @@ self.addEventListener('fetch', function (event) {
 });
 
 /**
- * Response from NET, save data in DB, respond data from DB if offline
+ * Response from DB, respond data from NET to compare with DB data and then save data in DB
  * @param {Request object} req
  * @param {String} dbStoreName
  */
 function idbResponse(req, dbStoreName) {
 
-  return fetch(req)
-    .then((response) => response.json())
-    .then((data) => {
-      IDBHelper.saveDataToIdb(data, dbStoreName)
-      return new Response(JSON.stringify(data))
+  return IDBHelper.getDataFromIdb(dbStoreName)
+    .then((res) => res.json())
+    .then((dbData) => {
+      const savedDbData = dbData
+      const fetchData = fetch(req)
+        .then((response) => response.json())
+        .then((data) => {
+          if (JSON.stringify(data) !== JSON.stringify(savedDbData) && savedDbData.length >= 1)
+            msgSwToClients.send('reloadThePageForMAJ')
+          
+          IDBHelper.saveDataToIdb(data, dbStoreName)
+          return new Response(JSON.stringify(data))
+        })
+        .catch(() => {
+          return IDBHelper.getDataFromIdb(dbStoreName)
+        })
+
+      dbData = dbData.length === 0 ? undefined : new Response(JSON.stringify(dbData))
+      return dbData || fetchData
     })
-    .catch((fetchError) => {
-      return IDBHelper.getDataFromIdb(dbStoreName, fetchError)
+    .catch((error) => {
+      console.log(error);
     })
 }
 
