@@ -13,8 +13,8 @@
         _msgWhenSwUpdated = '',
         _msgSync = '',
         _worker = null,
-        _preCache = '',
-        _timeoutMsg = null;
+        _preCache = '';
+    self._timeoutMsg = null;
 
     /**
      * Config Script
@@ -200,7 +200,7 @@
      * @param {*} msg 
      * @param {*} timeToHide // in milliseconds
      */
-    function showMsg(msg = '', timeToHide = 4500) {
+    self.showMsg = function (msg = '', timeToHide = 4500) {
         if (msg === '') return
 
         document.getElementById('msgOffline').innerHTML = msg;
@@ -213,7 +213,7 @@
     /**
      * hide Msg bar
      */
-    function hideMsg() {
+    self.hideMsg = function () {
         document.body.classList.remove('state-offline');
     }
 
