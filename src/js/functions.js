@@ -1,13 +1,16 @@
 /**
  * favorite OnClick
  */
-const favoriteOnClick = function () {
-    this.disabled = true // disable the button
+export const favoriteOnClick = function (DBHelper, event) {
+    console.log(DBHelper, event);
+    const _this = event.target
+
+    _this.disabled = true // disable the button
     const btnClassName = 'favorite-icon' // button class name
-    const id = parseInt(this.id.replace('fav-', '')); // get the id of restaurant
+    const id = parseInt(_this.id.replace('fav-', '')); // get the id of restaurant
 
     // get current state (Boolean) from class name
-    const currentState = this.classList.contains(`${btnClassName}--on`) ? true : false;
+    const currentState = _this.classList.contains(`${btnClassName}--on`) ? true : false;
     // get current state class name (String)
     const currentStateClass = currentState === true ? 'on' : 'off';
 
@@ -15,8 +18,8 @@ const favoriteOnClick = function () {
     const newState = !currentState; // toggel favorite state
     const btnClassNameCurrentState = `${btnClassName}--${currentStateClass}`;
     const btnClassNameNewState = `${btnClassName}--${newState === true ? 'on' : 'off'}`;
-    this.classList.replace(btnClassNameCurrentState, btnClassNameNewState);
-    this.setAttribute('aria-checked', newState);
+    _this.classList.replace(btnClassNameCurrentState, btnClassNameNewState);
+    _this.setAttribute('aria-checked', newState);
 
     // toggel favorite state on the server
     DBHelper.toggleFavoriteRestaurant(id, newState)
@@ -24,9 +27,9 @@ const favoriteOnClick = function () {
             // update favorite state if the new state does not applied
             if (res.is_favorite.toString() !== newState.toString()) {
                 // remove all classes
-                this.classList.remove(`${btnClassName}--on`, `${btnClassName}--off`);
-                this.classList.add(`${btnClassName}--${res.is_favorite.toString() === 'true' ? 'on' : 'off'}`);
-                this.setAttribute('aria-checked', res.is_favorite);
+                _this.classList.remove(`${btnClassName}--on`, `${btnClassName}--off`);
+                _this.classList.add(`${btnClassName}--${res.is_favorite.toString() === 'true' ? 'on' : 'off'}`);
+                _this.setAttribute('aria-checked', res.is_favorite);
             }
             
             // Update Local Restaurant Data favorite state
@@ -34,31 +37,31 @@ const favoriteOnClick = function () {
                 is_favorite: res.is_favorite
             })
 
-            this.disabled = false // re-enable the button
+            _this.disabled = false // re-enable the button
         }).catch((error) => {
             console.log(error)
             // rollback
-            this.classList.remove(`${btnClassName}--on`, `${btnClassName}--off`);
-            this.classList.add(`${btnClassName}--${currentStateClass}`)
-            this.setAttribute('aria-checked', currentState);
-            this.disabled = false // re-enable the button
+            _this.classList.remove(`${btnClassName}--on`, `${btnClassName}--off`);
+            _this.classList.add(`${btnClassName}--${currentStateClass}`)
+            _this.setAttribute('aria-checked', currentState);
+            _this.disabled = false // re-enable the button
         })
 };
 
 /**
  * favorite Click Listener
  */
-const favoriteClickListener = () => {
+export const favoriteClickListener = (DBHelper) => {
     const favoriteBtnList = document.getElementsByClassName('favorite-icon');
     Array.from(favoriteBtnList).forEach(function (favoriteBtn) {
-        favoriteBtn.addEventListener('click', favoriteOnClick);
+        favoriteBtn.addEventListener('click', favoriteOnClick.bind(null, DBHelper));
     });
 }
 
 /**
  * show Main Content
  */
-function showMainContent() {
+export function showMainContent() {
     document.getElementById('maincontent').classList.remove('visibility-hidden');
     document.getElementById('maincontent').classList.add('fadein');
     document.getElementById('footer').classList.remove('fixed-bottom');
@@ -68,7 +71,7 @@ function showMainContent() {
 /**
  * Get a parameter by name from page URL.
  */
-function getParameterByName (name, url) {
+export function getParameterByName(name, url) {
     if (!url)
         url = window.location.href;
     name = name.replace(/[\[\]]/g, '\\$&');

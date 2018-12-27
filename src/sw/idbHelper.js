@@ -2,31 +2,15 @@ import idb from 'idb';
 
 class IDBHelper {
     constructor() {
-        this.idbPromise = this.openDatabase();
+        this.idbPromise = this.openDatabase('restaurant-store', 1);
     }
 
     /**
      * Open a IDB database, create an objectStore,
      * @return {Promise} - idbPromise to access database
      */
-    openDatabase() {
-        return idb.open('restaurant-store', 1, upgradeDB => {
-            switch (upgradeDB.oldVersion) {
-                case 0:
-                    upgradeDB.createObjectStore('restaurants', {
-                        keyPath: 'id'
-                    })
-                    upgradeDB.createObjectStore('reviews', {
-                        keyPath: 'id'
-                    })
-                    upgradeDB.createObjectStore('requests', {
-                        keyPath: 'id'
-                    });
-                    upgradeDB.createObjectStore('post-requests', {
-                        keyPath: 'id'
-                    });
-            }
-        })
+    openDatabase(dbName, version) {
+        return idb.open(dbName, version);
     }
 
     /**

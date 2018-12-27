@@ -118,21 +118,17 @@ gulp.task('lint', function () {
 gulp.task('scripts', ['lint'], function () {
     const files = ['main', 'restaurant_info']
     return files.map((file) => {
-        return gulp.src([
-                'tokens.js',
-                'src/js/dbhelper.js',
-                'src/js/functions.js',
-                `src/js/${file}.js`,
-                'src/js/sw-registration.js'
-            ])
-            .pipe($.if(dev, sourcemaps.init()))
-            .pipe(plumber())
-            .pipe(concat(`${file}.js`))
-            .pipe(babel({
-                presets: ['@babel/preset-env']
-            }))
+        return browserify(`src/js/${file}.js`, {
+                debug: true
+            })
+            .transform(babelify, {
+                presets: ['@babel/preset-env'],
+                sourceMaps: dev ? true : false
+            }) // required for 'import'
+            .bundle()
+            .pipe(source(`${file}.js`))
+            .pipe(buffer()) // required to use stream w/ other plugins
             .pipe($.if(dev, replace('APIORIGIN', devAPIOrigin), replace('APIORIGIN', prodAPIOrigin)))
-            .pipe($.if(dev, sourcemaps.write()))
             .pipe($.if(!dev, uglify()))
             .pipe($.if(dev, gulp.dest('.temp/js'), gulp.dest('dist/js')))
             .pipe(reload({

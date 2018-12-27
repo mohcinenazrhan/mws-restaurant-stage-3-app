@@ -1,15 +1,23 @@
-// To get the data from network one time
-let fetchRestaurantsData = null;
+import tokens from '../../tokens';
+import IDBHelper from './idbHelper';
+
 /**
  * Common database helper functions.
  */
+
 class DBHelper {
-  
+
+  constructor () {
+    this.idbHelper = new IDBHelper();
+    // To get the data from network one time
+    this.fetchRestaurantsData = null;
+  }
+
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
    */
-  static getDbUrl(params = '') {
+  getDbUrl(params = '') {
     const API_ORIGIN = 'APIORIGIN'; // injected by gulp
     return `${API_ORIGIN}/${params}`;
   }
@@ -18,19 +26,20 @@ class DBHelper {
    * get MAPBOX Token from tokens.js
    * TODO: fetch it from db
    */
-  static fetchMAPBOXToken() {
+  fetchMAPBOXToken() {
     return atob(tokens.MAPBOX_TOKEN)
   }
 
   /**
    * Fetch all restaurants.
    */
-  static fetchRestaurants () {
+  fetchRestaurants () {
     
-    return fetchRestaurantsData || fetch(DBHelper.getDbUrl('restaurants'))
+    return this.fetchRestaurantsData || fetch(this.getDbUrl('restaurants'))
       .then((response) => response.json())
       .then((restaurants) => {
-          fetchRestaurantsData = Promise.resolve(restaurants)
+          this.idbHelper.saveDataToIdb(restaurants, 'restaurants')
+          this.fetchRestaurantsData = Promise.resolve(restaurants)
           return restaurants
       })
       .catch((error) => {
@@ -41,18 +50,18 @@ class DBHelper {
   /**
    * Fetch a restaurant by its ID.
    */
-  static fetchRestaurantById(id) {
+  fetchRestaurantById(id) {
     // fetch all restaurants with proper error handling.
-    return DBHelper.fetchRestaurants()
+    return this.fetchRestaurants()
                    .then((restaurants) => restaurants.find(r => r.id == id))
   }
 
   /**
    * Fetch restaurants by a cuisine type with proper error handling.
    */
-  static fetchRestaurantByCuisine(cuisine) {
+  fetchRestaurantByCuisine(cuisine) {
     // Fetch all restaurants  with proper error handling
-    return DBHelper.fetchRestaurants().then((restaurants) => {
+    return this.fetchRestaurants().then((restaurants) => {
         // Filter restaurants to have only given cuisine type
         const results = restaurants.filter(r => r.cuisine_type == cuisine);
         return results;
@@ -62,9 +71,9 @@ class DBHelper {
   /**
    * Fetch restaurants by a neighborhood with proper error handling.
    */
-  static fetchRestaurantByNeighborhood(neighborhood) {
+  fetchRestaurantByNeighborhood(neighborhood) {
     // Fetch all restaurants
-    return DBHelper.fetchRestaurants().then((restaurants) => {
+    return this.fetchRestaurants().then((restaurants) => {
         // Filter restaurants to have only given neighborhood
         const results = restaurants.filter(r => r.neighborhood == neighborhood);
         return results;
@@ -74,9 +83,9 @@ class DBHelper {
   /**
    * Fetch restaurants by a cuisine and a neighborhood with proper error handling.
    */
-  static fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood) {
+  fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood) {
     // Fetch all restaurants
-    return DBHelper.fetchRestaurants().then((restaurants) => {
+    return this.fetchRestaurants().then((restaurants) => {
       let results = restaurants
       if (cuisine != 'all') { // filter by cuisine
         results = results.filter(r => r.cuisine_type == cuisine);
@@ -91,9 +100,9 @@ class DBHelper {
   /**
    * Fetch all neighborhoods with proper error handling.
    */
-  static fetchNeighborhoods() {
+  fetchNeighborhoods() {
     // Fetch all restaurants
-    return DBHelper.fetchRestaurants().then((restaurants) => {
+    return this.fetchRestaurants().then((restaurants) => {
         // Get all neighborhoods from all restaurants
         const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood)
         // Remove duplicates from neighborhoods
@@ -105,9 +114,9 @@ class DBHelper {
   /**
    * Fetch all cuisines with proper error handling.
    */
-  static fetchCuisines() {
+  fetchCuisines() {
     // Fetch all restaurants
-    return DBHelper.fetchRestaurants().then((restaurants) => {
+    return this.fetchRestaurants().then((restaurants) => {
         // Get all cuisines from all restaurants
         const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type)
         // Remove duplicates from cuisines
@@ -119,40 +128,40 @@ class DBHelper {
   /**
    * Restaurant page URL.
    */
-  static urlForRestaurant(restaurant) {
+  urlForRestaurant(restaurant) {
     return (`./restaurant.html?id=${restaurant.id}`);
   }
 
   /**
    * Restaurant image URL.
    */
-  static imageUrlForRestaurant(restaurant) {
+  imageUrlForRestaurant(restaurant) {
     return (`/img/${restaurant.photograph}`);
   }
 
   /**
    * srcset Image Url For Restaurant.
    */
-  static srcsetImageUrlForRestaurant(restaurant) {
+  srcsetImageUrlForRestaurant(restaurant) {
     return restaurant.srcset_restaurant;
   }
 
   /**
    * srcset Image Url For Index.
    */
-  static srcsetImageUrlForIndex(restaurant) {
+  srcsetImageUrlForIndex(restaurant) {
     return restaurant.srcset_index;
   }
 
   /**
    * Map marker for a restaurant.
    */
-   static mapMarkerForRestaurant(restaurant, newMap) {
+   mapMarkerForRestaurant(restaurant, newMap) {
     // https://leafletjs.com/reference-1.3.0.html#marker  
     const marker = new L.marker([restaurant.latlng.lat, restaurant.latlng.lng],
       {title: restaurant.name,
       alt: `Localisation of ${restaurant.name} restaurant`,
-      url: DBHelper.urlForRestaurant(restaurant),
+      url: this.urlForRestaurant(restaurant),
       id: `marker-${restaurant.id}`
       })
       marker.addTo(newMap);
@@ -162,7 +171,7 @@ class DBHelper {
     const marker = new google.maps.Marker({
       position: restaurant.latlng,
       title: restaurant.name,
-      url: DBHelper.urlForRestaurant(restaurant),
+      url: this.urlForRestaurant(restaurant),
       map: map,
       animation: google.maps.Animation.DROP}
     );
@@ -172,10 +181,14 @@ class DBHelper {
   /**
    * Fetch reviews by restaurant ID.
    */
-  static fetchReviewsByRestaurantId(id) {
-    return fetch(DBHelper.getDbUrl(`reviews/?restaurant_id=${id}`))
+  fetchReviewsByRestaurantId(id) {
+    return fetch(this.getDbUrl(`reviews/?restaurant_id=${id}`))
       .then((response) => response.json())
-      .then((reviews) => reviews.filter(r => r.restaurant_id == id))
+      .then((reviews) => {
+        reviews = reviews.filter(r => r.restaurant_id == id)
+        this.idbHelper.saveDataToIdb(reviews, 'reviews')
+        return reviews
+      })
       .catch((error) => {
         console.log(error);
       });
@@ -187,8 +200,8 @@ class DBHelper {
    * @param {Number} id 
    * @param {Object} newRestaurant 
    */
-  static updateLocalRestaurantData(id, newRestaurant) {
-    return fetchRestaurantsData
+  updateLocalRestaurantData(id, newRestaurant) {
+    return this.fetchRestaurantsData
             .then((res) => {
               return res.map((restaurant) => {
                 if (restaurant.id === id) {
@@ -199,7 +212,7 @@ class DBHelper {
               })
             })
             .then((newRestaurantsData) => {
-              fetchRestaurantsData = Promise.resolve(newRestaurantsData)
+              this.fetchRestaurantsData = Promise.resolve(newRestaurantsData)
               return;
             })
   }
@@ -209,8 +222,8 @@ class DBHelper {
    * @param {Number} id 
    * @param {Boolean} newState
    */
-  static toggleFavoriteRestaurant(id, newState) {
-    return fetch(DBHelper.getDbUrl(`restaurants/${id}/`), {
+  toggleFavoriteRestaurant(id, newState) {
+    return fetch(this.getDbUrl(`restaurants/${id}/`), {
         method: 'PUT',
         body: JSON.stringify({is_favorite: newState}),
         headers: {
@@ -225,3 +238,5 @@ class DBHelper {
   }
 
 }
+
+export default DBHelper;

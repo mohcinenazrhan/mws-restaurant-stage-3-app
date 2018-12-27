@@ -1,3 +1,8 @@
+/* ======= Import modules ======= */
+import * as funcsHelpers from './functions';
+import './sw-registration';
+import DBHelper from './dbhelper';
+
 /* ======= Model ======= */
 let model = {
   restaurantId: null
@@ -6,6 +11,8 @@ let model = {
 /* ======= Controler ======= */
 const controler = {
   init: function () {
+    this.dbHelper = new DBHelper();
+
     /**
      * Initialize map as soon as the page is loaded.
      */
@@ -21,7 +28,7 @@ const controler = {
             this.initMap(restaurant);
             view.fillBreadcrumb(restaurant.name);
             view.fillRestaurantHTML(restaurant);
-              showMainContent();
+            funcsHelpers.showMainContent();
           })
           .catch((error) => {
             console.log(error);
@@ -53,25 +60,25 @@ const controler = {
         scrollWheelZoom: false
       });
       L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
-        mapboxToken: DBHelper.fetchMAPBOXToken(),
+        mapboxToken: this.dbHelper.fetchMAPBOXToken(),
         maxZoom: 18,
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
           '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
           'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         id: 'mapbox.streets'
       }).addTo(newMap);
-      DBHelper.mapMarkerForRestaurant(restaurant, newMap);
+      this.dbHelper.mapMarkerForRestaurant(restaurant, newMap);
     }
   },
   /**
    * Get current restaurant from page URL.
    */
   fetchRestaurantFromURL: function () {
-    const id = getParameterByName('id');
+    const id = funcsHelpers.getParameterByName('id');
     if (!id) { // no id found in URL
       return Promise.reject('No restaurant id in URL');
     } else {
-      return DBHelper.fetchRestaurantById(id).then((restaurant) => {
+      return this.dbHelper.fetchRestaurantById(id).then((restaurant) => {
         model.restaurantId = restaurant.id;
         return restaurant;
       });
@@ -81,11 +88,11 @@ const controler = {
    * Get current reviews from restaurant page URL.
    */
   fetchReviewsFromURL: function () {
-    const id = getParameterByName('id');
+    const id = funcsHelpers.getParameterByName('id');
     if (!id) { // no id found in URL
       return Promise.reject('No restaurant id in URL');
     } else {
-      return DBHelper.fetchReviewsByRestaurantId(id).then((reviews) => {
+      return this.dbHelper.fetchReviewsByRestaurantId(id).then((reviews) => {
         return reviews;
       });
     }
@@ -137,7 +144,7 @@ const controler = {
     // if offline allow sw post request
     if (navigator.onLine === false) options.mode = 'no-cors'
 
-    fetch(DBHelper.getDbUrl('reviews/'), options)
+    fetch(this.dbHelper.getDbUrl('reviews/'), options)
       .then((res) => res.json())
       .then((resReview) => {
         document.getElementById('reviews-list').appendChild(view.createReviewHTML(resReview));
@@ -166,8 +173,8 @@ const view = {
     const image = document.getElementById('restaurant-img');
     image.setAttribute('alt', restaurant.name);
     image.className = 'restaurant-img';
-    image.srcset = DBHelper.srcsetImageUrlForRestaurant(restaurant);
-    image.src = DBHelper.imageUrlForRestaurant(restaurant);
+    image.srcset = controler.dbHelper.srcsetImageUrlForRestaurant(restaurant);
+    image.src = controler.dbHelper.imageUrlForRestaurant(restaurant);
     image.sizes = '(max-width: 380px) 300px, (max-width: 480px) 400px, (max-width: 680px) 600px, (max-width: 768px) 800px, (max-width: 960px) 400px, (max-width: 1360px) 600px';
 
     const restaurantImgContainer = document.getElementById('restaurant-img-container')
@@ -182,7 +189,7 @@ const view = {
     btnFavorite.classList.add('favorite-icon');
     btnFavorite.classList.add(`favorite-icon--${isFavorite ? 'on' : 'off'}`);
     restaurantImgContainer.append(btnFavorite);
-    favoriteClickListener()
+    funcsHelpers.favoriteClickListener(controler.dbHelper);
 
     const cuisine = document.getElementById('restaurant-cuisine');
     cuisine.innerHTML = restaurant.cuisine_type;

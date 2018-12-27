@@ -1,3 +1,8 @@
+/* ======= Import modules ======= */
+import * as funcsHelpers from './functions';
+import './sw-registration';
+import DBHelper from './dbhelper';
+
 /* ======= Model ======= */
 let model = {
   restaurants: null,
@@ -8,6 +13,7 @@ let model = {
 /* ======= Controler ======= */
 const controler = {
   init: function () {
+    this.dbHelper = new DBHelper();
     this.initMap();
     view.init();
     // Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -17,8 +23,8 @@ const controler = {
             this.fetchNeighborhoods();
             this.fetchCuisines();
             this.listenerOnFilterChange();
-            showMainContent();
-            favoriteClickListener();
+            funcsHelpers.showMainContent();
+            funcsHelpers.favoriteClickListener(this.dbHelper);
           })
     });
   },
@@ -39,7 +45,7 @@ const controler = {
    * Fetch all neighborhoods and set their HTML.
    */
   fetchNeighborhoods: function () {
-    DBHelper.fetchNeighborhoods().then((neighborhoods) => {
+    this.dbHelper.fetchNeighborhoods().then((neighborhoods) => {
       view.fillNeighborhoodsHTML(neighborhoods);
     }).catch((error) => {
       console.error(error);
@@ -49,7 +55,7 @@ const controler = {
    * Fetch all cuisines and set their HTML.
    */
   fetchCuisines: function () {
-    DBHelper.fetchCuisines().then((cuisines) => {
+    this.dbHelper.fetchCuisines().then((cuisines) => {
       view.fillCuisinesHTML(cuisines);
     }).catch((error) => {
       console.error(error);
@@ -67,7 +73,7 @@ const controler = {
       });
 
       L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
-        mapboxToken: DBHelper.fetchMAPBOXToken(),
+        mapboxToken: this.dbHelper.fetchMAPBOXToken(),
         maxZoom: 18,
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
           '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -83,7 +89,7 @@ const controler = {
     const cuisine = view.getSelectValue('cuisines');
     const neighborhood = view.getSelectValue('neighborhoods');
     
-    return DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood)
+    return this.dbHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood)
       .then((restaurants) => {
         this.resetRestaurants(restaurants);
         view.fillRestaurantsHTML(restaurants);
@@ -161,8 +167,8 @@ const view = {
     image.setAttribute('alt', restaurant.name);
 
     image.className = 'restaurant-img';
-    image.src = DBHelper.imageUrlForRestaurant(restaurant);
-    image.srcset = DBHelper.srcsetImageUrlForIndex(restaurant);
+    image.src = controler.dbHelper.imageUrlForRestaurant(restaurant);
+    image.srcset = controler.dbHelper.srcsetImageUrlForIndex(restaurant);
     item.append(image);
 
     const btnFavorite = document.createElement('button');
@@ -196,7 +202,7 @@ const view = {
     const more = document.createElement('a');
     more.innerHTML = 'View Details';
     more.setAttribute('aria-labelledby', `res-${restaurant.id}`);
-    more.href = DBHelper.urlForRestaurant(restaurant);
+    more.href = controler.dbHelper.urlForRestaurant(restaurant);
     contentWrapper.append(more);
 
     item.append(contentWrapper);
@@ -241,7 +247,7 @@ const view = {
 
       restaurants.forEach(restaurant => {
         // Add marker to the map
-        const marker = DBHelper.mapMarkerForRestaurant(restaurant, model.newMap);
+        const marker = controler.dbHelper.mapMarkerForRestaurant(restaurant, model.newMap);
         marker.on('click', onClick);
 
         function onClick() {
