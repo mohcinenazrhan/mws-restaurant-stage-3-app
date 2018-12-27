@@ -254,10 +254,11 @@ function idbResponse(req, dbStoreName) {
       const fetchData = fetch(req)
         .then((response) => response.json())
         .then((data) => {
-          if (JSON.stringify(data) !== JSON.stringify(savedDbData) && savedDbData.length >= 1)
-            msgSwToClients.send('reloadThePageForMAJ')
-          
           IDBHelper.saveDataToIdb(data, dbStoreName)
+
+          if (JSON.stringify(data) !== JSON.stringify(savedDbData) && savedDbData.length >= 1)
+            msgSwToClients.send('updateContent') // update content
+          
           return new Response(JSON.stringify(data))
         })
         .catch(() => {

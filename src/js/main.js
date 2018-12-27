@@ -16,17 +16,36 @@ const controler = {
     this.dbHelper = new DBHelper();
     this.initMap();
     view.init();
+    this.listenerForSwMsg();
     // Fetch neighborhoods and cuisines as soon as the page is loaded.
     document.addEventListener('DOMContentLoaded', () => {
-      this.updateRestaurants()
-          .then(() => {
-            this.fetchNeighborhoods();
-            this.fetchCuisines();
-            this.listenerOnFilterChange();
-            funcsHelpers.showMainContent();
-            funcsHelpers.favoriteClickListener(this.dbHelper);
-          })
+      this.fillContent()
     });
+  },
+  /**
+  * update content automatically when receive message from service worker
+  */
+  listenerForSwMsg: function () {
+    
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data === 'updateContent') {
+        console.log('updateContent');
+        this.dbHelper.updateInmemoryRestaurantsData()
+          .then(() => {
+            this.fillContent()
+          })
+      }
+    });
+  },
+  fillContent: function () {
+    this.updateRestaurants()
+      .then(() => {
+        this.fetchNeighborhoods();
+        this.fetchCuisines();
+        this.listenerOnFilterChange();
+        funcsHelpers.showMainContent();
+        funcsHelpers.favoriteClickListener(this.dbHelper);
+      })
   },
   /**
    * Listen for select elements and update Restaurants
@@ -109,6 +128,7 @@ const controler = {
     //   model.markers.forEach(marker => marker.remove());
     // }
     // model.markers = [];
+    view.initContent();
     model.restaurants = restaurants;
   }
 };

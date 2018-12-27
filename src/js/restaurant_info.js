@@ -5,55 +5,79 @@ import DBHelper from './dbhelper';
 
 /* ======= Model ======= */
 let model = {
-  restaurantId: null
+  restaurantId: null,
+  currentMarker: null
 };
 
 /* ======= Controler ======= */
 const controler = {
   init: function () {
     this.dbHelper = new DBHelper();
-
+    this.listenerForSwMsg();
+    funcsHelpers.favoriteClickListener(this.dbHelper);
     /**
      * Initialize map as soon as the page is loaded.
      */
     document.addEventListener('DOMContentLoaded', () => {
-      // fill restaurant content
-      this.fetchRestaurantFromURL()
-          .then((restaurant) => {
-            if (!restaurant || restaurant.length === 0) {
-              console.log('No restaurant found');
-              return
-            }
-
-            this.initMap(restaurant);
-            view.fillBreadcrumb(restaurant.name);
-            view.fillRestaurantHTML(restaurant);
-            funcsHelpers.showMainContent();
-          })
-          .catch((error) => {
-            console.log(error);
-          })
-
-      // fill reviews content
-      this.fetchReviewsFromURL()
-          .then((reviews) => {
-            view.fillReviewsHTML(reviews);
-          })
-          .catch((error) => {
-            console.log(error);
-          })
-
-      // Listener for rating stars
-      this.checkedRatingListener();
-      // Listener for submit review
-      this.submitReviewListener();
+      this.fillContent()  
     });
+  },
+  /**
+   * update content automatically when receive message from service worker
+   */
+  listenerForSwMsg: function () {
+
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data === 'updateContent') {
+        console.log('updateContent');
+        this.dbHelper.updateInmemoryRestaurantsData()
+          .then(() => {
+            this.fillContent()
+          })
+      }
+    });
+  },
+  fillContent: function () {
+    // fill restaurant content
+    this.fetchRestaurantFromURL()
+      .then((restaurant) => {
+        if (!restaurant || restaurant.length === 0) {
+          console.log('No restaurant found');
+          return
+        }
+
+        this.initMap(restaurant);
+        view.fillBreadcrumb(restaurant.name);
+        view.fillRestaurantHTML(restaurant);
+        funcsHelpers.showMainContent();
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+
+    // fill reviews content
+    this.fetchReviewsFromURL()
+      .then((reviews) => {
+        view.fillReviewsHTML(reviews);
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+
+    // Listener for rating stars
+    this.checkedRatingListener();
+    // Listener for submit review
+    this.submitReviewListener();
   },
   /**
    * Initialize leaflet map
    */
   initMap: function (restaurant) {
     if (typeof L !== 'undefined') {
+      const container = L.DomUtil.get('map');
+      if (container !== null) container._leaflet_id = null;
+      if (model.currentMarker !== null) model.currentMarker.remove();
+
       const newMap = L.map('map', {
         center: [restaurant.latlng.lat, restaurant.latlng.lng],
         zoom: 16,
@@ -67,7 +91,7 @@ const controler = {
           'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         id: 'mapbox.streets'
       }).addTo(newMap);
-      this.dbHelper.mapMarkerForRestaurant(restaurant, newMap);
+      model.currentMarker = this.dbHelper.mapMarkerForRestaurant(restaurant, newMap);
     }
   },
   /**
@@ -177,19 +201,12 @@ const view = {
     image.src = controler.dbHelper.imageUrlForRestaurant(restaurant);
     image.sizes = '(max-width: 380px) 300px, (max-width: 480px) 400px, (max-width: 680px) 600px, (max-width: 768px) 800px, (max-width: 960px) 400px, (max-width: 1360px) 600px';
 
-    const restaurantImgContainer = document.getElementById('restaurant-img-container')
-    const btnFavorite = document.createElement('button');
+
+    const btnFavorite = document.querySelector('.favorite-icon');
     const isFavorite = restaurant.is_favorite.toString() === 'true' ? true : false;
-    btnFavorite.title = 'Favorite'
-    btnFavorite.setAttribute('tabindex', '0');
-    btnFavorite.setAttribute('aria-label', 'favorite restaurant');
-    btnFavorite.setAttribute('role', 'switch');
     btnFavorite.setAttribute('aria-checked', isFavorite);
     btnFavorite.setAttribute('id', `fav-${restaurant.id}`);
-    btnFavorite.classList.add('favorite-icon');
     btnFavorite.classList.add(`favorite-icon--${isFavorite ? 'on' : 'off'}`);
-    restaurantImgContainer.append(btnFavorite);
-    funcsHelpers.favoriteClickListener(controler.dbHelper);
 
     const cuisine = document.getElementById('restaurant-cuisine');
     cuisine.innerHTML = restaurant.cuisine_type;
@@ -205,6 +222,7 @@ const view = {
    */
   fillRestaurantHoursHTML: function (operatingHours) {
     const hours = document.getElementById('restaurant-hours');
+    hours.innerHTML = ''
     for (let key in operatingHours) {
       const row = document.createElement('tr');
       row.setAttribute('tabindex', '0');
@@ -225,10 +243,9 @@ const view = {
    */
   fillReviewsHTML: function (reviews) {
     const container = document.getElementById('reviews-container');
-    const title = document.createElement('h2');
-    title.innerHTML = 'Reviews';
-    container.appendChild(title);
+
     const ul = document.getElementById('reviews-list');
+    ul.innerHTML = ''
 
     if (reviews.length === 0 || !reviews) {
       const reviewsMsgContainer = document.createElement('p');
@@ -305,8 +322,17 @@ const view = {
    * Add restaurant name to the breadcrumb navigation menu
    */
   fillBreadcrumb: function (restaurantName) {
+    const currentPageName = document.getElementById('current-page-name')
+    if (currentPageName !== null) {
+      if (currentPageName.innerHTML !== restaurantName)
+        currentPageName.innerHTML = restaurantName
+        
+      return
+    }
+
     const breadcrumb = document.getElementById('breadcrumb');
     const li = document.createElement('li');
+    li.id = 'current-page-name'
     li.innerHTML = restaurantName;
     breadcrumb.appendChild(li);
   }

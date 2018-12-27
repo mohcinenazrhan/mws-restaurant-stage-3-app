@@ -48,6 +48,22 @@ class DBHelper {
   }
 
   /**
+   * update In-memory Restaurants Data.
+   */
+  updateInmemoryRestaurantsData() {
+
+    return fetch(this.getDbUrl('restaurants'))
+      .then((response) => response.json())
+      .then((restaurants) => {
+        this.fetchRestaurantsData = Promise.resolve(restaurants)
+        return restaurants
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  /**
    * Fetch a restaurant by its ID.
    */
   fetchRestaurantById(id) {
