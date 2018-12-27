@@ -108,7 +108,7 @@
     /**
      * update SW by send message to sw for skip waiting
      */
-    function updateSW() {
+    self.updateSW = function() {
         _worker.postMessage({
             action: 'skipWaiting'
         });
@@ -217,7 +217,7 @@
         document.body.classList.remove('state-offline');
     }
 
-(function () {
+export default (function () {
 
     'use strict';
     /****************** Fire Service Worker script ******************/

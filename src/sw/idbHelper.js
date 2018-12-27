@@ -6,28 +6,11 @@ class IDBHelper {
     }
 
     /**
-     * converts an idb operations success/error
-     * to a promise based resolve/reject
-     * @param {function} dbOperation - idb process to
-     * @param {*} err - error to pass as param on reject
-     * (mainly for transaction errors)
-     * @returns promise that resolves with the result of
-     * the operation and rejects with its error
-     */
-    getPromise(dbOperation, err) {
-        return new Promise((res, rej) => {
-            dbOperation().onsuccess = event => res(event.target.result);
-            dbOperation().onerror = event => rej(err || event.target.error);
-        });
-    };
-
-    /**
      * Open a IDB database, create an objectStore,
      * @return {Promise} - idbPromise to access database
      */
-    openDatabase() {
-        const req = indexedDB.open(dbName, version);
-        return getPromise(() => req);
+    openDatabase(dbName, version) {
+        return idb.open(dbName, version);
     }
 
     /**
