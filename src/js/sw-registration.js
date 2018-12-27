@@ -7,7 +7,6 @@ class SWRegistration {
             this._refreshing = false;
             this._isVisible = true;
             this._isOffline = false;
-            this._worker = null;
             this._timeoutMsg = null;
 
             this._config = {
@@ -101,24 +100,29 @@ class SWRegistration {
      * @param {Object} worker 
      */
     updateReady(worker) {
-        this._worker = worker
         if (this._config.askUserWhenSwUpdated) {
-            this.showMsg(`${this._config.msgWhenSwUpdated} <button class="btn-updatesw" onclick="updateSW()">Yes</button>`, null)
+            this.showMsg(`${this._config.msgWhenSwUpdated} <button class="btn-updatesw" id="btn-updatesw">Yes</button>`, null)
+            document.getElementById('btn-updatesw')
+                    .addEventListener('click', (function (_this) {
+                        return function () {
+                            _this.updateSW(worker);
+                            // hide notification bar if the user click Yes
+                            _this.hideMsg();
+                        }
+                    })(this))
             return
         }
         // if _askUserWhenSwUpdated is false just apply to updateSW
-        this.updateSW()
+        this.updateSW(worker)
     }
 
     /**
      * update SW by send message to sw for skip waiting
      */
-    updateSW () {
-        _worker.postMessage({
+    updateSW(worker) {
+        worker.postMessage({
             action: 'skipWaiting'
         });
-        // hide notification bar if the user click Yes
-        this.hideMsg();
     }
 
     /**
