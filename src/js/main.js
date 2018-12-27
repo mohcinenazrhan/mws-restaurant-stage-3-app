@@ -2,17 +2,20 @@
 import * as funcsHelpers from './functions';
 import './sw-registration';
 import DBHelper from './dbhelper';
+import SWRegistration from './sw-registration';
 
 /* ======= Model ======= */
 let model = {
   restaurants: null,
   newMap: null,
-  markers: []
+  markers: [],
+  swRegConfig: {}
 };
 
 /* ======= Controler ======= */
 const controler = {
   init: function () {
+    SWRegistration.fire(model.swRegConfig);
     this.dbHelper = new DBHelper();
     this.initMap();
     view.init();
@@ -33,7 +36,7 @@ const controler = {
         this.dbHelper.updateInmemoryRestaurantsData()
           .then(() => {
             this.fillContent()
-            showMsg('Content Updated')
+            SWRegistration.showMsg('Content Updated')
           })
       }
     });

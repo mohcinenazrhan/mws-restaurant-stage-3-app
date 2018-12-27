@@ -2,16 +2,19 @@
 import * as funcsHelpers from './functions';
 import './sw-registration';
 import DBHelper from './dbhelper';
+import SWRegistration from './sw-registration';
 
 /* ======= Model ======= */
 let model = {
   restaurantId: null,
-  currentMarker: null
+  currentMarker: null,
+  swRegConfig: {}
 };
 
 /* ======= Controler ======= */
 const controler = {
   init: function () {
+    SWRegistration.fire(model.swRegConfig);
     this.dbHelper = new DBHelper();
     this.listenerForSwMsg();
     funcsHelpers.favoriteClickListener(this.dbHelper);
