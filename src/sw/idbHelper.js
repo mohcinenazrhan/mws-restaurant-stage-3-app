@@ -2,31 +2,32 @@ import idb from 'idb';
 
 class IDBHelper {
     constructor() {
-        this.idbPromise = this.openDatabase();
+        this.idbPromise = this.openDatabase('restaurant-store', 1);
     }
+
+    /**
+     * converts an idb operations success/error
+     * to a promise based resolve/reject
+     * @param {function} dbOperation - idb process to
+     * @param {*} err - error to pass as param on reject
+     * (mainly for transaction errors)
+     * @returns promise that resolves with the result of
+     * the operation and rejects with its error
+     */
+    getPromise(dbOperation, err) {
+        return new Promise((res, rej) => {
+            dbOperation().onsuccess = event => res(event.target.result);
+            dbOperation().onerror = event => rej(err || event.target.error);
+        });
+    };
 
     /**
      * Open a IDB database, create an objectStore,
      * @return {Promise} - idbPromise to access database
      */
     openDatabase() {
-        return idb.open('restaurant-store', 1, upgradeDB => {
-            switch (upgradeDB.oldVersion) {
-                case 0:
-                    upgradeDB.createObjectStore('restaurants', {
-                        keyPath: 'id'
-                    })
-                    upgradeDB.createObjectStore('reviews', {
-                        keyPath: 'id'
-                    })
-                    upgradeDB.createObjectStore('requests', {
-                        keyPath: 'id'
-                    });
-                    upgradeDB.createObjectStore('post-requests', {
-                        keyPath: 'id'
-                    });
-            }
-        })
+        const req = indexedDB.open(dbName, version);
+        return getPromise(() => req);
     }
 
     /**
