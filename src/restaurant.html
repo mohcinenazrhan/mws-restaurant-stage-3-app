@@ -58,6 +58,7 @@
       <h1 id="restaurant-name"></h1>
       <div id="restaurant-img-container">
         <img id="restaurant-img">
+        <button title="Favorite" tabindex="0" aria-label="favorite restaurant" role="switch" class="favorite-icon"></button>
       </div>
       <p id="restaurant-cuisine"></p>
       <p id="restaurant-address"></p>
@@ -65,7 +66,8 @@
     </section>
     <!-- end restaurant -->
     <!-- Beginning reviews -->
-    <section id="reviews-container" aria-label="Reviews">
+    <section id="reviews-container" aria-labelledby="reviews-label">
+      <h2 id="reviews-label">Reviews</h2>
       <ul id="reviews-list" role="region" aria-label="Reviews list"></ul>
     </section>
     <section id="add-reviews-container" role="form" aria-labelledby="add-reviews-label">

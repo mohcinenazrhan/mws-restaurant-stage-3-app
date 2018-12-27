@@ -2,31 +2,54 @@
 import * as funcsHelpers from './functions';
 import './sw-registration';
 import DBHelper from './dbhelper';
+import SWRegistration from './sw-registration';
 
 /* ======= Model ======= */
 let model = {
   restaurants: null,
   newMap: null,
-  markers: []
+  markers: [],
+  swRegConfig: {}
 };
 
 /* ======= Controler ======= */
 const controler = {
   init: function () {
+    SWRegistration.fire(model.swRegConfig);
     this.dbHelper = new DBHelper();
     this.initMap();
     view.init();
+    this.listenerForSwMsg();
     // Fetch neighborhoods and cuisines as soon as the page is loaded.
     document.addEventListener('DOMContentLoaded', () => {
-      this.updateRestaurants()
-          .then(() => {
-            this.fetchNeighborhoods();
-            this.fetchCuisines();
-            this.listenerOnFilterChange();
-            funcsHelpers.showMainContent();
-            funcsHelpers.favoriteClickListener(this.dbHelper);
-          })
+      this.fillContent()
     });
+  },
+  /**
+  * update content automatically when receive message from service worker
+  */
+  listenerForSwMsg: function () {
+    
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data === 'updateContent') {
+        console.log('updateContent');
+        this.dbHelper.updateInmemoryRestaurantsData()
+          .then(() => {
+            this.fillContent()
+            SWRegistration.showMsg('Content Updated')
+          })
+      }
+    });
+  },
+  fillContent: function () {
+    this.updateRestaurants()
+      .then(() => {
+        this.fetchNeighborhoods();
+        this.fetchCuisines();
+        this.listenerOnFilterChange();
+        funcsHelpers.showMainContent();
+        funcsHelpers.favoriteClickListener(this.dbHelper);
+      })
   },
   /**
    * Listen for select elements and update Restaurants
@@ -105,10 +128,11 @@ const controler = {
     // Remove all restaurants
     model.restaurants = [];
     // Remove all map markers
-    // if (model.markers) {
-    //   model.markers.forEach(marker => marker.remove());
-    // }
-    // model.markers = [];
+    if (model.markers) {
+      model.markers.forEach(marker => marker.remove());
+    }
+    model.markers = [];
+    view.initContent();
     model.restaurants = restaurants;
   }
 };
