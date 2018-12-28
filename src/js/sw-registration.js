@@ -221,13 +221,14 @@ class SWRegistration {
      * @param {*} config 
      */
     fire(config) {
-        if (!('serviceWorker' in navigator)) return;
+        if (!('serviceWorker' in navigator)) Promise.reject('Your browser does not support serviceworker. the app will not be available offline.');
 
         this.initConfig(config);
         this.setSwMsgContianer();
-        this.serviceWorkerRegistration().then(() => {
+        return this.serviceWorkerRegistration().then(() => {
             this.listenToMessages();
             this.updateNetworkState();
+            return Promise.resolve();
         })
     }
 }
