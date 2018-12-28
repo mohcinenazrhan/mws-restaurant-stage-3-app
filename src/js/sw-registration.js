@@ -17,8 +17,9 @@ class SWRegistration {
                 msgWhenUpdate: 'The contents of this page have been updated. Please <a href="javascript:location.reload()">reload</a>',
                 askUserWhenSwUpdated: true,
                 msgSync: 'Your submit is saved and will auto-submit when you\'re online',
-                msgWhenSwUpdated: 'New version available online. Do you want to update? ',
-                preCache: 'precacheConfig' // strategy for pre-caching assets : onReload | precacheConfig
+                classIdBtnSwUpdate: 'btn-updatesw',
+                msgWhenSwUpdated: 'New version available online. Do you want to update? <button class="classIdBtnSwUpdate" id="classIdBtnSwUpdate">Yes</button>',
+                preCache: 'onReload' // strategy for pre-caching assets : onReload | precacheConfig
             }
 
             SWRegistration.instance = this;
@@ -101,8 +102,9 @@ class SWRegistration {
      */
     updateReady(worker) {
         if (this._config.askUserWhenSwUpdated) {
-            this.showMsg(`${this._config.msgWhenSwUpdated} <button class="btn-updatesw" id="btn-updatesw">Yes</button>`, null)
-            document.getElementById('btn-updatesw')
+            this.showMsg(this._config.msgWhenSwUpdated.replace(/classIdBtnSwUpdate/g, this._config.classIdBtnSwUpdate), null)
+
+            document.getElementById(this._config.classIdBtnSwUpdate)
                     .addEventListener('click', (function (_this) {
                         return function () {
                             _this.updateSW(worker);
@@ -217,7 +219,7 @@ class SWRegistration {
      */
     fire(config) {
         if (!('serviceWorker' in navigator)) return;
-        
+
         this.initConfig(config);
         this.setSwMsgContianer();
         this.serviceWorkerRegistration().then(() => {
