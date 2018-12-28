@@ -216,6 +216,8 @@ class SWRegistration {
      * @param {*} config 
      */
     fire(config) {
+        if (!('serviceWorker' in navigator)) return;
+        
         this.initConfig(config);
         this.setSwMsgContianer();
         this.serviceWorkerRegistration().then(() => {
