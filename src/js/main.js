@@ -15,11 +15,15 @@ let model = {
 /* ======= Controler ======= */
 const controler = {
   init: function () {
-    SWRegistration.fire(model.swRegConfig);
+    SWRegistration.fire(model.swRegConfig)
+                  .then(() => {
+                    this.listenerForSwMsg();
+                  });
+
     this.dbHelper = new DBHelper();
     this.initMap();
     view.init();
-    this.listenerForSwMsg();
+    
     // Fetch neighborhoods and cuisines as soon as the page is loaded.
     document.addEventListener('DOMContentLoaded', () => {
       this.fillContent()

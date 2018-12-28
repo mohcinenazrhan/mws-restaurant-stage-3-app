@@ -17,7 +17,8 @@ class SWRegistration {
                 msgWhenUpdate: 'The contents of this page have been updated. Please <a href="javascript:location.reload()">reload</a>',
                 askUserWhenSwUpdated: true,
                 msgSync: 'Your submit is saved and will auto-submit when you\'re online',
-                msgWhenSwUpdated: 'New version available online. Do you want to update? ',
+                classIdBtnSwUpdate: 'btn-updatesw',
+                msgWhenSwUpdated: 'New version available online. Do you want to update? <button class="classIdBtnSwUpdate" id="classIdBtnSwUpdate">Yes</button>',
                 preCache: 'precacheConfig' // strategy for pre-caching assets : onReload | precacheConfig
             }
 
@@ -101,13 +102,17 @@ class SWRegistration {
      */
     updateReady(worker) {
         if (this._config.askUserWhenSwUpdated) {
-            this.showMsg(`${this._config.msgWhenSwUpdated} <button class="btn-updatesw" id="btn-updatesw">Yes</button>`, null)
-            document.getElementById('btn-updatesw')
+            this.showMsg(this._config.msgWhenSwUpdated.replace(/classIdBtnSwUpdate/g, this._config.classIdBtnSwUpdate), null)
+
+            document.getElementById(this._config.classIdBtnSwUpdate)
                     .addEventListener('click', (function (_this) {
                         return function () {
                             _this.updateSW(worker);
                             // hide notification bar if the user click Yes
                             _this.hideMsg();
+                            // reload page if preCache not onReload to avoid reload page two times
+                            if (_this._config.preCache !== 'onReload')
+                                window.location.reload();
                         }
                     })(this))
             return
@@ -216,11 +221,14 @@ class SWRegistration {
      * @param {*} config 
      */
     fire(config) {
+        if (!('serviceWorker' in navigator)) Promise.reject('Your browser does not support serviceworker. the app will not be available offline.');
+
         this.initConfig(config);
         this.setSwMsgContianer();
-        this.serviceWorkerRegistration().then(() => {
+        return this.serviceWorkerRegistration().then(() => {
             this.listenToMessages();
             this.updateNetworkState();
+            return Promise.resolve();
         })
     }
 }

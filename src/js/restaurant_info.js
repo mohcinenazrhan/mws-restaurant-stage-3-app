@@ -14,9 +14,12 @@ let model = {
 /* ======= Controler ======= */
 const controler = {
   init: function () {
-    SWRegistration.fire(model.swRegConfig);
+    SWRegistration.fire(model.swRegConfig)
+                  .then(() => {
+                    this.listenerForSwMsg();
+                  });
+                  
     this.dbHelper = new DBHelper();
-    this.listenerForSwMsg();
     funcsHelpers.favoriteClickListener(this.dbHelper);
     /**
      * Initialize map as soon as the page is loaded.
