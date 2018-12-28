@@ -19,7 +19,7 @@ class SWRegistration {
                 msgSync: 'Your submit is saved and will auto-submit when you\'re online',
                 classIdBtnSwUpdate: 'btn-updatesw',
                 msgWhenSwUpdated: 'New version available online. Do you want to update? <button class="classIdBtnSwUpdate" id="classIdBtnSwUpdate">Yes</button>',
-                preCache: 'onReload' // strategy for pre-caching assets : onReload | precacheConfig
+                preCache: 'precacheConfig' // strategy for pre-caching assets : onReload | precacheConfig
             }
 
             SWRegistration.instance = this;
@@ -110,6 +110,9 @@ class SWRegistration {
                             _this.updateSW(worker);
                             // hide notification bar if the user click Yes
                             _this.hideMsg();
+                            // reload page if preCache not onReload to avoid reload page two times
+                            if (_this._config.preCache !== 'onReload')
+                                window.location.reload();
                         }
                     })(this))
             return
