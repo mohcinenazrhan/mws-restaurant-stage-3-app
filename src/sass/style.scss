@@ -228,6 +228,11 @@ nav a {
     appearance: none;
 }
 
+// Removing the IE>=10 Select Element Arrow
+select::-ms-expand {
+    display: none;
+}
+
 /* ====================== Restaurant Listing ====================== */
 
 #restaurants-list {
