@@ -89,6 +89,13 @@ section {
     min-height: 100%;
 }
 
+.headerfixposition::before {
+    content: '';
+    height: 132px;
+    width: 100%;
+    display: inline-block;
+}
+
 #footer {
     background-color: #444;
     color: #DBDBDB;
@@ -98,7 +105,7 @@ section {
     text-align: center;
     text-transform: uppercase;
     z-index: 10001;
-    position: sticky;
+    position: relative;
 }
 
 #footer.fixed-bottom {
@@ -286,7 +293,7 @@ nav a {
 /* ====================== Restaurant Details ====================== */
 
 .inside header {
-    position: sticky;
+    position: fixed;
     top: 0;
     width: 100%;
     z-index: 10000;
@@ -315,7 +322,7 @@ nav a {
     line-height: 1.1;
 }
 
-#restaurant-img-container{
+#restaurant-img-container {
     position: relative;
 }
 
@@ -445,6 +452,7 @@ nav a {
         height: calc(100% - 135px);
         position: fixed;
         right: 0;
+        bottom: 0;
         width: 50%;
     }
 
@@ -462,6 +470,7 @@ table tr:nth-of-type(odd) {
 table tr td {
     padding: 5px
 }
+
 /* ====================== Add review Form ====================== */
 
 #add-reviews-container form {
@@ -511,12 +520,12 @@ button[type="submit"] {
     line-height: 1.5;
     border-radius: .25rem;
     transition: color .15s ease-in-out,
-    background-color .15s ease-in-out,
-    border-color .15s ease-in-out,
-    box-shadow .15s ease-in-out;
+        background-color .15s ease-in-out,
+        border-color .15s ease-in-out,
+        box-shadow .15s ease-in-out;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
-    0 3px 1px -2px rgba(0, 0, 0, 0.12),
-    0 1px 5px 0 rgba(0, 0, 0, 0.2);
+        0 3px 1px -2px rgba(0, 0, 0, 0.12),
+        0 1px 5px 0 rgba(0, 0, 0, 0.2);
     color: #fff;
     border: 2px solid #125b8a;
     background-color: rgb(37, 40, 49);
@@ -637,7 +646,7 @@ screen and (-webkit-min-device-pixel-ratio:2) {
     background: none;
     padding: 0;
     transition: background-image .1s ease-in-out,
-    transform .1s linear;
+        transform .1s linear;
     background-repeat: no-repeat;
     background-position: center;
 }
@@ -740,7 +749,7 @@ screen and (-webkit-min-device-pixel-ratio:2) {
 }
 
 /* ====================== Display Animation ====================== */
-.visibility-hidden{
+.visibility-hidden {
     visibility: hidden
 }
 
