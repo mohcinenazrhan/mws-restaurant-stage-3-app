@@ -122,7 +122,6 @@ gulp.task('scripts', ['lint'], function () {
                 debug: true
             })
             .transform(babelify, {
-                presets: ['@babel/preset-env'],
                 sourceMaps: dev ? true : false
             }) // required for 'import'
             .bundle()

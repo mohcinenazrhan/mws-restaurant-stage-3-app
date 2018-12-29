@@ -23,6 +23,8 @@ const controler = {
     this.dbHelper = new DBHelper();
     this.initMap();
     view.init();
+                  
+    funcsHelpers.appendPolyfill();
     
     // Fetch neighborhoods and cuisines as soon as the page is loaded.
     document.addEventListener('DOMContentLoaded', () => {
@@ -186,7 +188,7 @@ const view = {
   createRestaurantHTML: function (restaurant) {
     const li = document.createElement('li');
     li.id = `listitem-${restaurant.id}`;
-    li.className = 'fadein';
+    li.className = 'fadein col-xs-12 col-sm-6 col-md-4 col-lg-3';
 
     const item = document.createElement('div');
     item.className = 'listitem';

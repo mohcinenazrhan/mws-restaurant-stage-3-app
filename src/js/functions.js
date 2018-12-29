@@ -18,7 +18,8 @@ export const favoriteOnClick = function (DBHelper, event) {
     const newState = !currentState; // toggel favorite state
     const btnClassNameCurrentState = `${btnClassName}--${currentStateClass}`;
     const btnClassNameNewState = `${btnClassName}--${newState === true ? 'on' : 'off'}`;
-    _this.classList.replace(btnClassNameCurrentState, btnClassNameNewState);
+    _this.classList.remove(btnClassNameCurrentState);
+    _this.classList.add(btnClassNameNewState);
     _this.setAttribute('aria-checked', newState);
 
     // toggel favorite state on the server
@@ -82,4 +83,49 @@ export function getParameterByName(name, url) {
     if (!results[2])
         return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+/**
+ * childnode append Polyfill
+ */
+export function appendPolyfill() {
+    // Source: https://github.com/jserz/js_piece/blob/master/DOM/ParentNode/append()/append().md
+    return (function (arr) {
+        arr.forEach(function (item) {
+            if (item.hasOwnProperty('append')) {
+                return;
+            }
+            Object.defineProperty(item, 'append', {
+                configurable: true,
+                enumerable: true,
+                writable: true,
+                value: function append() {
+                    var argArr = Array.prototype.slice.call(arguments),
+                        docFrag = document.createDocumentFragment();
+
+                    argArr.forEach(function (argItem) {
+                        var isNode = argItem instanceof Node;
+                        docFrag.appendChild(isNode ? argItem : document.createTextNode(String(argItem)));
+                    });
+
+                    this.appendChild(docFrag);
+                }
+            });
+        });
+    })([Element.prototype, Document.prototype, DocumentFragment.prototype]);
+}
+
+/**
+ * Polyfill ie 11 nodelist foreach
+ */
+export function polyfillIe11NodelistForeach() {
+    if ('NodeList' in window && !NodeList.prototype.forEach) {
+        console.info('polyfill for IE11');
+        NodeList.prototype.forEach = function (callback, thisArg) {
+            thisArg = thisArg || window;
+            for (var i = 0; i < this.length; i++) {
+                callback.call(thisArg, this[i], i, this);
+            }
+        };
+    }
 }

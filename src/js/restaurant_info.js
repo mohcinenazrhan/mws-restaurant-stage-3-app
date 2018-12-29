@@ -151,8 +151,10 @@ const controler = {
    */
   postReview: function () {
     let rating;
-    const ratingRadioList = document.querySelectorAll('#frating input[name="rating"]');
 
+    // to support Foreach over Nodelist in Ie11
+    funcsHelpers.polyfillIe11NodelistForeach();
+    const ratingRadioList = document.querySelectorAll('#frating input[name="rating"]');
     ratingRadioList.forEach(ratingRadio => {
       if (ratingRadio.checked) rating = ratingRadio.value;
     });
