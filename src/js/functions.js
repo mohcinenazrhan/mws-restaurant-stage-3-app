@@ -18,7 +18,8 @@ export const favoriteOnClick = function (DBHelper, event) {
     const newState = !currentState; // toggel favorite state
     const btnClassNameCurrentState = `${btnClassName}--${currentStateClass}`;
     const btnClassNameNewState = `${btnClassName}--${newState === true ? 'on' : 'off'}`;
-    _this.classList.replace(btnClassNameCurrentState, btnClassNameNewState);
+    _this.classList.remove(btnClassNameCurrentState);
+    _this.classList.add(btnClassNameNewState);
     _this.setAttribute('aria-checked', newState);
 
     // toggel favorite state on the server
