@@ -40,7 +40,7 @@ class SWRegistration {
      * Service worker registration & Update Process
      */
     serviceWorkerRegistration() {
-        if (!navigator.serviceWorker) return;
+        if (!navigator.serviceWorker) return Promise.resolve();
 
         // listen for the controlling service worker changing
         // and reload the page
@@ -67,14 +67,14 @@ class SWRegistration {
                 if (!navigator.serviceWorker.controller) {
                     console.log('Service Worker installed');
                     this.showMsg(this._config.msgSwInstalled);
-                    return
+                    return Promise.resolve();
                 };
 
                 // if there's an updated worker already waiting, call
                 // updateReady()
                 if (reg.waiting) {
                     this.updateReady(reg);
-                    return;
+                    return Promise.resolve();
                 }
 
                 // if there's an updated worker installing, track its
@@ -82,7 +82,7 @@ class SWRegistration {
                 // updateReady()
                 if (reg.installing) {
                     this.trackingprogressInstalled(reg.installing);
-                    return;
+                    return Promise.resolve();
                 }
 
                 // otherwise, listen for new installing workers arriving.
@@ -221,7 +221,7 @@ class SWRegistration {
      * @param {*} config 
      */
     fire(config) {
-        if (!('serviceWorker' in navigator)) Promise.reject('Your browser does not support serviceworker. the app will not be available offline.');
+        if (!('serviceWorker' in navigator)) return Promise.reject('Your browser does not support serviceworker. the app will not be available offline.');
 
         this.initConfig(config);
         this.setSwMsgContianer();
