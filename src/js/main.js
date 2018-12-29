@@ -23,6 +23,8 @@ const controler = {
     this.dbHelper = new DBHelper();
     this.initMap();
     view.init();
+                  
+    funcsHelpers.appendPolyfill();
     
     // Fetch neighborhoods and cuisines as soon as the page is loaded.
     document.addEventListener('DOMContentLoaded', () => {
