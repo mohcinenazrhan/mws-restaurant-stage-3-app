@@ -2,7 +2,7 @@ import idb from 'idb';
 
 class IDBHelper {
     constructor() {
-        this.idbPromise = this.openDatabase('restaurant-store', 1);
+        this.idbPromise = this.openDatabase('restaurant-store', 2);
     }
 
     /**
@@ -41,7 +41,16 @@ class IDBHelper {
      * @param {String} dbStoreName 
      * @param {String} fetchError 
      */
-    getDataFromIdb(dbStoreName, fetchError = '') {
+    getDataFromIdb(dbStoreName, keyValue = null) {        
+        if (keyValue !== null) {
+            if (keyValue.index === null && !isNaN(keyValue.id)) {
+                return this.getDataFromIdbById(dbStoreName, keyValue.id)
+            }
+            else if (keyValue.index !== null && !isNaN(keyValue.id)) {
+                return this.getAllItemsFromIndex(dbStoreName, keyValue.index, keyValue.id)
+            }
+        }
+
         return this.idbPromise.then(db => {
             if (!db) throw ('DB undefined');
             const tx = db.transaction(dbStoreName);
@@ -54,8 +63,8 @@ class IDBHelper {
             }).catch((error) => error);
 
         }).catch(dbError => {
-            console.log(`${fetchError} | ${dbError}`);
-            return Promise.reject(`${fetchError} | ${dbError}`);
+            console.log(dbError);
+            return Promise.reject(dbError);
         });
     }
 
@@ -94,7 +103,38 @@ class IDBHelper {
                 if (!db) return;
                 const tx = db.transaction(storeName);
                 const store = tx.objectStore(storeName);
-                return store.get(id);
+                return store.get(id).then(data => {
+                    if (data.length === 0) console.log(storeName + ' DB: data is empty');
+                    return new Response(JSON.stringify(data))
+                }).catch((error) => error);
+            })
+            .catch(error => console.log('idb error: ', error));
+    }
+
+    /**
+     * gets all items from an index with key (if it is given)
+     * @param {String} storeName - The name of the store to open
+     * @param {String} indexName - The name of the index to open
+     * @param {*} key - key to get items with (optional)
+     */
+    getAllItemsFromIndex(storeName, indexName, key) {
+        return this.idbPromise.then(db => {
+                if (!db) return;
+                const tx = db.transaction(storeName);
+                const index = tx.objectStore(storeName).index(indexName);
+                console.log(
+                    `Getting all items from store'${storeName}' by index ${indexName} with ${key ||
+                    'no key'}`
+                );
+                if (key) return index.getAll(key).then(data => {
+                    if (data.length === 0) console.log(storeName + ' DB: data is empty');
+                    return new Response(JSON.stringify(data))
+                }).catch((error) => error);
+
+                return index.getAll().then(data => {
+                    if (data.length === 0) console.log(storeName + ' DB: data is empty');
+                    return new Response(JSON.stringify(data))
+                }).catch((error) => error);
             })
             .catch(error => console.log('idb error: ', error));
     }

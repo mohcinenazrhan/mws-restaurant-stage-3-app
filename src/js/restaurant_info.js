@@ -36,11 +36,8 @@ const controler = {
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data === 'updateContent') {
         console.log('updateContent');
-        this.dbHelper.updateInmemoryRestaurantsData()
-          .then(() => {
-            this.fillContent()
-            showMsg('Content Updated')
-          })
+        this.fillContent()
+        funcsHelpers.showMsg('Content Updated')
       }
     });
   },
