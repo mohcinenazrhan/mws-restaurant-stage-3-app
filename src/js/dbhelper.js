@@ -67,9 +67,15 @@ class DBHelper {
    * Fetch a restaurant by its ID.
    */
   fetchRestaurantById(id) {
-    // fetch all restaurants with proper error handling.
-    return this.fetchRestaurants()
-                   .then((restaurants) => restaurants.find(r => r.id == id))
+    return fetch(this.getDbUrl(`restaurants/${id}`))
+      .then((response) => response.json())
+      .then((restaurant) => {
+        this.idbHelper.saveDataToIdb(restaurant, 'restaurants')
+        return restaurant
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   /**
