@@ -207,7 +207,6 @@ class DBHelper {
     return fetch(this.getDbUrl(`reviews/?restaurant_id=${id}`))
       .then((response) => response.json())
       .then((reviews) => {
-        reviews = reviews.filter(r => r.restaurant_id == id)
         this.idbHelper.saveDataToIdb(reviews, 'reviews')
         return reviews
       })

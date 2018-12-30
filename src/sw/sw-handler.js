@@ -86,16 +86,25 @@ function checkNeverCacheList(url) {
  * @param {String} search 
  * @param {String} sParam
  */
-function getUrlParameter(search, sParam) {
+function getUrlParameter(search, sParam, exactName = true) {
   const sPageURL = search.substring(1),
     sURLVariables = sPageURL.split('&');
   let sParameterName, i;
 
   for (i = 0; i < sURLVariables.length; i++) {
     sParameterName = sURLVariables[i].split('=');
-
-    if (sParameterName[0] === sParam) {
-      return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+    if (exactName) {
+      if (sParameterName[0] === sParam) {
+        return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+      }
+    }
+    else {
+      if (sParameterName[0].includes(sParam)) {
+        return {
+          index: sParameterName[0],
+          id: sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1])
+        }
+      }
     }
   }
 };
@@ -109,8 +118,8 @@ self.addEventListener('fetch', function (event) {
   let request = event.request,
     requestUrl = new URL(request.url);
   const urlParams = requestUrl.pathname.replace(/^\/+|\/+$/g, '').split('/')
-  const store = urlParams[0];
   const methods = ['POST', 'PUT'];
+  const store = urlParams[0];
 
   if (navigator.onLine === false && methods.includes(request.method)) {
     return _bgSyncManager.saveReqForBgSync({
@@ -197,7 +206,24 @@ self.addEventListener('fetch', function (event) {
 
       // RespondWith idbResponse fun if we call our server
       if (requestUrl.origin === BACKEND_API_ORIGIN) {
-        event.respondWith(idbResponse(request, store));
+          
+          let idFromSearch = requestUrl.search !== '' ? getUrlParameter(requestUrl.search, 'id', false) : null;
+          idFromSearch !== null && idFromSearch !== undefined ? idFromSearch.id = parseInt(idFromSearch.id) : idFromSearch;
+          // console.log('idFromSearch', idFromSearch);
+          
+          const idFromUrl = urlParams[1] !== '' && urlParams[1] !== undefined ? {
+            index: null,
+            id: parseInt(urlParams[1])
+          } : null;
+          // console.log('idFromUrl', idFromUrl);
+
+          const keyValue = idFromUrl || idFromSearch || null
+          // if (requestUrl.port !== '1337') return
+          // console.log('requestUrl', requestUrl);
+          // console.log('urlParams', urlParams);
+          // console.log('idFromUrl', idFromUrl);
+          // return
+        event.respondWith(idbResponse(request, store, keyValue));
         return;
       }
 
@@ -245,9 +271,10 @@ self.addEventListener('fetch', function (event) {
  * @param {Request object} req
  * @param {String} dbStoreName
  */
-function idbResponse(req, dbStoreName) {
+function idbResponse(req, dbStoreName, keyValue) {
+  // console.log(req, dbStoreName, keyValue);
 
-  return IDBHelper.getDataFromIdb(dbStoreName)
+  return IDBHelper.getDataFromIdb(dbStoreName, keyValue)
     .then((res) => res.json())
     .then((dbData) => {
       const savedDbData = dbData

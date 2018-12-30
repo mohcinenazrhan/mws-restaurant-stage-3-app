@@ -16,7 +16,7 @@ export default class IDBHelper {
             return Promise.resolve();
         }
 
-        return idb.open('restaurant-store', 1, upgradeDB => {
+        return idb.open('restaurant-store', 2, upgradeDB => {
             switch (upgradeDB.oldVersion) {
                 case 0:
                     upgradeDB.createObjectStore('restaurants', {
@@ -31,6 +31,9 @@ export default class IDBHelper {
                     upgradeDB.createObjectStore('post-requests', {
                         keyPath: 'id'
                     });
+                case 1:
+                    const reviewsStore = upgradeDB.transaction.objectStore('reviews');
+                    reviewsStore.createIndex('restaurant_id', 'restaurant_id');
             }
         })
 
