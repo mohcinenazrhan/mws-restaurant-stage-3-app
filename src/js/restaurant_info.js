@@ -39,7 +39,7 @@ const controler = {
         this.dbHelper.updateInmemoryRestaurantsData()
           .then(() => {
             this.fillContent()
-            showMsg('Content Updated')
+            funcsHelpers.showMsg('Content Updated')
           })
       }
     });
