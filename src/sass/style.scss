@@ -333,7 +333,7 @@ select::-ms-expand {
 }
 
 #restaurant-img {
-    max-width: 100%;
+    width: 100%; // for offline fallback small image to fit 100% space
     border-top-left-radius: 30px;
 }
 
