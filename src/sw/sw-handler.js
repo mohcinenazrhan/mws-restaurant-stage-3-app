@@ -254,7 +254,7 @@ self.addEventListener('fetch', function (event) {
             console.log('fallback', request.url);
             if (request.url.indexOf('/img/') >= 0) {
               let imgurl = request.url
-              imgurl = `${imgurl.substring(0, imgurl.indexOf('/img/'))}/img/offlineimg${imgurl.substring(imgurl.indexOf('-'), imgurl.length)}`;
+              imgurl = `${imgurl.substring(0, imgurl.indexOf('/img/'))}/offlineimg/offlineimg${imgurl.substring(imgurl.indexOf('-'), imgurl.length)}`;
               console.log(imgurl);
 
               return caches.match(imgurl);

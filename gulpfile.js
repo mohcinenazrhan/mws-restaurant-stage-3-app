@@ -157,6 +157,13 @@ gulp.task('html', function () {
 })
 
 // Generates responsive images
+gulp.task('offlineimgs', function () {
+    const folder = 'offlineimgs';
+    return gulp.src(`src/${folder}/*.{png,jpg}`)
+               .pipe($.if(dev, gulp.dest(`.temp/${folder}`), gulp.dest(`dist/${folder}`)))
+});
+
+// Generates responsive images
 gulp.task('res-images', function () {
     return gulp.src('src/img/*.{png,jpg}')
         .pipe(responsive({
@@ -213,7 +220,7 @@ gulp.task('clean', function () {
 });
 
 gulp.task('serve', () => {
-    runSequence(['clean'], ['watch', 'res-images', 'pwafiles'], ['service-worker'])
+    runSequence(['clean'], ['watch', 'res-images', 'offlineimgs', 'pwafiles'], ['service-worker'])
 })
 
 /////////////////////////////// Build for Prod : Dist ///////////////////////////////
