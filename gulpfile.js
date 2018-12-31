@@ -292,7 +292,7 @@ gulp.task('default', () => {
 
 gulp.task('generate-service-worker', function (callback) {
     swPrecache.write(`${rootDir}/sw/service-worker.js`, {
-        staticFileGlobs: [rootDir + '/**/*.{js,html,css,png,jpg,gif,svg,eot,ttf,woff}'],
+        staticFileGlobs: [rootDir + '/**/*.{js,html,css,eot,ttf,woff}', rootDir + '/offlineimgs/*.{png,jpg,gif,svg}'],
         stripPrefix: rootDir,
         handleFetch: false,
         skipWaiting: false
