@@ -49,6 +49,7 @@ const msgSwToClients = {
 }
 
 // Import modules
+import '@babel/polyfill';
 import IDBHelper from '../../src/sw/idbHelper'; // to adapte it to gulp task
 import BgSyncManager from '../../src/sw/bg-sync-manager'; // to adapte it to gulp task
 
@@ -71,6 +72,10 @@ const navigateFallbackWhitelist = [/^\/restaurant/];
 const navigateFallback = '/404.html'; // Just to test this feature
 
 const BACKEND_API_ORIGIN = 'APIORIGIN';
+
+const imgSizes = ['-800_2x', '-600_2x', '-400', '-300'];
+const regexToReplaceWithWhite = /-\d+(_2x|)/g;
+const restaurantOfflineImg = self.location.origin + '/offlineimgs/offlineimg.jpg';
 
 const neverCacheUrls = [/mapbox/, /maps/];
 // Check if current url is in the neverCacheUrls list
@@ -252,12 +257,8 @@ self.addEventListener('fetch', function (event) {
           }).catch(error => {
             console.log('error ', error);
             console.log('fallback', request.url);
-            if (request.url.indexOf('/img/') >= 0) {
-              let imgurl = request.url
-              imgurl = `${imgurl.substring(0, imgurl.indexOf('/img/'))}/offlineimgs/offlineimg${imgurl.substring(imgurl.indexOf('-'), imgurl.length)}`;
-              console.log(imgurl);
-
-              return caches.match(urlsToCacheKeys.get(imgurl));
+            if (requestUrl.pathname.startsWith('/img/')) {
+              return serveRestaurantImgs(event.request);
             }
           });
         })
@@ -265,6 +266,39 @@ self.addEventListener('fetch', function (event) {
     }
   }
 });
+
+/**
+ * Serve restaurant imgs fallback
+ * @param {*} request 
+ */
+async function serveRestaurantImgs(request) {
+  // as: 5-800_2x.jpg
+  const imageUrl = request.url;
+  let storageUrl = imageUrl.replace(regexToReplaceWithWhite, ''); // as: 5.jpg
+  console.log('storageUrl', storageUrl);
+
+  // search for original image without (size in name) 
+  // not all the browsers support 'srcset'
+  let cachedResponse = await caches.match(storageUrl);
+  console.log('cachedResponse', cachedResponse);
+  if (cachedResponse) return cachedResponse;
+
+  // loop over imgSiezs ['-800_2x', '-600_2x', '-400', '-300']
+  // loop from big size to smaller
+  // return the first images founded
+  for (let i = 0; i < imgSizes.length; i++) {
+    storageUrl = imageUrl.replace(regexToReplaceWithWhite, imgSizes[i])
+    console.log('storageUrl', storageUrl);
+    
+    cachedResponse = await caches.match(storageUrl);
+    console.log('cachedResponse', cachedResponse);
+    if (cachedResponse) return cachedResponse;
+  }
+
+  // if there is no images of all sizes in cache,
+  // response with (image not available offline) image
+  return caches.match(urlsToCacheKeys.get(restaurantOfflineImg));
+}
 
 /**
  * Response from DB, respond data from NET to compare with DB data and then save data in DB
