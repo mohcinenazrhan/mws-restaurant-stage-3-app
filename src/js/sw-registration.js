@@ -13,13 +13,14 @@ class SWRegistration {
                 swUrl: 'sw/service-worker.js',
                 msgSwInstalled: 'Service Worker installed! Pages you view are cached for offline use.',
                 msgOffline: 'You\'re currently offline',
-                msgOnline: 'You\'re back online',
+                msgOnline: 'You\'re back online <a href="javascript:location.reload()">refresh</a>',
                 msgWhenUpdate: 'The contents of this page have been updated. Please <a href="javascript:location.reload()">reload</a>',
                 askUserWhenSwUpdated: true,
                 msgSync: 'Your submit is saved and will auto-submit when you\'re online',
                 classIdBtnSwUpdate: 'btn-updatesw',
                 msgWhenSwUpdated: 'New version available online. Do you want to update? <button class="classIdBtnSwUpdate" id="classIdBtnSwUpdate">Yes</button>',
-                preCache: 'precacheConfig' // strategy for pre-caching assets : onReload | precacheConfig
+                preCache: 'precacheConfig', // strategy for pre-caching assets : onReload | precacheConfig
+                msgSWUnsupported: 'Your browser does not support serviceworker. the app will not be available offline.'
             }
 
             SWRegistration.instance = this;
@@ -169,6 +170,15 @@ class SWRegistration {
 
         window.addEventListener('online', this.updateNetworkState.bind(this));
         window.addEventListener('offline', this.updateNetworkState.bind(this));
+
+        container.addEventListener('mouseover', () => {
+            if (this._timeoutMsg !== null) 
+                clearTimeout(this._timeoutMsg);
+        });
+        container.addEventListener('mouseout', () => {
+            if (this._timeoutMsg !== null) 
+                this._timeoutMsg = setTimeout(this.hideMsg, 2000);
+        });
     }
 
     /**
@@ -207,6 +217,7 @@ class SWRegistration {
 
         if (this._timeoutMsg !== null) clearTimeout(this._timeoutMsg);
         if (timeToHide !== null) this._timeoutMsg = setTimeout(this.hideMsg, timeToHide);
+        else this._timeoutMsg = null
     }
 
     /**
@@ -221,10 +232,13 @@ class SWRegistration {
      * @param {*} config 
      */
     fire(config) {
-        if (!('serviceWorker' in navigator)) return Promise.reject('Your browser does not support serviceworker. the app will not be available offline.');
-
         this.initConfig(config);
         this.setSwMsgContianer();
+        if (!('serviceWorker' in navigator)) {
+            this.showMsg(this._config.msgSWUnsupported);
+            return Promise.reject(this._config.msgSWUnsupported);
+        }
+
         return this.serviceWorkerRegistration().then(() => {
             this.listenToMessages();
             this.updateNetworkState();
