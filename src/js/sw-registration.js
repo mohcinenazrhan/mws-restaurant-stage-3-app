@@ -13,7 +13,7 @@ class SWRegistration {
                 swUrl: 'sw/service-worker.js',
                 msgSwInstalled: 'Service Worker installed! Pages you view are cached for offline use.',
                 msgOffline: 'You\'re currently offline',
-                msgOnline: 'You\'re back online',
+                msgOnline: 'You\'re back online <a href="javascript:location.reload()">refresh</a>',
                 msgWhenUpdate: 'The contents of this page have been updated. Please <a href="javascript:location.reload()">reload</a>',
                 askUserWhenSwUpdated: true,
                 msgSync: 'Your submit is saved and will auto-submit when you\'re online',
