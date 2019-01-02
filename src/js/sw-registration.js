@@ -19,7 +19,8 @@ class SWRegistration {
                 msgSync: 'Your submit is saved and will auto-submit when you\'re online',
                 classIdBtnSwUpdate: 'btn-updatesw',
                 msgWhenSwUpdated: 'New version available online. Do you want to update? <button class="classIdBtnSwUpdate" id="classIdBtnSwUpdate">Yes</button>',
-                preCache: 'precacheConfig' // strategy for pre-caching assets : onReload | precacheConfig
+                preCache: 'precacheConfig', // strategy for pre-caching assets : onReload | precacheConfig
+                msgSWUnsupported: 'Your browser does not support serviceworker. the app will not be available offline.'
             }
 
             SWRegistration.instance = this;
@@ -231,10 +232,13 @@ class SWRegistration {
      * @param {*} config 
      */
     fire(config) {
-        if (!('serviceWorker' in navigator)) return Promise.reject('Your browser does not support serviceworker. the app will not be available offline.');
-
         this.initConfig(config);
         this.setSwMsgContianer();
+        if (!('serviceWorker' in navigator)) {
+            this.showMsg(this._config.msgSWUnsupported);
+            return Promise.reject(this._config.msgSWUnsupported);
+        }
+
         return this.serviceWorkerRegistration().then(() => {
             this.listenToMessages();
             this.updateNetworkState();
