@@ -1,6 +1,5 @@
 /* ======= Import modules ======= */
 import * as funcsHelpers from './functions';
-import './sw-registration';
 import DBHelper from './dbhelper';
 import SWRegistration from './sw-registration';
 

@@ -148,7 +148,7 @@ class SWRegistration {
      */
     setSwMsgContianer() {
         const container = document.createElement('div');
-        container.className = 'offline-indicator offline-indicator--bottom';
+        container.className = 'snackbar';
 
         const parag = document.createElement('p');
         parag.id = 'msgOffline';
@@ -156,8 +156,8 @@ class SWRegistration {
 
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'close-indicator';
-        button.setAttribute('aria-label', 'close-indicator');
+        button.className = 'snackbar-close';
+        button.setAttribute('aria-label', 'snackbar-close');
         button.addEventListener('click', this.hideMsg);
 
         const span = document.createElement('span');
@@ -213,7 +213,7 @@ class SWRegistration {
         if (msg === '') return
 
         document.getElementById('msgOffline').innerHTML = msg;
-        document.body.classList.add('state-offline');
+        document.body.classList.add('snackbar--show');
 
         if (this._timeoutMsg !== null) clearTimeout(this._timeoutMsg);
         if (timeToHide !== null) this._timeoutMsg = setTimeout(this.hideMsg, timeToHide);
@@ -224,7 +224,7 @@ class SWRegistration {
      * hide Msg bar
      */
     hideMsg() {
-        document.body.classList.remove('state-offline');
+        document.body.classList.remove('snackbar--show');
     }
 
     /**
