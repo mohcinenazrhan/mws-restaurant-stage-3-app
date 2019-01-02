@@ -222,6 +222,9 @@ class DBHelper {
    * @param {Object} newRestaurant 
    */
   updateLocalRestaurantData(id, newRestaurant) {
+    // to make this process only in the main page
+    if (this.fetchRestaurantsData === null) return
+
     return this.fetchRestaurantsData
             .then((res) => {
               return res.map((restaurant) => {
