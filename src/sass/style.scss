@@ -1825,9 +1825,8 @@ screen and (-webkit-min-device-pixel-ratio:2) {
     }
 }
 
-/* ====================== Offline Indicator ====================== */
-body.state-offline .offline-indicator,
-body.state-offline .offline-indicator--top {
+/* ====================== Snackbar to show messages to user ====================== */
+body.snackbar--show .snackbar {
     -webkit-transform: translateY(0);
     -moz-transform: translateY(0);
     -ms-transform: translateY(0);
@@ -1835,7 +1834,7 @@ body.state-offline .offline-indicator--top {
     transform: translateY(0);
 }
 
-.offline-indicator {
+.snackbar {
     background-color: rgb(18, 18, 19);
     color: #fff;
     padding: 10px 48px 10px 10px;
@@ -1859,13 +1858,13 @@ body.state-offline .offline-indicator--top {
     transition: transform 200ms ease-in-out false;
 }
 
-.offline-indicator p {
+.snackbar p {
     margin: 0 40px 0 0;
     color: #fff;
     text-align: center;
 }
 
-.offline-indicator .close-indicator {
+.snackbar .snackbar-close {
     position: absolute;
     top: 0;
     right: 0;
@@ -1880,12 +1879,12 @@ body.state-offline .offline-indicator--top {
     color: #FFF;
 }
 
-.offline-indicator .close-indicator:hover,
-.offline-indicator .close-indicator:focus {
+.snackbar .snackbar-close:hover,
+.snackbar .snackbar-close:focus {
     background: #575757;
 }
 
-.offline-indicator a {
+.snackbar a {
     color: #FFF;
     font-weight: bold;
     text-decoration: underline;
