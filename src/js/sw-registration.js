@@ -169,6 +169,15 @@ class SWRegistration {
 
         window.addEventListener('online', this.updateNetworkState.bind(this));
         window.addEventListener('offline', this.updateNetworkState.bind(this));
+
+        container.addEventListener('mouseover', () => {
+            if (this._timeoutMsg !== null) 
+                clearTimeout(this._timeoutMsg);
+        });
+        container.addEventListener('mouseout', () => {
+            if (this._timeoutMsg !== null) 
+                this._timeoutMsg = setTimeout(this.hideMsg, 2000);
+        });
     }
 
     /**
@@ -207,6 +216,7 @@ class SWRegistration {
 
         if (this._timeoutMsg !== null) clearTimeout(this._timeoutMsg);
         if (timeToHide !== null) this._timeoutMsg = setTimeout(this.hideMsg, timeToHide);
+        else this._timeoutMsg = null
     }
 
     /**
