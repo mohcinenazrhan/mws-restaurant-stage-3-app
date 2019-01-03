@@ -325,8 +325,11 @@ function idbResponse(req, dbStoreName, keyValue) {
         .catch(() => {
           return IDBHelper.getDataFromIdb(dbStoreName)
         })
-
-      dbData = dbData.length === 0 ? undefined : new Response(JSON.stringify(dbData))
+      
+      // undefined to get data from fetchData
+      // get data from fetchData if local data is empty and we are online
+      // if we are offline just response what we get from local db
+      dbData = dbData.length === 0 && navigator.onLine ? undefined : new Response(JSON.stringify(dbData))
       return dbData || fetchData
     })
     .catch((error) => {
