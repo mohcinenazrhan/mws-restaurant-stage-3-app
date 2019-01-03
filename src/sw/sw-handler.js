@@ -311,27 +311,70 @@ function idbResponse(req, dbStoreName, keyValue) {
   return IDBHelper.getDataFromIdb(dbStoreName, keyValue)
     // .then((res) => res.json())
     .then((dbData) => {
-      const savedDbData = dbData
+      // retrieve object that have storageLocal property for a fair comparison with net
+      const savedDbData = retrieveByProperty(dbData, 'storageLocal', 'object');
+
       const fetchData = fetch(req)
         .then((response) => response.json())
         .then((data) => {
+          // temporary fix to avoid issues
+          // retrieve storageLocal property for a fair comparison with local db
+          // TODO: make the API avoid addition properties storageLocal
+          data = retrieveByProperty(data, 'storageLocal', 'property');
+
           IDBHelper.saveDataToIdb(data, dbStoreName)
 
-          if (JSON.stringify(data) !== JSON.stringify(savedDbData) && savedDbData.length >= 1)
+          // comparison between data from NET and localDb
+          // make the comparison only if localDb has data
+          if (savedDbData.length >= 1) {
+            if (JSON.stringify(data) !== JSON.stringify(savedDbData))
             msgSwToClients.send('updateContent') // update content
+          }
           
           return new Response(JSON.stringify(data))
         })
         .catch(() => {
           return IDBHelper.getDataFromIdb(dbStoreName)
         })
-
-      dbData = dbData.length === 0 ? undefined : new Response(JSON.stringify(dbData))
+      
+      // undefined to get data from fetchData
+      // get data from fetchData if local data is empty and we are online
+      // if we are offline just response what we get from local db
+      dbData = dbData.length === 0 && navigator.onLine ? undefined : new Response(JSON.stringify(dbData))
       return dbData || fetchData
     })
     .catch((error) => {
       console.log(error);
     })
+}
+
+/**
+ * retrieve property or object from data by property name given
+ * @param {String} data 
+ * @param {String} property 
+ * @param {String} whatRetrieve // property | object
+ */
+function retrieveByProperty(data, property, whatRetrieve) {
+  if (whatRetrieve === 'property') {
+    if (data.length > 1) {
+      data = data.map((obj) => {
+        if (obj.hasOwnProperty(property)) delete obj[property]
+
+        return obj
+      })
+    } else if (data.length === 1) {
+      if (!data.hasOwnProperty(property)) delete data[property]
+    }
+  } else if (whatRetrieve === 'object') {
+    if (data.length > 1) {
+      data = data.filter((obj) => !obj.hasOwnProperty(property))
+    } else if (data.length === 1) {
+      if (!data.hasOwnProperty(property))
+        data = {}
+    }
+  }
+
+  return data
 }
 
 /**

@@ -38,7 +38,7 @@ const controler = {
       if (event.data === 'updateContent') {
         console.log('updateContent');
         this.fillContent()
-        funcsHelpers.showMsg('Content Updated')
+        SWRegistration.showMsg('Content Updated')
       }
     });
   },
