@@ -106,25 +106,10 @@ class BgSyncManager {
                     return this.reSubmitRequests(tagStore.reqs, tagStore.data)
                         .then(() => {
                             this.msgSwToClients.send('isVisible').then((isVisible) => {
-                                if (isVisible === false) {
-                                    console.log('syncRequests', this.syncRequests);
-
-                                    let last = '' // for distinct notification
-                                    this.syncRequests.sort((r1, r2) => r1.request.referrer > r2.request.referrer ? 1 : -1)
-                                                        .map((obj) => {
-                                                            const lastreferrer = last
-                                                            last = obj.request.referrer
-                                                            if (obj.request.referrer === lastreferrer) return;
-
-                                                            self.registration.showNotification('Your review is submited', {
-                                                                body: 'Ckeck your review',
-                                                                icon: this.notificationIcon,
-                                                                vibrate: [200, 100, 200, 100, 200, 100, 200],
-                                                                tag: obj.request.referrer
-                                                            });
-                                                        });
-                                }
-                                else this.msgSwToClients.send('reloadThePageForMAJ')
+                                if (isVisible === false) 
+                                    this.pushNotification(tagStore.data, this.syncRequests)
+                                else 
+                                    this.msgSwToClients.send('reloadThePageForMAJ')
                             })
                         })
                 }
@@ -169,6 +154,26 @@ class BgSyncManager {
                     })
                 )
             })
+    }
+
+    pushNotification(subject, syncRequests) {
+        console.log('syncRequests', syncRequests);
+
+        let last = '' // for distinct notification
+        syncRequests
+            .sort((r1, r2) => r1.request.referrer > r2.request.referrer ? 1 : -1)
+            .map((obj) => {
+                const lastreferrer = last
+                last = obj.request.referrer
+                if (obj.request.referrer === lastreferrer) return;
+
+                self.registration.showNotification(`Your ${subject} are submited`, {
+                    body: `Ckeck your ${subject}`,
+                    icon: this.notificationIcon,
+                    vibrate: [200, 100, 200, 100, 200, 100, 200],
+                    tag: obj.request.referrer
+                });
+            });
     }
 }
 
