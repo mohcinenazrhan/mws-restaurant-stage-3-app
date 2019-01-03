@@ -39,7 +39,7 @@ const msgSwToClients = {
       })
       .then((res) => {
         // Response from client for sw request
-        if (msg === 'isVisible') return isVisible = res[0];
+        if (msg === 'isVisible') return res[0];
         else return res || new Promise.resolve('Done');
       });
   },
@@ -62,11 +62,11 @@ const TAG_TO_STORE = {
     data: 'reviews'
   }
 };
+const notificationIcon = 'http://icons.iconarchive.com/icons/graphicloads/100-flat/256/home-icon.png';
 
-const _bgSyncManager = new BgSyncManager(TAG_TO_STORE, IDBHelper, msgSwToClients);
+const _bgSyncManager = new BgSyncManager(TAG_TO_STORE, IDBHelper, msgSwToClients, notificationIcon);
 
 var ignoreUrlParametersMatching = [/^utm_/];
-let isVisible = false;
 
 const navigateFallbackWhitelist = [/^\/restaurant/];
 const navigateFallback = '/404.html'; // Just to test this feature
@@ -309,7 +309,7 @@ function idbResponse(req, dbStoreName, keyValue) {
   // console.log(req, dbStoreName, keyValue);
 
   return IDBHelper.getDataFromIdb(dbStoreName, keyValue)
-    .then((res) => res.json())
+    // .then((res) => res.json())
     .then((dbData) => {
       const savedDbData = dbData
       const fetchData = fetch(req)
@@ -337,12 +337,13 @@ function idbResponse(req, dbStoreName, keyValue) {
 /**
  * Listener sync
  */
-self.addEventListener('sync', function (event) {
+self.addEventListener('sync', (event) => {
+  console.log(event.tag);
   switch (event.tag) {
     case 'test-tag-from-devtools':
     case 'reviews-sync':
     case 'trigger-sync':
-      _bgSyncManager.bgSyncProcess(event);
+        _bgSyncManager.bgSyncProcess(event);
       break;
     default:
       console.error(`Unknown background sync: ${event.tag}`);
@@ -357,4 +358,14 @@ self.addEventListener('message', (event) => {
     // skipWaiting if you get the appropriate message
     self.skipWaiting();
   }
+});
+
+/**
+ * notification click
+ */
+self.addEventListener('notificationclick', function (event) {
+  console.log(event.notification.tag);
+  const referrer = event.notification.tag;
+  event.notification.close();
+  event.waitUntil(clients.openWindow(referrer));
 });

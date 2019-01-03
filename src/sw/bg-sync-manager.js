@@ -1,8 +1,10 @@
 class BgSyncManager {
-    constructor(TAG_TO_STORE, IDBHelper, msgSwToClients) {
+    constructor(TAG_TO_STORE, IDBHelper, msgSwToClients, notificationIcon) {
         this.TAG_TO_STORE = TAG_TO_STORE
         this.IDBHelper = IDBHelper
         this.msgSwToClients = msgSwToClients
+        this.notificationIcon = notificationIcon
+        this.syncRequests = []
     }
 
     /**
@@ -85,6 +87,7 @@ class BgSyncManager {
         data = Object.assign(data, {
             id: ID
         })
+        console.log('saveRequest', data);
         
         return (this.IDBHelper.saveDataToIdb(serRequest, this.TAG_TO_STORE[params.syncTagName].reqs) && this.IDBHelper.updateOrSaveDatainIdb(data, params.store))
     }
@@ -102,7 +105,12 @@ class BgSyncManager {
                 if (tagStore.data) {
                     return this.reSubmitRequests(tagStore.reqs, tagStore.data)
                         .then(() => {
-                            this.msgSwToClients.send('reloadThePageForMAJ')
+                            this.msgSwToClients.send('isVisible').then((isVisible) => {
+                                if (isVisible === false) 
+                                    this.pushNotification(tagStore.data, this.syncRequests)
+                                else 
+                                    this.msgSwToClients.send('reloadThePageForMAJ')
+                            })
                         })
                 }
 
@@ -124,7 +132,7 @@ class BgSyncManager {
         const storesDeleteFrom = dataStore ? [reqStore, dataStore] : reqStore
         return this.IDBHelper.getDataFromIdb(reqStore)
             .then((res) => res)
-            .then((data) => data.json())
+            // .then((data) => data.json())
             .then((requests) => {
                 return requests.map((obj) => ({
                     request: this.deserializeRequest(obj),
@@ -132,6 +140,8 @@ class BgSyncManager {
                 }))
             })
             .then((reqs) => {
+                this.syncRequests = reqs
+
                 return Promise.all(
                     reqs.map((req) => {
                         try {
@@ -144,6 +154,26 @@ class BgSyncManager {
                     })
                 )
             })
+    }
+
+    pushNotification(subject, syncRequests) {
+        console.log('syncRequests', syncRequests);
+
+        let last = '' // for distinct notification
+        syncRequests
+            .sort((r1, r2) => r1.request.referrer > r2.request.referrer ? 1 : -1)
+            .map((obj) => {
+                const lastreferrer = last
+                last = obj.request.referrer
+                if (obj.request.referrer === lastreferrer) return;
+
+                self.registration.showNotification(`Your ${subject} are submited`, {
+                    body: `Ckeck your ${subject}`,
+                    icon: this.notificationIcon,
+                    vibrate: [200, 100, 200, 100, 200, 100, 200],
+                    tag: obj.request.referrer
+                });
+            });
     }
 }
 

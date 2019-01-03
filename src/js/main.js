@@ -2,6 +2,7 @@
 import * as funcsHelpers from './functions';
 import DBHelper from './dbhelper';
 import SWRegistration from './sw-registration';
+import Notificationbtn from './Notificationbtn';
 
 /* ======= Model ======= */
 let model = {
@@ -17,6 +18,7 @@ const controler = {
     SWRegistration.fire(model.swRegConfig)
                   .then(() => {
                     this.listenerForSwMsg();
+                    Notificationbtn.create();
                   });
 
     this.dbHelper = new DBHelper();

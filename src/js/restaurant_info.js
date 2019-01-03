@@ -2,6 +2,7 @@
 import * as funcsHelpers from './functions';
 import DBHelper from './dbhelper';
 import SWRegistration from './sw-registration';
+import Notificationbtn from './Notificationbtn';
 
 /* ======= Model ======= */
 let model = {
@@ -16,6 +17,7 @@ const controler = {
     SWRegistration.fire(model.swRegConfig)
                   .then(() => {
                     this.listenerForSwMsg();
+                    Notificationbtn.create();
                   });
                   
     this.dbHelper = new DBHelper();
@@ -137,6 +139,7 @@ const controler = {
     });
   },
   submitReviewListener: function () {
+    console.log('submitReviewListener');
     document.querySelector('#form-review').addEventListener('submit', (e) => {
       e.preventDefault();    //stop form from submitting
       this.postReview();
@@ -146,6 +149,8 @@ const controler = {
    * Post Review
    */
   postReview: function () {
+    console.log('postReview');
+    
     let rating;
 
     // to support Foreach over Nodelist in Ie11

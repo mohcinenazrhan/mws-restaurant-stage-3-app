@@ -19,7 +19,7 @@ class IDBHelper {
      * @param {String} dbStoreName 
      */
     saveDataToIdb(data, dbStoreName) {
-        console.log('saveDataToIdb', dbStoreName);
+        console.log('saveDataToIdb', dbStoreName, data);
 
         return this.idbPromise.then(db => {
             if (!db) return;
@@ -59,7 +59,8 @@ class IDBHelper {
                 // if (data.length === 0) throw ('DB: data is empty');
                 if (data.length === 0) console.log('DB: data is empty');
                 console.log('Data served from DB');
-                return new Response(JSON.stringify(data))
+                // return new Response(JSON.stringify(data))
+                return data
             }).catch((error) => error);
 
         }).catch(dbError => {
@@ -104,8 +105,10 @@ class IDBHelper {
                 const tx = db.transaction(storeName);
                 const store = tx.objectStore(storeName);
                 return store.get(id).then(data => {
-                    if (data.length === 0) console.log(storeName + ' DB: data is empty');
-                    return new Response(JSON.stringify(data))
+                    if(data === undefined) data = {};
+                    // if (data.length === 0) console.log(storeName + ' DB: data is empty');
+                    // return new Response(JSON.stringify(data))
+                    return data
                 }).catch((error) => error);
             })
             .catch(error => console.log('idb error: ', error));
@@ -128,12 +131,14 @@ class IDBHelper {
                 );
                 if (key) return index.getAll(key).then(data => {
                     if (data.length === 0) console.log(storeName + ' DB: data is empty');
-                    return new Response(JSON.stringify(data))
+                    // return new Response(JSON.stringify(data))
+                    return data;
                 }).catch((error) => error);
 
                 return index.getAll().then(data => {
                     if (data.length === 0) console.log(storeName + ' DB: data is empty');
-                    return new Response(JSON.stringify(data))
+                    // return new Response(JSON.stringify(data))
+                    return data;
                 }).catch((error) => error);
             })
             .catch(error => console.log('idb error: ', error));
@@ -148,9 +153,13 @@ class IDBHelper {
 
         return this.getDataFromIdbById(dbStoresName, newData.id)
             .then((data) => {
+                console.log('before', data);
+                console.log('newData.id', newData.id);
+                console.log('dbStoresName', dbStoresName);
+
                 if (data === undefined) data = newData
                 else data = Object.assign(data, newData)
-
+                console.log('updateOrSaveDatainIdb', data);
                 return this.saveDataToIdb(data, dbStoresName);
             })
     }
