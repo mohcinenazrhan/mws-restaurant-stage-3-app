@@ -201,6 +201,7 @@ class SWRegistration {
         navigator.serviceWorker.addEventListener('message', (event) => {
             if (event.data === 'reloadThePageForMAJ') this.showMsg(this._config.msgWhenUpdate);
             if (event.data === 'NotifyUserReqSaved') this.showMsg(this._config.msgSync);
+            if (event.data === 'isVisible') event.ports[0].postMessage(this._isVisible);
         });
     }
 
@@ -228,6 +229,26 @@ class SWRegistration {
     }
 
     /**
+     * handle Visibility Change for the page
+     */
+    handleVisibilityChange() {
+        if (document.hidden) {
+            console.log('hidden');
+            this._isVisible = false;
+        } else {
+            console.log('visible');
+            this._isVisible = true;
+        }
+    }
+
+    /**
+     * listen to visibility change
+     */
+    listenVisibilityChange() {
+        document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+    }
+
+    /**
      * fire sw
      * @param {*} config 
      */
@@ -241,6 +262,7 @@ class SWRegistration {
 
         return this.serviceWorkerRegistration().then(() => {
             this.listenToMessages();
+            this.listenVisibilityChange();
             this.updateNetworkState();
             return Promise.resolve();
         })
