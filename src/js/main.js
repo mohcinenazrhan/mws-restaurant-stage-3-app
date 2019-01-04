@@ -197,14 +197,17 @@ const view = {
     const item = document.createElement('div');
     item.className = 'listitem';
 
+    const ratioContainer = document.createElement('div');
+    ratioContainer.className = 'ratio-container';
+
     const image = document.createElement('img');
     image.setAttribute('alt', restaurant.name);
 
-    image.className = 'restaurant-img lazyload';
+    image.className = 'restaurant-img lazyload blur-up';
     image.setAttribute('data-src', controler.dbHelper.imageUrlForRestaurant(restaurant));
     image.setAttribute('data-srcset', controler.dbHelper.srcsetImageUrlForIndex(restaurant));
     image.setAttribute('data-sizes', 'auto');
-    item.append(image);
+    ratioContainer.append(image);
 
     const btnFavorite = document.createElement('button');
     const isFavorite = restaurant.is_favorite.toString() === 'true' ? true : false;
@@ -216,7 +219,9 @@ const view = {
     btnFavorite.setAttribute('id', `fav-${restaurant.id}`);
     btnFavorite.classList.add('favorite-icon');
     btnFavorite.classList.add(`favorite-icon--${isFavorite ? 'on' : 'off'}`);
-    item.append(btnFavorite);
+    ratioContainer.append(btnFavorite);
+
+    item.append(ratioContainer)
 
     const contentWrapper = document.createElement('div');
     contentWrapper.className = 'content-wrapper';

@@ -210,7 +210,7 @@ const view = {
 
     const image = document.getElementById('restaurant-img');
     image.setAttribute('alt', restaurant.name);
-    image.className = 'restaurant-img lazyload';
+    image.className = 'restaurant-img lazyload blur-up';
     image.setAttribute('data-srcset', controler.dbHelper.srcsetImageUrlForRestaurant(restaurant));
     image.setAttribute('data-src', controler.dbHelper.imageUrlForRestaurant(restaurant));
     image.setAttribute('data-sizes', '(max-width: 380px) 300px, (max-width: 480px) 400px, (max-width: 680px) 600px, (max-width: 768px) 800px, (max-width: 960px) 400px, (max-width: 1360px) 600px');
