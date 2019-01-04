@@ -250,7 +250,7 @@ select::-ms-expand {
 
 #restaurants-list .listitem {
     background-color: #f3f3f3;
-    max-width: 300px;
+    max-width: 302px;
     margin: 0 auto;
     position: relative;
     border: 1px solid #efefef;
@@ -328,10 +328,6 @@ select::-ms-expand {
     line-height: 1.1;
 }
 
-#restaurant-img-container {
-    position: relative;
-}
-
 #restaurant-img {
     width: 100%; // for offline fallback small image to fit 100% space
     border-top-left-radius: 30px;
@@ -348,7 +344,7 @@ select::-ms-expand {
     font-size: 12pt;
     font-weight: 300;
     letter-spacing: 10px;
-    margin: -8px 0 20px;
+    margin: 0 0 20px 0;
     padding: 2px 0;
     text-align: center;
     text-transform: uppercase;
@@ -2753,4 +2749,33 @@ body.snackbar--show .snackbar {
 
 #notificationbtn-bell-container.notificationbtn-reset .notificationbtn-bell-launcher.notificationbtn-bell-launcher-theme-default .notificationbtn-bell-launcher-button svg:hover {
     opacity: 1
+}
+
+/*------------- lazy loader for images ----------*/
+.blur-up {
+    -webkit-filter: blur(5px);
+    filter: blur(5px);
+    transition: filter 400ms, -webkit-filter 400ms;
+}
+
+.blur-up.lazyloaded {
+    -webkit-filter: blur(0);
+    filter: blur(0);
+}
+
+.ratio-container {
+    position: relative;
+}
+
+.ratio-container:after {
+    content: '';
+    display: block;
+    height: 0;
+    width: 100%;
+    /* 4:3 = 75% = calc(3 / 4 * 100%) */
+    padding-bottom: 75%;
+}
+
+.ratio-container>* {
+    position: absolute;
 }

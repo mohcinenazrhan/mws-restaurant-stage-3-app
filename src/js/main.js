@@ -3,6 +3,7 @@ import * as funcsHelpers from './functions';
 import DBHelper from './dbhelper';
 import SWRegistration from './sw-registration';
 import Notificationbtn from './Notificationbtn';
+import lazySizes from 'lazysizes';
 
 /* ======= Model ======= */
 let model = {
@@ -25,6 +26,8 @@ const controler = {
     this.initMap();
     view.init();
                   
+    lazySizes.init();
+    
     funcsHelpers.appendPolyfill();
     
     // Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -194,13 +197,17 @@ const view = {
     const item = document.createElement('div');
     item.className = 'listitem';
 
+    const ratioContainer = document.createElement('div');
+    ratioContainer.className = 'ratio-container';
+
     const image = document.createElement('img');
     image.setAttribute('alt', restaurant.name);
 
-    image.className = 'restaurant-img';
-    image.src = controler.dbHelper.imageUrlForRestaurant(restaurant);
-    image.srcset = controler.dbHelper.srcsetImageUrlForIndex(restaurant);
-    item.append(image);
+    image.className = 'restaurant-img lazyload blur-up';
+    image.setAttribute('data-src', controler.dbHelper.imageUrlForRestaurant(restaurant));
+    image.setAttribute('data-srcset', controler.dbHelper.srcsetImageUrlForIndex(restaurant));
+    image.setAttribute('data-sizes', 'auto');
+    ratioContainer.append(image);
 
     const btnFavorite = document.createElement('button');
     const isFavorite = restaurant.is_favorite.toString() === 'true' ? true : false;
@@ -212,7 +219,9 @@ const view = {
     btnFavorite.setAttribute('id', `fav-${restaurant.id}`);
     btnFavorite.classList.add('favorite-icon');
     btnFavorite.classList.add(`favorite-icon--${isFavorite ? 'on' : 'off'}`);
-    item.append(btnFavorite);
+    ratioContainer.append(btnFavorite);
+
+    item.append(ratioContainer)
 
     const contentWrapper = document.createElement('div');
     contentWrapper.className = 'content-wrapper';

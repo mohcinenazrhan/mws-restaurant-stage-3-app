@@ -3,6 +3,7 @@ import * as funcsHelpers from './functions';
 import DBHelper from './dbhelper';
 import SWRegistration from './sw-registration';
 import Notificationbtn from './Notificationbtn';
+import lazySizes from 'lazysizes';
 
 /* ======= Model ======= */
 let model = {
@@ -22,6 +23,9 @@ const controler = {
                   
     this.dbHelper = new DBHelper();
     funcsHelpers.favoriteClickListener(this.dbHelper);
+
+    lazySizes.init();
+
     /**
      * Initialize map as soon as the page is loaded.
      */
@@ -206,10 +210,10 @@ const view = {
 
     const image = document.getElementById('restaurant-img');
     image.setAttribute('alt', restaurant.name);
-    image.className = 'restaurant-img';
-    image.srcset = controler.dbHelper.srcsetImageUrlForRestaurant(restaurant);
-    image.src = controler.dbHelper.imageUrlForRestaurant(restaurant);
-    image.sizes = '(max-width: 380px) 300px, (max-width: 480px) 400px, (max-width: 680px) 600px, (max-width: 768px) 800px, (max-width: 960px) 400px, (max-width: 1360px) 600px';
+    image.className = 'restaurant-img lazyload blur-up';
+    image.setAttribute('data-srcset', controler.dbHelper.srcsetImageUrlForRestaurant(restaurant));
+    image.setAttribute('data-src', controler.dbHelper.imageUrlForRestaurant(restaurant));
+    image.setAttribute('data-sizes', '(max-width: 380px) 300px, (max-width: 480px) 400px, (max-width: 680px) 600px, (max-width: 768px) 800px, (max-width: 960px) 400px, (max-width: 1360px) 600px');
 
     const btnClassName = 'favorite-icon'
     const btnFavorite = document.querySelector(`.${btnClassName}`);
