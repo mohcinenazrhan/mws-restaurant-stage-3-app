@@ -3,6 +3,7 @@ import * as funcsHelpers from './functions';
 import DBHelper from './dbhelper';
 import SWRegistration from './sw-registration';
 import Notificationbtn from './Notificationbtn';
+import lazySizes from 'lazysizes';
 
 /* ======= Model ======= */
 let model = {
@@ -25,6 +26,8 @@ const controler = {
     this.initMap();
     view.init();
                   
+    lazySizes.init();
+    
     funcsHelpers.appendPolyfill();
     
     // Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -197,9 +200,10 @@ const view = {
     const image = document.createElement('img');
     image.setAttribute('alt', restaurant.name);
 
-    image.className = 'restaurant-img';
-    image.src = controler.dbHelper.imageUrlForRestaurant(restaurant);
-    image.srcset = controler.dbHelper.srcsetImageUrlForIndex(restaurant);
+    image.className = 'restaurant-img lazyload';
+    image.setAttribute('data-src', controler.dbHelper.imageUrlForRestaurant(restaurant));
+    image.setAttribute('data-srcset', controler.dbHelper.srcsetImageUrlForIndex(restaurant));
+    image.setAttribute('data-sizes', 'auto');
     item.append(image);
 
     const btnFavorite = document.createElement('button');
