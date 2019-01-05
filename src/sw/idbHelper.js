@@ -155,19 +155,19 @@ class IDBHelper {
      * @param {*} newData 
      * @param {*} dbStoresName 
      */
-    updateOrSaveDatainIdb(newData, dbStoresName) {
+    async updateOrSaveDatainIdb(newData, dbStoresName) {
+        const data = await this.getDataFromIdbById(dbStoresName, newData.id)
+        
+        console.log('before', data);
+        console.log('newData.id', newData.id);
+        console.log('dbStoresName', dbStoresName);
 
-        return this.getDataFromIdbById(dbStoresName, newData.id)
-            .then((data) => {
-                console.log('before', data);
-                console.log('newData.id', newData.id);
-                console.log('dbStoresName', dbStoresName);
+        if (data === undefined) data = newData
+        else data = Object.assign(data, newData)
 
-                if (data === undefined) data = newData
-                else data = Object.assign(data, newData)
-                console.log('updateOrSaveDatainIdb', data);
-                return this.saveDataToIdb(data, dbStoresName);
-            })
+        console.log('updateOrSaveDatainIdb', data);
+
+        return this.saveDataToIdb(data, dbStoresName);
     }
 }
 
