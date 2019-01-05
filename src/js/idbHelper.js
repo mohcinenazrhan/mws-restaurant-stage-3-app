@@ -44,16 +44,17 @@ export default class IDBHelper {
      * @param {Object} data 
      * @param {String} dbStoreName 
      */
-    saveDataToIdb(data, dbStoreName) {
+    async saveDataToIdb(data, dbStoreName) {
         if (!('serviceWorker' in navigator)) return;
-
-        return this.isDataDbEmpty(dbStoreName).then((isEmpty) => {
-            if (isEmpty) {
-                console.log('saveDataToIdb client side', dbStoreName);
-                return this.idbPromise.then(db => {
-                    if (!db) return;
-                    const tx = db.transaction(dbStoreName, 'readwrite');
-                    const store = tx.objectStore(dbStoreName);
+        
+        const isEmpty = await this.isDataDbEmpty(dbStoreName);
+        if (isEmpty) {
+            console.log('saveDataToIdb client side', dbStoreName);
+            try {
+                const db = await this.idbPromise;
+                if (!db) throw ('DB undefined');
+                const tx = db.transaction(dbStoreName, 'readwrite');
+                const store = tx.objectStore(dbStoreName);
                     if (Array.isArray(data)) {
                         for (const row of data) {
                             store.put(row);
@@ -61,10 +62,11 @@ export default class IDBHelper {
                     } else {
                         store.put(data);
                     }
-                    return tx.complete;
-                }).catch(error => console.log('idb error: ', error));
+                return tx.complete;
+            } catch (error) {
+                console.log('idb error: ', error);
             }
-        })
+        }
     }
 
     /**
@@ -72,20 +74,18 @@ export default class IDBHelper {
      * @param {String} dbStoreName 
      * @param {String} fetchError 
      */
-    isDataDbEmpty(dbStoreName) {
-        return this.idbPromise.then(db => {
+    async isDataDbEmpty(dbStoreName) {
+        try {
+            const db = await this.idbPromise;
             if (!db) throw ('DB undefined');
             const tx = db.transaction(dbStoreName);
             const store = tx.objectStore(dbStoreName);
             return store.getAll().then(data => {
                 if (data.length === 0 || data === undefined) return true
-
                 return false
-            }).catch((error) => error);
-
-        }).catch(dbError => {
-            console.log(dbError);
-            return Promise.reject(dbError);
-        });
+            }).catch((error) => console.log(error));
+        } catch (error) {
+            console.log('idb error: ', error);
+        }
     }
 }
