@@ -186,21 +186,19 @@ self.addEventListener('fetch', function (event) {
     // If shouldRespond was set to true at any point, then call
     // event.respondWith(), using the appropriate cache key.
     if (shouldRespond) {
-      event.respondWith(
-        caches.open(cacheName).then(function (cache) {
-          return cache.match(urlsToCacheKeys.get(url)).then(function (response) {
-            if (response) {
-              return response;
-            }
-            throw Error('The cached response that was expected is missing.');
-          });
-        }).catch(function (e) {
+      event.respondWith((async () => {
+        try {
+          const cache = await caches.open(cacheName);
+          const cachedResponse = await cache.match(urlsToCacheKeys.get(url));
+          if (cachedResponse) return cachedResponse;
+          else throw Error('The cached response that was expected is missing.');
+        } catch (error) {
           // Fall back to just fetch()ing the request if some unexpected error
           // prevented the cached response from being valid.
-          console.warn('Couldn\'t serve response for "%s" from cache: %O', event.request.url, e);
+          console.warn('Couldn\'t serve response for "%s" from cache: %O', event.request.url, error);
           return fetch(event.request)
-        })
-      );
+        }
+      })());
     } else {
 
       // Return if the current request url is in the never cache list
@@ -244,25 +242,24 @@ self.addEventListener('fetch', function (event) {
 
       //  console.log('fetch', requestUrl);
 
-      event.respondWith(
-        caches.match(request).then((response) => {
-          // console.log('Response from cache', response);
-          if (response) return response;
-          return fetch(request).then((response) => {
-            return caches.open(cacheName).then((cache) => {
-              // console.log('Add to cache & return response from NET');
-              cache.put(request, response.clone()); // put clone in cache
-              return response;
-            })
-          }).catch(error => {
-            console.log('error ', error);
-            console.log('fallback', request.url);
-            if (requestUrl.pathname.startsWith('/img/')) {
-              return serveRestaurantImgs(event.request);
-            }
-          });
-        })
-      );
+      event.respondWith((async () => {
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) return cachedResponse;
+
+        try {
+          const response = await fetch(request);
+            const cache = await caches.open(cacheName);
+            // console.log('Add to cache & return response from NET');
+            cache.put(request, response.clone()); // put clone in cache
+          return response;
+        } catch (error) {
+          console.log('fetch error ', error);
+          console.log('fallback ', request.url);
+          if (requestUrl.pathname.startsWith('/img/')) {
+            return serveRestaurantImgs(event.request);
+          }
+        }
+      })());
     }
   }
 });
