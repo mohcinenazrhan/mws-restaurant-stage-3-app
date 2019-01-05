@@ -252,7 +252,7 @@ class SWRegistration {
      * fire sw
      * @param {*} config 
      */
-    fire(config) {
+    async fire(config) {
         this.initConfig(config);
         this.setSwMsgContianer();
         if (!('serviceWorker' in navigator)) {
@@ -260,12 +260,15 @@ class SWRegistration {
             return Promise.reject(this._config.msgSWUnsupported);
         }
 
-        return this.serviceWorkerRegistration().then(() => {
-            this.listenToMessages();
-            this.listenVisibilityChange();
-            this.updateNetworkState();
+        try {
+            await this.serviceWorkerRegistration();
+                  this.listenToMessages();
+                  this.listenVisibilityChange();
+                  this.updateNetworkState();
             return Promise.resolve();
-        })
+        } catch (error) {
+            console.log(error);
+        }
     }
 }
 
