@@ -18,22 +18,24 @@ class IDBHelper {
      * @param {Object} data 
      * @param {String} dbStoreName 
      */
-    saveDataToIdb(data, dbStoreName) {
+    async saveDataToIdb(data, dbStoreName) {
         console.log('saveDataToIdb', dbStoreName, data);
-
-        return this.idbPromise.then(db => {
-            if (!db) return;
+        try {
+            const db = await this.idbPromise;
+            if (!db) throw ('DB undefined');
             const tx = db.transaction(dbStoreName, 'readwrite');
             const store = tx.objectStore(dbStoreName);
-            if (Array.isArray(data)) {
-                for (const row of data) {
-                    store.put(row);
+                if (Array.isArray(data)) {
+                    for (const row of data) {
+                        store.put(row);
+                    }
+                } else {
+                    store.put(data);
                 }
-            } else {
-                store.put(data);
-            }
             return tx.complete;
-        }).catch(error => console.log('idb error: ', error));
+        } catch (error) {
+            console.log('idb error: ', error);
+        }
     }
 
     /**
@@ -41,7 +43,7 @@ class IDBHelper {
      * @param {String} dbStoreName 
      * @param {String} fetchError 
      */
-    getDataFromIdb(dbStoreName, keyValue = null) {        
+    async getDataFromIdb(dbStoreName, keyValue = null) {        
         if (keyValue !== null) {
             if (keyValue.index === null && !isNaN(keyValue.id)) {
                 return this.getDataFromIdbById(dbStoreName, keyValue.id)
@@ -51,22 +53,23 @@ class IDBHelper {
             }
         }
 
-        return this.idbPromise.then(db => {
+        try {
+            const db = await this.idbPromise;
             if (!db) throw ('DB undefined');
             const tx = db.transaction(dbStoreName);
             const store = tx.objectStore(dbStoreName);
-            return store.getAll().then(data => {
-                // if (data.length === 0) throw ('DB: data is empty');
-                if (data.length === 0) console.log('DB: data is empty');
-                console.log('Data served from DB');
-                // return new Response(JSON.stringify(data))
-                return data
-            }).catch((error) => error);
+            return store.getAll()
+                        .then(data => {
+                            // just for debugging
+                            if (data.length === 0) console.log('DB: data is empty');
 
-        }).catch(dbError => {
-            console.log(dbError);
-            return Promise.reject(dbError);
-        });
+                            console.log('Data served from DB');
+                            return data;
+                        }).catch((error) => error);
+
+        } catch (error) {
+            console.log('idb error: ', error);
+        }
     }
 
     /**
@@ -74,7 +77,7 @@ class IDBHelper {
      * @param {Number} id 
      * @param {String | Array} dbStoresName 
      */
-    deleteDataFromIdb(id, dbStoresName) {
+    async deleteDataFromIdb(id, dbStoresName) {
         let storesName = []
         if (!Array.isArray(dbStoresName)) {
             storesName.push(dbStoresName)
@@ -82,16 +85,17 @@ class IDBHelper {
             storesName = dbStoresName
         }
 
-        return storesName.map((storeName) => {
-            return this.idbPromise.then(db => {
-                    if (!db) return;
-                    const tx = db.transaction(storeName, 'readwrite');
-                    const store = tx.objectStore(storeName);
-                    return store.delete(id).complete;
-                })
-                .catch(error => console.log('idb error: ', error));
-        })
-
+        try {
+            const db = await this.idbPromise;
+            if (!db) throw ('DB undefined');
+            return storesName.map(async (storeName) => {
+                return await db.transaction(storeName, 'readwrite')
+                                .objectStore(storeName)
+                                .delete(id).complete;
+            })
+        } catch (error) {
+            console.log('idb error: ', error);
+        }
     }
 
     /**
@@ -99,19 +103,20 @@ class IDBHelper {
      * @param {*} storeName 
      * @param {*} id 
      */
-    getDataFromIdbById(storeName, id) {
-        return this.idbPromise.then(db => {
-                if (!db) return;
-                const tx = db.transaction(storeName);
-                const store = tx.objectStore(storeName);
-                return store.get(id).then(data => {
-                    if(data === undefined) data = {};
-                    // if (data.length === 0) console.log(storeName + ' DB: data is empty');
-                    // return new Response(JSON.stringify(data))
-                    return data
-                }).catch((error) => error);
-            })
-            .catch(error => console.log('idb error: ', error));
+    async getDataFromIdbById(storeName, id) {
+        try {
+            const db = await this.idbPromise;
+            if (!db) throw ('DB undefined');
+            const tx = db.transaction(storeName);
+            const store = tx.objectStore(storeName);
+            return store.get(id).then(data => {
+                if (data === undefined) data = {};
+                return data
+            }).catch((error) => console.log(error));
+
+        } catch (error) {
+            console.log('idb error: ', error);
+        }
     }
 
     /**
@@ -120,28 +125,29 @@ class IDBHelper {
      * @param {String} indexName - The name of the index to open
      * @param {*} key - key to get items with (optional)
      */
-    getAllItemsFromIndex(storeName, indexName, key) {
-        return this.idbPromise.then(db => {
-                if (!db) return;
-                const tx = db.transaction(storeName);
-                const index = tx.objectStore(storeName).index(indexName);
-                console.log(
-                    `Getting all items from store'${storeName}' by index ${indexName} with ${key ||
+    async getAllItemsFromIndex(storeName, indexName, key) {
+        try {
+            const db = await this.idbPromise;
+            if (!db) throw ('DB undefined');
+            const tx = db.transaction(storeName);
+            const index = tx.objectStore(storeName).index(indexName);
+             console.log(
+                 `Getting all items from store'${storeName}' by index ${indexName} with ${key ||
                     'no key'}`
-                );
-                if (key) return index.getAll(key).then(data => {
-                    if (data.length === 0) console.log(storeName + ' DB: data is empty');
-                    // return new Response(JSON.stringify(data))
-                    return data;
-                }).catch((error) => error);
+             );
+            if (key) return index.getAll(key).then(data => {
+                if (data.length === 0) console.log(storeName + ' DB: data is empty');
+                return data;
+            }).catch((error) => console.log(error));
 
-                return index.getAll().then(data => {
-                    if (data.length === 0) console.log(storeName + ' DB: data is empty');
-                    // return new Response(JSON.stringify(data))
-                    return data;
-                }).catch((error) => error);
-            })
-            .catch(error => console.log('idb error: ', error));
+            return index.getAll().then(data => {
+                if (data.length === 0) console.log(storeName + ' DB: data is empty');
+                return data;
+            }).catch((error) => console.log(error));
+
+        } catch (error) {
+            console.log('idb error: ', error);
+        }
     }
 
     /**
