@@ -16,16 +16,11 @@ let model = {
 /* ======= Controler ======= */
 const controler = {
   init: function () {
-    SWRegistration.fire(model.swRegConfig)
-                  .then(() => {
-                    this.listenerForSwMsg();
-                    Notificationbtn.create();
-                  });
+    this.swRegistration();
 
     this.dbHelper = new DBHelper();
     this.initMap();
     view.init();
-                  
     lazySizes.init();
     
     funcsHelpers.appendPolyfill();
@@ -36,30 +31,34 @@ const controler = {
     });
   },
   /**
+   * sw registration
+   */
+  swRegistration: async function () {
+    await SWRegistration.fire(model.swRegConfig);
+      this.listenerForSwMsg();
+      Notificationbtn.create();
+  },
+  /**
   * update content automatically when receive message from service worker
   */
   listenerForSwMsg: function () {
-    
-    navigator.serviceWorker.addEventListener('message', (event) => {
+    navigator.serviceWorker.addEventListener('message', async (event) => {
       if (event.data === 'updateContent') {
         console.log('updateContent');
-        this.dbHelper.updateInmemoryRestaurantsData()
-          .then(() => {
-            this.fillContent()
-            SWRegistration.showMsg('Content Updated')
-          })
+        await this.dbHelper.updateInmemoryRestaurantsData();
+          this.fillContent();
+          SWRegistration.showMsg('Content Updated');
       }
     });
   },
-  fillContent: function () {
-    this.updateRestaurants()
-      .then(() => {
-        this.fetchNeighborhoods();
-        this.fetchCuisines();
-        this.listenerOnFilterChange();
-        funcsHelpers.showMainContent();
-        funcsHelpers.favoriteClickListener(this.dbHelper);
-      })
+  fillContent: async function () {
+    await this.updateRestaurants();
+
+      this.fetchNeighborhoods();
+      this.fetchCuisines();
+      this.listenerOnFilterChange();
+      funcsHelpers.showMainContent();
+      funcsHelpers.favoriteClickListener(this.dbHelper);
   },
   /**
    * Listen for select elements and update Restaurants
@@ -77,22 +76,24 @@ const controler = {
   /**
    * Fetch all neighborhoods and set their HTML.
    */
-  fetchNeighborhoods: function () {
-    this.dbHelper.fetchNeighborhoods().then((neighborhoods) => {
+  fetchNeighborhoods: async function () {
+    try {
+      const neighborhoods = await this.dbHelper.fetchNeighborhoods();
       view.fillNeighborhoodsHTML(neighborhoods);
-    }).catch((error) => {
+    } catch (error) {
       console.error(error);
-    })
+    }
   },
   /**
    * Fetch all cuisines and set their HTML.
    */
-  fetchCuisines: function () {
-    this.dbHelper.fetchCuisines().then((cuisines) => {
+  fetchCuisines: async function () {
+    try {
+      const cuisines = await this.dbHelper.fetchCuisines();
       view.fillCuisinesHTML(cuisines);
-    }).catch((error) => {
+    } catch (error) {
       console.error(error);
-    })
+    }
   },
   /**
    * Initialize leaflet map, called from HTML.
@@ -118,18 +119,18 @@ const controler = {
   /**
    * Update page and map for current restaurants.
    */
-  updateRestaurants: function () {
+  updateRestaurants: async function () {
     const cuisine = view.getSelectValue('cuisines');
     const neighborhood = view.getSelectValue('neighborhoods');
     
-    return this.dbHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood)
-      .then((restaurants) => {
-        this.resetRestaurants(restaurants);
-        view.fillRestaurantsHTML(restaurants);
-        view.addMarkersToMap(restaurants);
-      }).catch((error) => {
-        console.log(error);
-      })
+    try {
+      const restaurants = await this.dbHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood)
+      this.resetRestaurants(restaurants);
+      view.fillRestaurantsHTML(restaurants);
+      view.addMarkersToMap(restaurants);
+    } catch (error) {
+      console.log(error);
+    }
   },
   /**
    * Clear current restaurants, their HTML and remove their map markers.

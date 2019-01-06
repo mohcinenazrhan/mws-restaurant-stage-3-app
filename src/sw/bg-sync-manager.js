@@ -10,20 +10,18 @@ class BgSyncManager {
     /**
      * sync Manager
      */
-    syncManager() {
+    async syncManager() {
         let registration = self.registration;
         if (!registration) {
             try {
-                navigator.serviceWorker.getRegistration().then((reg) => {
-                    registration = reg
-                })
+                registration = await navigator.serviceWorker.getRegistration();
             } catch (e) {}
         }
         return registration.sync;
     }
 
-    trigger(tagName) {
-        return this.syncManager().register(tagName);
+    async trigger(tagName) {
+        return (await this.syncManager()).register(tagName);
     }
 
     serializeRequest(request, body) {
@@ -52,19 +50,19 @@ class BgSyncManager {
      */
     saveReqForBgSync(params) {
         if (!'SyncManager' in self) return;
-        const event = params.event
+        const event = params.event;
 
         event.waitUntil(
             (() => {
 
-                event.request.json().then((data) => {
+                event.request.json().then(async (data) => {
                     event.respondWith(new Response(JSON.stringify(data), {
                         status: 302
                     }));
-                    this.saveRequest(params, data).then(() => {
-                        this.trigger(params.syncTagName);
-                        this.msgSwToClients.send('NotifyUserReqSaved');
-                    })
+                    
+                    await this.saveRequest(params, data);
+                    await this.trigger(params.syncTagName);
+                    this.msgSwToClients.send('NotifyUserReqSaved');
                 })
 
             })()
@@ -76,7 +74,7 @@ class BgSyncManager {
      * @param {*} params 
      * @param {*} data 
      */
-    saveRequest(params, data) {
+    async saveRequest(params, data) {
         const ID = params.id || this.generateUID()
         const request = params.event.request
 
@@ -89,7 +87,10 @@ class BgSyncManager {
         })
         console.log('saveRequest', data);
         
-        return (this.IDBHelper.saveDataToIdb(serRequest, this.TAG_TO_STORE[params.syncTagName].reqs) && this.IDBHelper.updateOrSaveDatainIdb(data, params.store))
+        return await Promise.all([
+            this.IDBHelper.saveDataToIdb(serRequest, this.TAG_TO_STORE[params.syncTagName].reqs),
+            this.IDBHelper.updateOrSaveDatainIdb(data, params.store)
+        ])
     }
 
     /**
@@ -98,27 +99,23 @@ class BgSyncManager {
      */
     bgSyncProcess(event) {
         event.waitUntil(
-            (() => {
+            (async () => {
                 if (!(event.tag in this.TAG_TO_STORE)) return;
                 const tagStore = this.TAG_TO_STORE[event.tag];
 
                 if (tagStore.data) {
-                    return this.reSubmitRequests(tagStore.reqs, tagStore.data)
-                        .then(() => {
-                            this.msgSwToClients.send('isVisible').then((isVisible) => {
-                                if (isVisible === false) 
-                                    this.pushNotification(tagStore.data, this.syncRequests)
-                                else 
-                                    this.msgSwToClients.send('reloadThePageForMAJ')
-                            })
+                    await this.reSubmitRequests(tagStore.reqs, tagStore.data);
+                    await this.msgSwToClients.send('isVisible')
+                        .then((isVisible) => {
+                            if (isVisible === false) 
+                                this.pushNotification(tagStore.data, this.syncRequests);
+                            else 
+                                this.msgSwToClients.send('reloadThePageForMAJ');
                         })
                 }
 
-                return this.reSubmitRequests(tagStore.reqs)
-                    .then(() => {
-                        this.msgSwToClients.send('reloadThePageForMAJ')
-                    })
-
+                await this.reSubmitRequests(tagStore.reqs);
+                this.msgSwToClients.send('reloadThePageForMAJ');
             })()
         );
     };
@@ -131,8 +128,6 @@ class BgSyncManager {
     reSubmitRequests(reqStore, dataStore = null) {
         const storesDeleteFrom = dataStore ? [reqStore, dataStore] : reqStore
         return this.IDBHelper.getDataFromIdb(reqStore)
-            .then((res) => res)
-            // .then((data) => data.json())
             .then((requests) => {
                 return requests.map((obj) => ({
                     request: this.deserializeRequest(obj),
@@ -143,11 +138,11 @@ class BgSyncManager {
                 this.syncRequests = reqs
 
                 return Promise.all(
-                    reqs.map((req) => {
+                    reqs.map(async (req) => {
                         try {
-                            fetch(req.request).then((res) => {
-                                return this.IDBHelper.deleteDataFromIdb(req.id, storesDeleteFrom)
-                            })
+                            await fetch(req.request);
+                            await this.IDBHelper.deleteDataFromIdb(req.id, storesDeleteFrom);
+                            return true;
                         } catch (e) {
                             console.log(e);
                         }

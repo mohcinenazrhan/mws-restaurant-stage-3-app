@@ -15,16 +15,13 @@ let model = {
 /* ======= Controler ======= */
 const controler = {
   init: function () {
-    SWRegistration.fire(model.swRegConfig)
-                  .then(() => {
-                    this.listenerForSwMsg();
-                    Notificationbtn.create();
-                  });
+    this.swRegistration();
                   
     this.dbHelper = new DBHelper();
     funcsHelpers.favoriteClickListener(this.dbHelper);
 
     lazySizes.init();
+    view.init();
 
     /**
      * Initialize map as soon as the page is loaded.
@@ -34,10 +31,21 @@ const controler = {
     });
   },
   /**
+   * sw registration
+   */
+  swRegistration: async function () {
+    try {
+      await SWRegistration.fire(model.swRegConfig);
+        this.listenerForSwMsg();
+        Notificationbtn.create();
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  /**
    * update content automatically when receive message from service worker
    */
   listenerForSwMsg: function () {
-
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data === 'updateContent') {
         console.log('updateContent');
@@ -47,36 +55,39 @@ const controler = {
     });
   },
   fillContent: function () {
-    // fill restaurant content
-    this.fetchRestaurantFromURL()
-      .then((restaurant) => {
-        if (!restaurant || restaurant.length === 0) {
-          console.log('No restaurant found');
-          return
-        }
-
-        this.initMap(restaurant);
-        view.fillBreadcrumb(restaurant.name);
-        view.fillRestaurantHTML(restaurant);
-        funcsHelpers.showMainContent();
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-
-    // fill reviews content
-    this.fetchReviewsFromURL()
-      .then((reviews) => {
-        view.fillReviewsHTML(reviews);
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-
+    // Fill restaurant content
+    this.fillRestaurantContent();
+    // Fill reviews content
+    this.fillReviewsContent();
     // Listener for rating stars
     this.checkedRatingListener();
     // Listener for submit review
     this.submitReviewListener();
+  },
+  fillRestaurantContent: async function () {
+    try {
+    const restaurant = await this.fetchRestaurantFromURL();
+    if (!restaurant || restaurant.length === 0) {
+      console.log('No restaurant found');
+      return
+    }
+
+      this.initMap(restaurant);
+      view.fillBreadcrumb(restaurant.name);
+      view.fillRestaurantHTML(restaurant);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      funcsHelpers.showMainContent();
+    }
+  },
+  fillReviewsContent: async function () {
+    try {
+      const reviews = await this.fetchReviewsFromURL();
+        view.fillReviewsHTML(reviews);
+    } catch (error) {
+      console.log(error);
+    }
   },
   /**
    * Initialize leaflet map
@@ -106,28 +117,33 @@ const controler = {
   /**
    * Get current restaurant from page URL.
    */
-  fetchRestaurantFromURL: function () {
+  fetchRestaurantFromURL: async function () {
     const id = funcsHelpers.getParameterByName('id');
     if (!id) { // no id found in URL
       return Promise.reject('No restaurant id in URL');
     } else {
-      return this.dbHelper.fetchRestaurantById(id).then((restaurant) => {
+      try {
+        const restaurant = await this.dbHelper.fetchRestaurantById(id);
         model.restaurantId = restaurant.id;
         return restaurant;
-      });
+      } catch (error) {
+        console.log(error);
+      }
     }
   },
   /**
    * Get current reviews from restaurant page URL.
    */
-  fetchReviewsFromURL: function () {
+  fetchReviewsFromURL: async function () {
     const id = funcsHelpers.getParameterByName('id');
     if (!id) { // no id found in URL
       return Promise.reject('No restaurant id in URL');
     } else {
-      return this.dbHelper.fetchReviewsByRestaurantId(id).then((reviews) => {
-        return reviews;
-      });
+      try {
+        return await this.dbHelper.fetchReviewsByRestaurantId(id);
+      } catch (error) {
+        console.log(error);
+      }
     }
   },
   /**
@@ -152,51 +168,85 @@ const controler = {
   /**
    * Post Review
    */
-  postReview: function () {
-    console.log('postReview');
-    
-    let rating;
-
-    // to support Foreach over Nodelist in Ie11
-    funcsHelpers.polyfillIe11NodelistForeach();
-    const ratingRadioList = document.querySelectorAll('#frating input[name="rating"]');
-    ratingRadioList.forEach(ratingRadio => {
-      if (ratingRadio.checked) rating = ratingRadio.value;
-    });
-
+  postReview: async function () {
+    // prepare the data to be post
     const review = {
       'restaurant_id': model.restaurantId,
-      'name': document.getElementById('fname').value,
-      'rating': rating,
-      'comments': document.getElementById('fcomment').value
+      'name': view.getNameValue(),
+      'rating': view.getRatingValue(),
+      'comments': view.getCommentValue()
     }
 
     // if offline mention that review will be Stored locally
     if (navigator.onLine === false) review.storageLocal = 'Stored locally';
 
+    // addition fetch options
     let options = {
-      method: 'POST',
       body: JSON.stringify(review)
     }
 
     // if offline allow sw post request
     if (navigator.onLine === false) options.mode = 'no-cors'
 
-    fetch(this.dbHelper.getDbUrl('reviews/'), options)
-      .then((res) => res.json())
-      .then((resReview) => {
-        document.getElementById('reviews-list').appendChild(view.createReviewHTML(resReview));
-        document.getElementById('fname').value = ''
-        document.getElementsByName('rating')[4].checked = true
-        document.getElementById('fcomment').value = ''
-      })
-      .catch((error) => console.log(error))
+    try {
+      const resReview = await this.dbHelper.postReview(options);
+        view.createNewReview(resReview);
+        view.initReviewForm();
+    } catch (error) {
+      console.log(error);
+    }
   }
 };
 
 /* ======= View ======= */
 const view = {
   init: function () {
+    this.reviewsList = document.getElementById('reviews-list');
+    this.fname = document.getElementById('fname');
+    this.rating = document.getElementsByName('rating');
+    this.fcomment = document.getElementById('fcomment');
+    this.ratingRadioList = document.querySelectorAll('#frating input[name="rating"]');
+  },
+  /**
+   * init review form inputs
+   */
+  initReviewForm: function () {
+    this.fname.value = '';
+    this.rating[4].checked = true;
+    this.fcomment.value = '';
+  },
+  /**
+   * get rating value
+   */
+  getRatingValue: function () {
+    let rating;
+    // to support Foreach over Nodelist in Ie11
+    funcsHelpers.polyfillIe11NodelistForeach();
+    
+    this.ratingRadioList.forEach(ratingRadio => {
+      if (ratingRadio.checked) rating = ratingRadio.value;
+    });
+
+    return rating;
+  },
+  /**
+   * get comment value
+   */
+  getCommentValue: function () {
+    return this.fcomment.value;
+  },
+  /**
+   * get name value
+   */
+  getNameValue: function () {
+    return this.fname.value;
+  },
+  /**
+   * create new review by adding it to reviews list section
+   * @param {*} review 
+   */
+  createNewReview: function (review) {
+    this.reviewsList.appendChild(this.createReviewHTML(review));  
   },
   /**
    * Create restaurant HTML and add it to the webpage
