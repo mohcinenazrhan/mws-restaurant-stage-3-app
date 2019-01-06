@@ -156,7 +156,7 @@ class IDBHelper {
      * @param {*} dbStoresName 
      */
     async updateOrSaveDatainIdb(newData, dbStoresName) {
-        const data = await this.getDataFromIdbById(dbStoresName, newData.id)
+        let data = await this.getDataFromIdbById(dbStoresName, newData.id)
         
         console.log('before', data);
         console.log('newData.id', newData.id);
