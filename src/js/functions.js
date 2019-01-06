@@ -1,7 +1,7 @@
 /**
  * favorite OnClick
  */
-export const favoriteOnClick = function (DBHelper, event) {
+export const favoriteOnClick = async function (DBHelper, event) {
     console.log(DBHelper, event);
     const _this = event.target
 
@@ -21,32 +21,31 @@ export const favoriteOnClick = function (DBHelper, event) {
     _this.classList.remove(btnClassNameCurrentState);
     _this.classList.add(btnClassNameNewState);
     _this.setAttribute('aria-checked', newState);
+    
+    try {
+        const resData = await DBHelper.toggleFavoriteRestaurant(id, newState);
 
-    // toggel favorite state on the server
-    DBHelper.toggleFavoriteRestaurant(id, newState)
-        .then((res) => {
-            // update favorite state if the new state does not applied
-            if (res.is_favorite.toString() !== newState.toString()) {
-                // remove all classes
-                _this.classList.remove(`${btnClassName}--on`, `${btnClassName}--off`);
-                _this.classList.add(`${btnClassName}--${res.is_favorite.toString() === 'true' ? 'on' : 'off'}`);
-                _this.setAttribute('aria-checked', res.is_favorite);
-            }
-            
-            // Update Local Restaurant Data favorite state
-            DBHelper.updateLocalRestaurantData(id, {
-                is_favorite: res.is_favorite
-            })
-
-            _this.disabled = false // re-enable the button
-        }).catch((error) => {
-            console.log(error)
-            // rollback
+        // update favorite state if the new state does not applied
+        if (resData.is_favorite.toString() !== newState.toString()) {
+            // remove all classes
             _this.classList.remove(`${btnClassName}--on`, `${btnClassName}--off`);
-            _this.classList.add(`${btnClassName}--${currentStateClass}`)
-            _this.setAttribute('aria-checked', currentState);
-            _this.disabled = false // re-enable the button
+            _this.classList.add(`${btnClassName}--${resData.is_favorite.toString() === 'true' ? 'on' : 'off'}`);
+            _this.setAttribute('aria-checked', resData.is_favorite);
+        }
+
+        // Update Local Restaurant Data favorite state
+        DBHelper.updateLocalRestaurantData(id, {
+            is_favorite: resData.is_favorite
         })
+    } catch (error) {
+        console.log(error)
+        // rollback
+        _this.classList.remove(`${btnClassName}--on`, `${btnClassName}--off`);
+        _this.classList.add(`${btnClassName}--${currentStateClass}`)
+        _this.setAttribute('aria-checked', currentState);
+    } finally {
+        _this.disabled = false // re-enable the button
+    }
 };
 
 /**
