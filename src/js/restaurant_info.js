@@ -21,6 +21,7 @@ const controler = {
     funcsHelpers.favoriteClickListener(this.dbHelper);
 
     lazySizes.init();
+    view.init();
 
     /**
      * Initialize map as soon as the page is loaded.
@@ -168,27 +169,18 @@ const controler = {
    * Post Review
    */
   postReview: async function () {
-    console.log('postReview');
-    
-    let rating;
-
-    // to support Foreach over Nodelist in Ie11
-    funcsHelpers.polyfillIe11NodelistForeach();
-    const ratingRadioList = document.querySelectorAll('#frating input[name="rating"]');
-    ratingRadioList.forEach(ratingRadio => {
-      if (ratingRadio.checked) rating = ratingRadio.value;
-    });
-
+    // prepare the data to be post
     const review = {
       'restaurant_id': model.restaurantId,
-      'name': document.getElementById('fname').value,
-      'rating': rating,
-      'comments': document.getElementById('fcomment').value
+      'name': view.getNameValue(),
+      'rating': view.getRatingValue(),
+      'comments': view.getCommentValue()
     }
 
     // if offline mention that review will be Stored locally
     if (navigator.onLine === false) review.storageLocal = 'Stored locally';
 
+    // addition fetch options
     let options = {
       body: JSON.stringify(review)
     }
@@ -198,11 +190,8 @@ const controler = {
 
     try {
       const resReview = await this.dbHelper.postReview(options);
-      
-        document.getElementById('reviews-list').appendChild(view.createReviewHTML(resReview));
-        document.getElementById('fname').value = '';
-        document.getElementsByName('rating')[4].checked = true;
-        document.getElementById('fcomment').value = '';
+        view.createNewReview(resReview);
+        view.initReviewForm();
     } catch (error) {
       console.log(error);
     }
@@ -212,6 +201,52 @@ const controler = {
 /* ======= View ======= */
 const view = {
   init: function () {
+    this.reviewsList = document.getElementById('reviews-list');
+    this.fname = document.getElementById('fname');
+    this.rating = document.getElementsByName('rating');
+    this.fcomment = document.getElementById('fcomment');
+    this.ratingRadioList = document.querySelectorAll('#frating input[name="rating"]');
+  },
+  /**
+   * init review form inputs
+   */
+  initReviewForm: function () {
+    this.fname.value = '';
+    this.rating[4].checked = true;
+    this.fcomment.value = '';
+  },
+  /**
+   * get rating value
+   */
+  getRatingValue: function () {
+    let rating;
+    // to support Foreach over Nodelist in Ie11
+    funcsHelpers.polyfillIe11NodelistForeach();
+    
+    this.ratingRadioList.forEach(ratingRadio => {
+      if (ratingRadio.checked) rating = ratingRadio.value;
+    });
+
+    return rating;
+  },
+  /**
+   * get comment value
+   */
+  getCommentValue: function () {
+    return this.fcomment.value;
+  },
+  /**
+   * get name value
+   */
+  getNameValue: function () {
+    return this.fname.value;
+  },
+  /**
+   * create new review by adding it to reviews list section
+   * @param {*} review 
+   */
+  createNewReview: function (review) {
+    this.reviewsList.appendChild(this.createReviewHTML(review));  
   },
   /**
    * Create restaurant HTML and add it to the webpage
