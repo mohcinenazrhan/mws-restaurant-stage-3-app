@@ -31,15 +31,22 @@ class DBHelper {
   }
 
   /**
-   * Get data from promise response as objects
-   * @param {*} promise 
+   * fetch the given endpoint with options 
+   * return value of json response promise 
+   * @param {*} endPoint 
+   * @param {*} options 
    */
-  async getDataFromPromise(promise) {
-    let data = null;
-    await promise.then((promiseData) => {
-      data = promiseData
-    });
-    return data;
+  async fetchAndGetJsonData(endpoint, options = {}) {
+    try {
+      let data = null;
+      const promiseResponse = (await fetch(endpoint, options)).json();
+      await promiseResponse.then((promiseData) => {
+        data = promiseData
+      });
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /**
@@ -50,11 +57,8 @@ class DBHelper {
       // return In-memory Restaurants Data if not null
       if (this.fetchRestaurantsData) return this.fetchRestaurantsData;
 
-      // Get Restaurants Data from NET.
-      const promiseResponse = (await fetch(this.getDbUrl('restaurants'))).json();
-
-      // Get data from promise response as objects
-      const restaurants = await this.getDataFromPromise(promiseResponse);
+      // Get value (json) from fetch response 
+      const restaurants = await this.fetchAndGetJsonData(this.getDbUrl('restaurants'));
 
       // save the promise resolved to serve it for future call
       // to get the response from NET. just one time for better performance
@@ -78,11 +82,8 @@ class DBHelper {
    */
   async updateInmemoryRestaurantsData() {
     try {
-      // Get Restaurants Data from NET.
-      const promiseResponse = (await fetch(this.getDbUrl('restaurants'))).json();
-
-      // Get data from promise response as objects
-      const restaurants = await this.getDataFromPromise(promiseResponse);
+      // Get value (json) from fetch response 
+      const restaurants = await this.fetchAndGetJsonData(this.getDbUrl('restaurants'));
 
       // save the promise resolved to serve it for future call
       // to get the response from NET. just one time for better performance
@@ -101,11 +102,8 @@ class DBHelper {
    */
   async fetchRestaurantById(id) {
     try {
-      // Get Restaurants Data from NET.
-      const promiseResponse = (await fetch(this.getDbUrl(`restaurants/${id}`))).json();
-
-      // Get data from promise response as objects
-      const restaurant = await this.getDataFromPromise(promiseResponse);
+      // Get value (json) from fetch response 
+      const restaurant = await this.fetchAndGetJsonData(this.getDbUrl(`restaurants/${id}`));
 
       // Save Data To Local Db (client side persistent data)
       // Save Data if empty (first visit) without await SW to do that in the second visit
@@ -263,11 +261,8 @@ class DBHelper {
    */
   async fetchReviewsByRestaurantId(id) {
     try {
-      // Get Restaurants Data from NET.
-      const promiseResponse = (await fetch(this.getDbUrl(`reviews/?restaurant_id=${id}`))).json();
-
-      // Get data from promise response as objects
-      const reviews = await this.getDataFromPromise(promiseResponse);
+      // Get value (json) from fetch response 
+      const reviews = await this.fetchAndGetJsonData(this.getDbUrl(`reviews/?restaurant_id=${id}`));
 
       // Save Data To Local Db (client side persistent data)
       // Save Data if empty (first visit) without await SW to do that in the second visit
@@ -317,11 +312,8 @@ class DBHelper {
         }
       }
 
-      // Get Restaurants Data from NET.
-      const promiseResponse = (await fetch(this.getDbUrl(`restaurants/${id}/`), options)).json();
-
-      // Get data from promise response as objects
-      return await this.getDataFromPromise(promiseResponse);
+      // Get value (json) from fetch response 
+      return await this.fetchAndGetJsonData(this.getDbUrl(`restaurants/${id}/`), options);
     } catch (error) {
       console.log('Request failed', error);
       return Promise.reject('rollback');
@@ -337,11 +329,8 @@ class DBHelper {
         }
       }, additionOptions)
 
-      // Get Restaurants Data from NET.
-      const promiseResponse = (await fetch(this.dbHelper.getDbUrl('reviews/'), options)).json();
-
-      // Get data from promise response as objects
-      return await this.getDataFromPromise(promiseResponse);
+      // Get value (json) from fetch response 
+      return await this.fetchAndGetJsonData(this.getDbUrl('reviews/'), options);
     } catch (error) {
       console.log(error);
     }
