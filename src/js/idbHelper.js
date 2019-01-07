@@ -80,8 +80,8 @@ export default class IDBHelper {
             if (!db) throw ('DB undefined');
             const tx = db.transaction(dbStoreName);
             const store = tx.objectStore(dbStoreName);
-            return store.getAll().then(data => {
-                if (data.length === 0 || data === undefined) return true
+            return store.count().then(count => {
+                if (count === 0) return true
                 return false
             }).catch((error) => console.log(error));
         } catch (error) {
