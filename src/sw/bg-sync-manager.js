@@ -112,10 +112,10 @@ class BgSyncManager {
                             else 
                                 this.msgSwToClients.send('reloadThePageForMAJ');
                         })
+                } else {
+                    await this.reSubmitRequests(tagStore.reqs);
+                    this.msgSwToClients.send('reloadThePageForMAJ');
                 }
-
-                await this.reSubmitRequests(tagStore.reqs);
-                this.msgSwToClients.send('reloadThePageForMAJ');
             })()
         );
     };
