@@ -1399,27 +1399,6 @@ select::-ms-expand {
     }
 }
 
-// .row {
-//     box-sizing: border-box;
-//     display: flex;
-//     flex-basis: 302px;
-//     flex-grow: 1;
-//     flex-direction: row;
-//     flex-wrap: wrap;
-// }
-
-// .grid-container {
-// max-width: 1400px;
-// margin: 0 auto;
-// display: grid;
-// display:-ms-grid;
-// justify-content: center;
-// grid-template-columns: repeat(auto-fill, 302px);
-// -ms-grid-columns: repeat(auto-fill, 302px);
-// grid-column-gap: 30px;
-// grid-row-gap: 60px;
-// }
-
 /* fluid breakpoint of restaurant page */
 @media only screen and (min-width: 768px) {
 
