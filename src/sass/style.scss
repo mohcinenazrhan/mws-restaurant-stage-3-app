@@ -99,7 +99,7 @@ section {
 }
 
 #footer {
-    background-color: #444;
+    background-color: $banner-color;
     color: #DBDBDB;
     font-size: 8pt;
     letter-spacing: 1px;
@@ -341,7 +341,7 @@ select::-ms-expand {
 }
 
 #restaurant-cuisine {
-    background-color: #333;
+    background-color: $banner-color;
     color: #ddd;
     font-size: 12pt;
     font-weight: 300;
@@ -393,7 +393,7 @@ select::-ms-expand {
 }
 
 #reviews-list .review-header {
-    background-color: #000;
+    background-color: $banner-color;
     color: #FFF;
     display: flex;
     padding: 10px 20px;
