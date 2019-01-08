@@ -49,7 +49,6 @@ class BgSyncManager {
      * @param {*} event 
      */
     saveReqForBgSync(params) {
-        if (!'SyncManager' in self) return;
         const event = params.event;
 
         event.waitUntil(
@@ -61,7 +60,7 @@ class BgSyncManager {
                     }));
                     
                     await this.saveRequest(params, data);
-                    await this.trigger(params.syncTagName);
+                    if ('SyncManager' in self) await this.trigger(params.syncTagName);
                     this.msgSwToClients.send('NotifyUserReqSaved');
                 })
 
@@ -99,26 +98,46 @@ class BgSyncManager {
      */
     bgSyncProcess(event) {
         event.waitUntil(
-            (async () => {
+            (() => {
                 if (!(event.tag in this.TAG_TO_STORE)) return;
                 const tagStore = this.TAG_TO_STORE[event.tag];
-
-                if (tagStore.data) {
-                    await this.reSubmitRequests(tagStore.reqs, tagStore.data);
-                    await this.msgSwToClients.send('isVisible')
-                        .then((isVisible) => {
-                            if (isVisible === false) 
-                                this.pushNotification(tagStore.data, this.syncRequests);
-                            else 
-                                this.msgSwToClients.send('reloadThePageForMAJ');
-                        })
-                } else {
-                    await this.reSubmitRequests(tagStore.reqs);
-                    this.msgSwToClients.send('reloadThePageForMAJ');
-                }
+                this.process(tagStore);
             })()
         );
     };
+
+    /**
+     * Run process
+     * @param {*} tagStore 
+     */
+    async process(tagStore) {
+        if (tagStore.data) {
+            await this.reSubmitRequests(tagStore.reqs, tagStore.data);
+            await this.msgSwToClients.send('isVisible')
+                .then((isVisible) => {
+                    if (isVisible === false)
+                        this.pushNotification(tagStore.data, this.syncRequests);
+                    else
+                        this.msgSwToClients.send('reloadThePageForMAJ');
+                })
+        } else {
+            await this.reSubmitRequests(tagStore.reqs);
+            this.msgSwToClients.send('reloadThePageForMAJ');
+        }
+    }
+
+    /**
+     * BG Sync polyfill
+     */
+    async bgSyncPolyfill() {
+        for (const tag in this.TAG_TO_STORE) {
+            if (this.TAG_TO_STORE.hasOwnProperty(tag)) {
+                const tagStore = this.TAG_TO_STORE[tag];
+                const isEmpty = await this.IDBHelper.isDataDbEmpty(tagStore.reqs);
+                if (!isEmpty) this.process(tagStore);
+            }
+        }
+    }
 
     /**
      * reSubmit Requests
