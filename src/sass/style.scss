@@ -1,7 +1,7 @@
 @import "normalize";
 
 $main-color: #125b8a;
-$main-color--hover: #11669d;
+$main-color--hover: #10507a;
 
 $banner-color: #252831;
 
@@ -53,7 +53,7 @@ a {
 
 a:hover,
 a:focus {
-    color: #3397db;
+    color: $main-color--hover;
     text-decoration: none;
 }
 
@@ -173,7 +173,7 @@ nav a {
 /* Add a color on mouse-over */
 
 #breadcrumb li a:hover {
-    color: #01447e;
+    color: $main-color--hover;
     text-decoration: underline;
 }
 
@@ -1488,7 +1488,7 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: $main-color
+    background-color: $main-color--hover
 }
 
 .starability-checkmark {
@@ -1859,7 +1859,7 @@ body.snackbar--show .snackbar {
 
 .snackbar .snackbar-close:hover,
 .snackbar .snackbar-close:focus {
-    background: #575757;
+    background: $main-color--hover;
 }
 
 .snackbar a {
