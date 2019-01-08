@@ -45,25 +45,40 @@ class BgSyncManager {
     }
 
     /**
+     * Get value json of request body
+     * @param {*} request 
+     */
+    async getValueBodyJsonReq(request) {
+        let data = null;
+        await request.json().then((resData) => {
+            data = resData
+        })
+        return data
+    }
+
+    /**
      * Save request and trigger Bg Sync
      * @param {*} event 
      */
     saveReqForBgSync(params) {
         const event = params.event;
+        // For firefox cuz it doesn't support await for promise to run event.respondWith
+        const cloneReq = event.request.clone();
 
         event.waitUntil(
-            (() => {
-
-                event.request.json().then(async (data) => {
-                    event.respondWith(new Response(JSON.stringify(data), {
+            (async () => {
+                event.respondWith((async () => {
+                    // For firefox cuz it doesn't support await for promise to run event.respondWith
+                    const data = await this.getValueBodyJsonReq(event.request);
+                    return new Response(JSON.stringify(data), {
                         status: 302
-                    }));
-                    
-                    await this.saveRequest(params, data);
-                    if ('SyncManager' in self) await this.trigger(params.syncTagName);
-                    this.msgSwToClients.send('NotifyUserReqSaved');
-                })
+                    });
+                })());
 
+                const data = await this.getValueBodyJsonReq(cloneReq);
+                await this.saveRequest(params, data);
+                if ('SyncManager' in self) await this.trigger(params.syncTagName);
+                this.msgSwToClients.send('NotifyUserReqSaved');
             })()
         )
     }
