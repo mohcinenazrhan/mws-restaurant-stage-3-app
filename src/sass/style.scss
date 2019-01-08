@@ -1,7 +1,9 @@
 @import "normalize";
 
-$primary-color: #252831;
-$secondary-color: #125b8a;
+$main-color: #125b8a;
+$main-color--hover: #11669d;
+
+$banner-color: #252831;
 
 /* CSS Document */
 * {
@@ -123,7 +125,7 @@ section {
 nav {
     width: 100%;
     padding: 30px 0;
-    background-color: #252831;
+    background-color: $banner-color;
     text-align: center;
 }
 
@@ -163,7 +165,7 @@ nav a {
 /* Add a color to all links inside the list */
 
 #breadcrumb li a {
-    color: #125b8a;
+    color: $main-color;
     text-decoration: none;
 }
 
@@ -183,7 +185,7 @@ nav a {
 }
 
 .leaflet-container a {
-    color: #125b8a !important;
+    color: $main-color !important;
     font-size: 10px;
 }
 
@@ -194,7 +196,7 @@ nav a {
 /* ====================== Restaurant Filtering ====================== */
 
 .filter-options {
-    background-color: #125b8a;
+    background-color: $main-color;
     text-align: center;
     padding: 10px 20px;
 }
@@ -263,7 +265,7 @@ select::-ms-expand {
 }
 
 #restaurants-list h3 {
-    color: #125b8a;
+    color: $main-color;
     font-family: Arial, sans-serif;
     font-size: 14pt;
     font-weight: 200;
@@ -277,7 +279,7 @@ select::-ms-expand {
 }
 
 #restaurants-list a {
-    background-color: #125b8a;
+    background-color: $main-color;
     border-bottom: 3px solid #eee;
     color: #fff;
     display: inline-block;
@@ -289,7 +291,7 @@ select::-ms-expand {
 }
 
 #restaurants-list a:hover {
-    background-color: #11669d;
+    background-color: $main-color--hover;
 }
 
 #restaurants-list .content-wrapper {
@@ -318,7 +320,7 @@ select::-ms-expand {
 }
 
 #restaurant-name {
-    color: #125b8a;
+    color: $main-color;
     font-family: Arial, sans-serif;
     font-size: 1.6rem;
     font-weight: 200;
@@ -361,7 +363,7 @@ select::-ms-expand {
 
 #reviews-container h2,
 #add-reviews-container h2 {
-    color: #125b8a;
+    color: $main-color;
     *font-size: 24pt;
     font-weight: 300;
     letter-spacing: -1px;
@@ -420,7 +422,7 @@ select::-ms-expand {
 }
 
 #reviews-list .rating .icon--active {
-    color: #125b8a;
+    color: $main-color;
 }
 
 #reviews-list .comment {
@@ -1500,13 +1502,13 @@ button[type="submit"] {
         0 3px 1px -2px rgba(0, 0, 0, 0.12),
         0 1px 5px 0 rgba(0, 0, 0, 0.2);
     color: #fff;
-    border: 2px solid #125b8a;
+    border: 2px solid $main-color;
     background-color: rgb(37, 40, 49);
     font-weight: bold;
 }
 
 button[type="submit"]:hover {
-    background-color: #125b8a
+    background-color: $main-color
 }
 
 .starability-checkmark {
@@ -1649,7 +1651,7 @@ screen and (-webkit-min-device-pixel-ratio:2) {
 
 .loader #spinner {
     box-sizing: border-box;
-    stroke: $primary-color;
+    stroke: $banner-color;
     stroke-width: 3px;
     -webkit-transform-origin: 50%;
     transform-origin: 50%;
