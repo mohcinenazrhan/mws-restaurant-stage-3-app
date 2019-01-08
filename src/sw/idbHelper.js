@@ -169,6 +169,25 @@ class IDBHelper {
 
         return this.saveDataToIdb(data, dbStoresName);
     }
+
+    /**
+     * get Data state: empty or filled
+     * @param {String} dbStoreName 
+     */
+    async isDataDbEmpty(dbStoreName) {
+        try {
+            const db = await this.idbPromise;
+            if (!db) throw ('DB undefined');
+            const tx = db.transaction(dbStoreName);
+            const store = tx.objectStore(dbStoreName);
+            return store.count().then(count => {
+                if (count === 0) return true
+                return false
+            }).catch((error) => console.log(error));
+        } catch (error) {
+            console.log('idb error: ', error);
+        }
+    }
 }
 
 export default new IDBHelper();

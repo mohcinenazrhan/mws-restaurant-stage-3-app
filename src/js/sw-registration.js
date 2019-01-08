@@ -186,7 +186,10 @@ class SWRegistration {
      */
     updateNetworkState() {
         if (navigator.onLine) {
-            if (this._isOffline === true) this.showMsg(this._config.msgOnline);
+            if (this._isOffline === true)  {
+                this.showMsg(this._config.msgOnline);
+                this.bgSyncPolyfill();
+            }
             this._isOffline = false;
         } else {
             this.showMsg(this._config.msgOffline);
@@ -202,6 +205,29 @@ class SWRegistration {
             if (event.data === 'reloadThePageForMAJ') this.showMsg(this._config.msgWhenUpdate);
             if (event.data === 'NotifyUserReqSaved') this.showMsg(this._config.msgSync);
             if (event.data === 'isVisible') event.ports[0].postMessage(this._isVisible);
+        });
+    }
+
+    /**
+     * Send message to sw
+     * @param {*} msg 
+     */
+    send_message_to_sw(msg) {
+        return new Promise(function (resolve, reject) {
+            // Create a Message Channel
+            var msg_chan = new MessageChannel();
+
+            // Handler for recieving message reply from service worker
+            msg_chan.port1.onmessage = function (event) {
+                if (event.data.error) {
+                    reject(event.data.error);
+                } else {
+                    resolve(event.data);
+                }
+            };
+
+            // Send message to service worker along with port for reply
+            navigator.serviceWorker.controller.postMessage(msg, [msg_chan.port2]);
         });
     }
 
@@ -249,6 +275,30 @@ class SWRegistration {
     }
 
     /**
+     * Send message to sw to execute bg sync process 
+     *  if current browser doesn't support BG Sync
+     * To resubmite reqs saved when offline
+     * Work as bg sync polyfill when back online
+     */
+    bgSyncPolyfill() {
+        if (('SyncManager' in self) === false) {
+            if (navigator.serviceWorker.controller) 
+                this.send_message_to_sw({
+                    action: 'bgSyncPolyfill'
+                });
+        }
+    }
+
+    /**
+     * Call functions when DOMContentLoaded
+     */
+    callFuncsWhenDOMContentLoaded() {        
+        document.addEventListener('DOMContentLoaded', () => {
+            this.bgSyncPolyfill();
+        });
+    }
+
+    /**
      * fire sw
      * @param {*} config 
      */
@@ -261,6 +311,7 @@ class SWRegistration {
         }
 
         try {
+                  this.callFuncsWhenDOMContentLoaded();
             await this.serviceWorkerRegistration();
                   this.listenToMessages();
                   this.listenVisibilityChange();

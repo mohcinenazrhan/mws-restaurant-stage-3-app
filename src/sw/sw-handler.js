@@ -397,6 +397,8 @@ self.addEventListener('message', (event) => {
   if (event.data.action === 'skipWaiting') {
     // skipWaiting if you get the appropriate message
     self.skipWaiting();
+  } else if (event.data.action === 'bgSyncPolyfill') {
+    _bgSyncManager.bgSyncPolyfill();
   }
 });
 

@@ -45,26 +45,40 @@ class BgSyncManager {
     }
 
     /**
+     * Get value json of request body
+     * @param {*} request 
+     */
+    async getValueBodyJsonReq(request) {
+        let data = null;
+        await request.json().then((resData) => {
+            data = resData
+        })
+        return data
+    }
+
+    /**
      * Save request and trigger Bg Sync
      * @param {*} event 
      */
     saveReqForBgSync(params) {
-        if (!'SyncManager' in self) return;
         const event = params.event;
+        // For firefox cuz it doesn't support await for promise to run event.respondWith
+        const cloneReq = event.request.clone();
 
         event.waitUntil(
-            (() => {
-
-                event.request.json().then(async (data) => {
-                    event.respondWith(new Response(JSON.stringify(data), {
+            (async () => {
+                event.respondWith((async () => {
+                    // For firefox cuz it doesn't support await for promise to run event.respondWith
+                    const data = await this.getValueBodyJsonReq(event.request);
+                    return new Response(JSON.stringify(data), {
                         status: 302
-                    }));
-                    
-                    await this.saveRequest(params, data);
-                    await this.trigger(params.syncTagName);
-                    this.msgSwToClients.send('NotifyUserReqSaved');
-                })
+                    });
+                })());
 
+                const data = await this.getValueBodyJsonReq(cloneReq);
+                await this.saveRequest(params, data);
+                if ('SyncManager' in self) await this.trigger(params.syncTagName);
+                this.msgSwToClients.send('NotifyUserReqSaved');
             })()
         )
     }
@@ -99,26 +113,46 @@ class BgSyncManager {
      */
     bgSyncProcess(event) {
         event.waitUntil(
-            (async () => {
+            (() => {
                 if (!(event.tag in this.TAG_TO_STORE)) return;
                 const tagStore = this.TAG_TO_STORE[event.tag];
-
-                if (tagStore.data) {
-                    await this.reSubmitRequests(tagStore.reqs, tagStore.data);
-                    await this.msgSwToClients.send('isVisible')
-                        .then((isVisible) => {
-                            if (isVisible === false) 
-                                this.pushNotification(tagStore.data, this.syncRequests);
-                            else 
-                                this.msgSwToClients.send('reloadThePageForMAJ');
-                        })
-                } else {
-                    await this.reSubmitRequests(tagStore.reqs);
-                    this.msgSwToClients.send('reloadThePageForMAJ');
-                }
+                this.process(tagStore);
             })()
         );
     };
+
+    /**
+     * Run process
+     * @param {*} tagStore 
+     */
+    async process(tagStore) {
+        if (tagStore.data) {
+            await this.reSubmitRequests(tagStore.reqs, tagStore.data);
+            await this.msgSwToClients.send('isVisible')
+                .then((isVisible) => {
+                    if (isVisible === false)
+                        this.pushNotification(tagStore.data, this.syncRequests);
+                    else
+                        this.msgSwToClients.send('reloadThePageForMAJ');
+                })
+        } else {
+            await this.reSubmitRequests(tagStore.reqs);
+            this.msgSwToClients.send('reloadThePageForMAJ');
+        }
+    }
+
+    /**
+     * BG Sync polyfill
+     */
+    async bgSyncPolyfill() {
+        for (const tag in this.TAG_TO_STORE) {
+            if (this.TAG_TO_STORE.hasOwnProperty(tag)) {
+                const tagStore = this.TAG_TO_STORE[tag];
+                const isEmpty = await this.IDBHelper.isDataDbEmpty(tagStore.reqs);
+                if (!isEmpty) this.process(tagStore);
+            }
+        }
+    }
 
     /**
      * reSubmit Requests
