@@ -188,6 +188,35 @@ class IDBHelper {
             console.log('idb error: ', error);
         }
     }
+
+    /**
+     * Remove removed data from Idb and save new data it in Idb
+     * @param {*} neWdata 
+     * @param {*} dbStoreName 
+     * @param {*} keyValue 
+     */
+    async removeDiffDataAndSaveInIdb(neWdata, dbStoreName, savedDbData) {
+        try {
+            
+            if (Array.isArray(savedDbData)) {
+                const newIds = neWdata.map((obj) => obj.id);
+                const db = await this.idbPromise;
+                if (!db) throw ('DB undefined');
+                const tx = db.transaction(dbStoreName, 'readwrite');
+                const store = tx.objectStore(dbStoreName);
+
+                savedDbData.forEach((obj) => {
+                    if (!newIds.includes(obj.id))
+                        store.delete(obj.id);
+                });
+            }
+
+            this.saveDataToIdb(neWdata, dbStoreName);
+
+        } catch (error) {
+            console.log('idb error: ', error);
+        }
+    }
 }
 
 export default new IDBHelper();

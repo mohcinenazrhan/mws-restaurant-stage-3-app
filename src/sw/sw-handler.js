@@ -318,14 +318,16 @@ function idbResponse(req, dbStoreName, keyValue) {
           // TODO: make the API avoid addition properties storageLocal
           data = retrieveByProperty(data, 'storageLocal', 'property');
 
-          IDBHelper.saveDataToIdb(data, dbStoreName)
-
           // comparison between data from NET and localDb
           // make the comparison only if localDb has data
           const dataLength = savedDbData.length || Object.keys(savedDbData).length;
           if (dataLength >= 1) {
-            if (JSON.stringify(data) !== JSON.stringify(savedDbData))
-              msgSwToClients.send('updateContent') // update content
+            if (JSON.stringify(data) !== JSON.stringify(savedDbData)) {
+              IDBHelper.removeDiffDataAndSaveInIdb(data, dbStoreName, savedDbData);
+              msgSwToClients.send('updateContent'); // update content
+            }
+          } else {
+            IDBHelper.saveDataToIdb(data, dbStoreName);
           }
 
           return new Response(JSON.stringify(data))
