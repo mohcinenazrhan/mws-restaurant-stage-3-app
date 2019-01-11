@@ -128,3 +128,63 @@ export function polyfillIe11NodelistForeach() {
         };
     }
 }
+
+/**
+ * About modal
+ */
+export default (function () {
+    // Get the modal
+    const modal = document.getElementById('about-modal');
+    // Get the modal container
+    const aboutModalContainer = document.getElementById('about-modal-container');
+    // Get the button that opens the modal
+    const btnOpen = document.getElementById('open-about-model');
+    // Get the button that closes the modal
+    const btnClose = document.getElementById('close-about-model');
+
+    // Centralize about model according to window
+    function centralizeAboutModel() {
+        if (modal.style.display !== 'none') {
+            const fullWidth = window.innerWidth;
+            const containerWidth = aboutModalContainer.offsetWidth;
+            const rightPos = (parseInt(fullWidth) - parseInt(containerWidth)) / 2;
+            aboutModalContainer.style.right = `${rightPos}px`;
+        }
+    }
+
+    function showModal() {
+        modal.style.display = 'block';
+        centralizeAboutModel();
+    }
+
+    // show modal fo first visite
+    const firstVisite = localStorage.getItem('firstVisite');
+    if (firstVisite === null) {
+        localStorage.setItem('firstVisite', true);
+        showModal();
+    }
+    
+
+    // When the user clicks on the button, open the modal 
+    btnOpen.onclick = function () {
+        showModal();
+    }
+
+    // When the browser window resize and the modal is open
+    // centralize it according to window new width
+    window.onresize = function () {
+        centralizeAboutModel();
+    }
+
+    // When the user clicks on [x], close the modal
+    btnClose.onclick = function () {
+        modal.style.display = 'none';
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+})()
