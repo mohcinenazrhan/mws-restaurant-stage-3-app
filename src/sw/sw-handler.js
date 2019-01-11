@@ -102,8 +102,7 @@ function getUrlParameter(search, sParam, exactName = true) {
       if (sParameterName[0] === sParam) {
         return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
       }
-    }
-    else {
+    } else {
       if (sParameterName[0].includes(sParam)) {
         return {
           index: sParameterName[0],
@@ -209,23 +208,23 @@ self.addEventListener('fetch', function (event) {
 
       // RespondWith idbResponse fun if we call our server
       if (requestUrl.origin === BACKEND_API_ORIGIN) {
-          
-          let idFromSearch = requestUrl.search !== '' ? getUrlParameter(requestUrl.search, 'id', false) : null;
-          idFromSearch !== null && idFromSearch !== undefined ? idFromSearch.id = parseInt(idFromSearch.id) : idFromSearch;
-          // console.log('idFromSearch', idFromSearch);
-          
-          const idFromUrl = urlParams[1] !== '' && urlParams[1] !== undefined ? {
-            index: null,
-            id: parseInt(urlParams[1])
-          } : null;
-          // console.log('idFromUrl', idFromUrl);
 
-          const keyValue = idFromUrl || idFromSearch || null
-          // if (requestUrl.port !== '1337') return
-          // console.log('requestUrl', requestUrl);
-          // console.log('urlParams', urlParams);
-          // console.log('idFromUrl', idFromUrl);
-          // return
+        let idFromSearch = requestUrl.search !== '' ? getUrlParameter(requestUrl.search, 'id', false) : null;
+        idFromSearch !== null && idFromSearch !== undefined ? idFromSearch.id = parseInt(idFromSearch.id) : idFromSearch;
+        // console.log('idFromSearch', idFromSearch);
+
+        const idFromUrl = urlParams[1] !== '' && urlParams[1] !== undefined ? {
+          index: null,
+          id: parseInt(urlParams[1])
+        } : null;
+        // console.log('idFromUrl', idFromUrl);
+
+        const keyValue = idFromUrl || idFromSearch || null
+        // if (requestUrl.port !== '1337') return
+        // console.log('requestUrl', requestUrl);
+        // console.log('urlParams', urlParams);
+        // console.log('idFromUrl', idFromUrl);
+        // return
         event.respondWith(idbResponse(request, store, keyValue));
         return;
       }
@@ -248,9 +247,9 @@ self.addEventListener('fetch', function (event) {
 
         try {
           const response = await fetch(request);
-            const cache = await caches.open(cacheName);
-            // console.log('Add to cache & return response from NET');
-            cache.put(request, response.clone()); // put clone in cache
+          const cache = await caches.open(cacheName);
+          // console.log('Add to cache & return response from NET');
+          cache.put(request, response.clone()); // put clone in cache
           return response;
         } catch (error) {
           console.log('fetch error ', error);
@@ -286,7 +285,7 @@ async function serveRestaurantImgs(request) {
   for (let i = 0; i < imgSizes.length; i++) {
     storageUrl = imageUrl.replace(regexToReplaceWithWhite, imgSizes[i])
     console.log('storageUrl', storageUrl);
-    
+
     cachedResponse = await caches.match(storageUrl);
     console.log('cachedResponse', cachedResponse);
     if (cachedResponse) return cachedResponse;
@@ -319,21 +318,24 @@ function idbResponse(req, dbStoreName, keyValue) {
           // TODO: make the API avoid addition properties storageLocal
           data = retrieveByProperty(data, 'storageLocal', 'property');
 
-          IDBHelper.saveDataToIdb(data, dbStoreName)
-
           // comparison between data from NET and localDb
           // make the comparison only if localDb has data
-          if (savedDbData.length >= 1) {
-            if (JSON.stringify(data) !== JSON.stringify(savedDbData))
-            msgSwToClients.send('updateContent') // update content
+          const dataLength = savedDbData.length || Object.keys(savedDbData).length;
+          if (dataLength >= 1) {
+            if (JSON.stringify(data) !== JSON.stringify(savedDbData)) {
+              IDBHelper.removeDiffDataAndSaveInIdb(data, dbStoreName, savedDbData);
+              msgSwToClients.send('updateContent'); // update content
+            }
+          } else {
+            IDBHelper.saveDataToIdb(data, dbStoreName);
           }
-          
+
           return new Response(JSON.stringify(data))
         })
         .catch(() => {
           return IDBHelper.getDataFromIdb(dbStoreName)
         })
-      
+
       // undefined to get data from fetchData
       // get data from fetchData if local data is empty and we are online
       // if we are offline just response what we get from local db
@@ -346,27 +348,27 @@ function idbResponse(req, dbStoreName, keyValue) {
 }
 
 /**
- * retrieve property or object from data by property name given
- * @param {String} data 
+ * Retrieve property or object from data by property name given
+ * @param {Array | Object} data
  * @param {String} property 
  * @param {String} whatRetrieve // property | object
  */
 function retrieveByProperty(data, property, whatRetrieve) {
   if (whatRetrieve === 'property') {
-    if (data.length > 1) {
+    if (Array.isArray(data)) {
       data = data.map((obj) => {
         if (obj.hasOwnProperty(property)) delete obj[property]
 
         return obj
       })
-    } else if (data.length === 1) {
-      if (!data.hasOwnProperty(property)) delete data[property]
+    } else if (data.constructor === Object) {
+      if (data.hasOwnProperty(property)) delete data[property]
     }
   } else if (whatRetrieve === 'object') {
-    if (data.length > 1) {
+    if (Array.isArray(data)) {
       data = data.filter((obj) => !obj.hasOwnProperty(property))
-    } else if (data.length === 1) {
-      if (!data.hasOwnProperty(property))
+    } else if (data.constructor === Object) {
+      if (data.hasOwnProperty(property))
         data = {}
     }
   }
@@ -383,7 +385,7 @@ self.addEventListener('sync', (event) => {
     case 'test-tag-from-devtools':
     case 'reviews-sync':
     case 'trigger-sync':
-        _bgSyncManager.bgSyncProcess(event);
+      _bgSyncManager.bgSyncProcess(event);
       break;
     default:
       console.error(`Unknown background sync: ${event.tag}`);
