@@ -152,10 +152,22 @@ export default (function () {
         }
     }
 
-    // When the user clicks on the button, open the modal 
-    btnOpen.onclick = function () {
+    function showModal() {
         modal.style.display = 'block';
         centralizeAboutModel();
+    }
+
+    // show modal fo first visite
+    const firstVisite = localStorage.getItem('firstVisite');
+    if (firstVisite === null) {
+        localStorage.setItem('firstVisite', true);
+        showModal();
+    }
+    
+
+    // When the user clicks on the button, open the modal 
+    btnOpen.onclick = function () {
+        showModal();
     }
 
     // When the browser window resize and the modal is open
