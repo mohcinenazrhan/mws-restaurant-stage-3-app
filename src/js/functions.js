@@ -287,9 +287,21 @@ function scrollToTop() {
 }
 
 /**
+ * Scroll to add review section
+ */
+function scrollToAddReview() {
+    const scrollButton = document.querySelector('.scroll-to-add-review');
+    const destination = document.getElementById('add-reviews-container');
+    if (scrollButton === null || destination === null) return;
+
+    scrollButton.addEventListener('click', () => scrollIt(destination.offsetTop - 140));
+}
+
+/**
  * Auto invoked functions
  */
 export default (function () {
     aboutModal();
     scrollToTop();
+    scrollToAddReview();
 })()
