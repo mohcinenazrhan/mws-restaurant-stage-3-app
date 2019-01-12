@@ -2864,3 +2864,18 @@ body.snackbar--show .snackbar {
         0 3px 1px -2px rgba(0, 0, 0, 0.12),
         0 1px 5px 0 rgba(0, 0, 0, 0.2);
 }
+
+/*------------- alert ----------*/
+.alert {
+    display: none;
+    padding: .75rem 1.25rem;
+    margin: 1rem 0;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+}
+
+.alert-danger {
+    background-color: #f2dede;
+    border-color: #ebcccc;
+    color: #a94442;
+}
