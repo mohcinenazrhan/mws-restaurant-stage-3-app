@@ -132,7 +132,7 @@ export function polyfillIe11NodelistForeach() {
 /**
  * About modal
  */
-export default (function () {
+function aboutModal() {
     // Get the modal
     const modal = document.getElementById('about-modal');
     // Get the modal container
@@ -187,4 +187,11 @@ export default (function () {
             modal.style.display = 'none';
         }
     }
+}
+
+/**
+ * Auto invoked functions
+ */
+export default (function () {
+    aboutModal();
 })()
