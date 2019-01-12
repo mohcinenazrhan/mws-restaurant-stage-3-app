@@ -2829,3 +2829,16 @@ body.snackbar--show .snackbar {
         box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
     }
 }
+
+/*------------- scroll navigation ----------*/
+.scroll-to-top {
+    position: absolute;
+    top: -24px;
+    right: calc(50% - 24px);
+    background: #252831;
+    border: none;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    border-radius: 5px;
+}
