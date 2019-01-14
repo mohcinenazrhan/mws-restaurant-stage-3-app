@@ -372,9 +372,11 @@ const view = {
     }
 
     if (reviews.length > 1) {
+      const frag = document.createDocumentFragment();
       reviews.forEach(review => {
-        ul.appendChild(this.createReviewHTML(review));
+        frag.appendChild(this.createReviewHTML(review));
       });
+      ul.appendChild(frag);
     } else {
       ul.appendChild(this.createReviewHTML(reviews));
     }
