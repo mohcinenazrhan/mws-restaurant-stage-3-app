@@ -1444,6 +1444,9 @@ table tr td {
 
 .form-group {
     margin-bottom: 1rem;
+    textarea {
+        min-height: 100px;
+    }
 }
 
 .required {
@@ -1464,6 +1467,8 @@ textarea {
 .form-control {
     display: block;
     width: 100%;
+    min-width: 100%;
+    max-width: 100%;
     padding: .375rem .75rem;
     font-size: 1rem;
     line-height: 1.5;
