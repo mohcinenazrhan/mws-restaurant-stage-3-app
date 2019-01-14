@@ -38,14 +38,23 @@ class DBHelper {
    */
   async fetchAndGetJsonData(endpoint, options = {}) {
     try {
-      let data = null;
-      const promiseResponse = (await fetch(endpoint, options)).json();
-      await promiseResponse.then((promiseData) => {
-        data = promiseData
-      });
-      return data;
+      const promiseResponse = await fetch(endpoint, options);
+      
+      if (promiseResponse.status === 200) {
+
+        let data = null;
+        const promiseResponseJson = promiseResponse.json();
+        await promiseResponseJson.then((promiseData) => {
+          data = promiseData
+        });
+        return data;
+
+      } else {
+        throw promiseResponse.status;
+      }
+
     } catch (error) {
-      console.log(error);
+      return Promise.reject(error);
     }
   }
 
@@ -73,7 +82,7 @@ class DBHelper {
       return restaurants;
 
     } catch (error) {
-      console.log(error);
+      return Promise.reject(error);
     }
   }
 
@@ -93,7 +102,7 @@ class DBHelper {
       return restaurants;
 
     } catch (error) {
-      console.log(error);
+      return Promise.reject(error);
     }
   }
 
@@ -113,8 +122,9 @@ class DBHelper {
       // return data as objects
       return restaurant;
 
-    } catch (error) {
-      console.log(error);
+    } catch (status) {
+      if (status === 404) return Promise.reject('No restaurant found');
+      return Promise.reject(status);
     }
   }
 
@@ -129,7 +139,7 @@ class DBHelper {
       // Filter restaurants to have only given cuisine type
       return restaurants.filter(r => r.cuisine_type == cuisine);
     } catch (error) {
-      console.log(error);
+      return Promise.reject(error);
     }
   }
 
@@ -144,7 +154,7 @@ class DBHelper {
       // Filter restaurants to have only given neighborhood
       return restaurants.filter(r => r.neighborhood == neighborhood);
     } catch (error) {
-      console.log(error);
+      return Promise.reject(error);
     }
   }
 
@@ -165,7 +175,7 @@ class DBHelper {
 
       return restaurants;
     } catch (error) {
-      console.log(error);
+      return Promise.reject(error);
     }
   }
 
@@ -183,7 +193,7 @@ class DBHelper {
       // Remove duplicates from neighborhoods
       return neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i);
     } catch (error) {
-      console.log(error);
+      return Promise.reject(error);
     }
   }
 
@@ -199,7 +209,7 @@ class DBHelper {
       // Remove duplicates from cuisines
       return cuisines.filter((v, i) => cuisines.indexOf(v) == i);
     } catch (error) {
-      console.log(error);
+      return Promise.reject(error);
     }
   }
 
@@ -272,8 +282,9 @@ class DBHelper {
       // return data as objects
       return reviews;
 
-    } catch (error) {
-      console.log(error);
+    } catch (status) {
+      if (status === 404) return Promise.reject('No reviews found');
+      return Promise.reject(status);
     }
   }
 
@@ -332,7 +343,7 @@ class DBHelper {
       // Get value (json) from fetch response 
       return await this.fetchAndGetJsonData(this.getDbUrl('reviews/'), options);
     } catch (error) {
-      console.log(error);
+      return Promise.reject(error);
     }
   }
 
