@@ -267,9 +267,11 @@ const view = {
       return;
     }
 
+    const frag = document.createDocumentFragment();
     restaurants.forEach(restaurant => {
-      this.restaurantsList.append(this.createRestaurantHTML(restaurant));
+      frag.appendChild(this.createRestaurantHTML(restaurant))
     });
+    this.restaurantsList.append(frag);
   },
   /**
    * Add markers for current restaurants to the map.
