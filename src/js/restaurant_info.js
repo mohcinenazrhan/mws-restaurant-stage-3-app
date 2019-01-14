@@ -169,6 +169,38 @@ const controler = {
    * Post Review
    */
   postReview: async function () {
+
+    // Validation inputs
+    let formValidationMsg = null;
+
+    // Validation name input 
+    if (view.getNameValue() === '') {
+      formValidationMsg = 'Please, fill in the filed \'Name\',it is required';
+    } else {
+      if (view.getNameValue().length > 20) {
+        formValidationMsg = 'The maximum characters allowed for the field \'Name\' is 20';
+      } else if (view.getNameValue().length === 1) {
+        formValidationMsg = 'Please, enter your real name, I do not think your name is One-Letter Name :)';
+      }
+    }
+
+    // Validation review input
+    if (view.getCommentValue() === '') {
+      formValidationMsg = 'Please, fill in the filed \'Review\',it is required';
+    } else {
+      if (view.getCommentValue().length < 20) {
+        formValidationMsg = 'Please, describe your opinion more, the minimum characters allowed for the field \'Review\' is 20';
+      } else if (view.getCommentValue().length > 500) {
+        formValidationMsg = 'Please, summarize your opinion more, the maximum characters allowed for the field \'Review\' is 500';
+      }
+    }
+    
+    // Show form validation message 
+    if (formValidationMsg !== null) {
+      view.showFormValidationMsg(formValidationMsg);
+      return
+    }
+
     // prepare the data to be post
     const review = {
       'restaurant_id': model.restaurantId,
@@ -206,6 +238,7 @@ const view = {
     this.rating = document.getElementsByName('rating');
     this.fcomment = document.getElementById('fcomment');
     this.ratingRadioList = document.querySelectorAll('#frating input[name="rating"]');
+    this.formValidationMsg = document.getElementById('validattion-message');
   },
   /**
    * init review form inputs
@@ -214,6 +247,22 @@ const view = {
     this.fname.value = '';
     this.rating[4].checked = true;
     this.fcomment.value = '';
+    this.hideFormValidationMsg();
+  },
+  /**
+   * Show form validation message
+   * @param {String} msg 
+   */
+  showFormValidationMsg: function (msg) {
+    this.formValidationMsg.innerHTML = msg;
+    this.formValidationMsg.style.display = 'block';
+  },
+  /**
+   * Hide form validation message
+   */
+  hideFormValidationMsg: function () {
+    this.formValidationMsg.style.display = 'none';
+    this.formValidationMsg.innerHTML = '';
   },
   /**
    * get rating value
@@ -233,13 +282,13 @@ const view = {
    * get comment value
    */
   getCommentValue: function () {
-    return this.fcomment.value;
+    return this.fcomment.value.trim();
   },
   /**
    * get name value
    */
   getNameValue: function () {
-    return this.fname.value;
+    return this.fname.value.trim();
   },
   /**
    * create new review by adding it to reviews list section
@@ -323,9 +372,11 @@ const view = {
     }
 
     if (reviews.length > 1) {
+      const frag = document.createDocumentFragment();
       reviews.forEach(review => {
-        ul.appendChild(this.createReviewHTML(review));
+        frag.appendChild(this.createReviewHTML(review));
       });
+      ul.appendChild(frag);
     } else {
       ul.appendChild(this.createReviewHTML(reviews));
     }
