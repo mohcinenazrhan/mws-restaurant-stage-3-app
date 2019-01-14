@@ -143,7 +143,7 @@ const controler = {
       model.markers.forEach(marker => marker.remove());
     }
     model.markers = [];
-    view.initContent();
+    // view.initContent();
     model.restaurants = restaurants;
   }
 };
@@ -256,14 +256,24 @@ const view = {
    */
   fillRestaurantsHTML: function (restaurants) {
     
-    const resElementList = view.restaurantsList.getElementsByTagName('li')
-    if (resElementList.length > 1) {
-      const restaurantsListIds = restaurants.map(res => `listitem-${res.id}`);
-      for (let item of resElementList) {
-        if (restaurantsListIds.includes(item.id)) item.className = 'fadein'
-        else item.className = 'fadeout'
-      }
+    const items = this.restaurantsList.getElementsByTagName('li');
+    if (items.length > 1) {
+      const restaurantsIds = restaurants.map((res) => res.id);
       
+      for (let i = 0; i < items.length; ++i) {
+        const id = items[i].id.replace('listitem-', '');
+        if (restaurantsIds.includes(parseInt(id))) {
+          items[i].classList.remove('fadeout', 'hide');
+          items[i].classList.add('fadein');
+        } else {
+          items[i].classList.remove('fadein');
+          items[i].classList.add('fadeout');
+          setTimeout(() => {
+            items[i].classList.add('hide');
+          }, 500);
+        }
+      }
+
       return;
     }
 

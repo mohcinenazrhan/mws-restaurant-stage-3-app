@@ -246,6 +246,7 @@ select::-ms-expand {
 }
 
 #restaurants-list li {
+    will-change: opacity;
     font-family: Arial, sans-serif;
     text-align: left;
     margin-bottom: 30px;
@@ -1721,7 +1722,7 @@ screen and (-webkit-min-device-pixel-ratio:2) {
     }
 
     to {
-        opacity: 0;
+        opacity: .1;
     }
 }
 
@@ -1731,20 +1732,23 @@ screen and (-webkit-min-device-pixel-ratio:2) {
     }
 
     to {
-        opacity: 0;
+        opacity: .1;
     }
 }
 
 .fadeout {
+    -webkit-animation: fadeOut .5s;
+    animation: fadeOut .5s;
+}
+
+.hide {
     visibility: hidden;
     display: none;
-    -webkit-animation: fadeOut 1s;
-    animation: fadeOut 1s;
 }
 
 .fadein {
     visibility: visible;
-    display: initial;
+    display: block;
     -webkit-animation: fadein 1s;
     /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 1s;
