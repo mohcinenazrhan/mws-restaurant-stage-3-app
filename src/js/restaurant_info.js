@@ -67,16 +67,12 @@ const controler = {
   fillRestaurantContent: async function () {
     try {
     const restaurant = await this.fetchRestaurantFromURL();
-    if (!restaurant || restaurant.length === 0) {
-      console.log('No restaurant found');
-      return
-    }
 
       this.initMap(restaurant);
       view.fillBreadcrumb(restaurant.name);
       view.fillRestaurantHTML(restaurant);
     } catch (error) {
-      console.log(error);
+      view.showMsgInMainContent(error);
     } finally {
       funcsHelpers.showMainContent();
     }
@@ -84,7 +80,7 @@ const controler = {
   fillReviewsContent: async function () {
     try {
       const reviews = await this.fetchReviewsFromURL();
-        view.fillReviewsHTML(reviews);
+        if (reviews && reviews.length > 0) view.fillReviewsHTML(reviews);
     } catch (error) {
       console.log(error);
     }
@@ -127,7 +123,7 @@ const controler = {
         model.restaurantId = restaurant.id;
         return restaurant;
       } catch (error) {
-        console.log(error);
+        return Promise.reject(error);
       }
     }
   },
@@ -142,7 +138,7 @@ const controler = {
       try {
         return await this.dbHelper.fetchReviewsByRestaurantId(id);
       } catch (error) {
-        console.log(error);
+        return Promise.reject(error);
       }
     }
   },
@@ -451,6 +447,9 @@ const view = {
     li.id = 'current-page-name'
     li.innerHTML = restaurantName;
     breadcrumb.appendChild(li);
+  },
+  showMsgInMainContent: function (msg) {
+    document.getElementById('maincontent').innerHTML = `<section class="maincontent-msg"><h1>${msg}</h1></section>`;
   }
 };
 
