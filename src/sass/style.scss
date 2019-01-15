@@ -91,6 +91,10 @@ section {
     min-height: 100%;
 }
 
+.bg-white {
+    background-color: #FFF;
+}
+
 .headerfixposition::before {
     content: '';
     height: 132px;
@@ -240,9 +244,9 @@ select::-ms-expand {
 
 #restaurants-list {
     list-style: outside none none;
-    padding: 30px 15px;
+    padding: 0;
     text-align: center;
-    margin: 0;
+    margin: 30px 0;
 }
 
 #restaurants-list li {
@@ -258,7 +262,7 @@ select::-ms-expand {
     margin: 0 auto;
     position: relative;
     border: 1px solid #efefef;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .2);
+    box-shadow: 0 1px 4px rgba(92, 25, 25, 0.2);
 }
 
 #restaurants-list .restaurant-img {
@@ -452,11 +456,6 @@ select::-ms-expand {
 .container {
     margin-right: auto;
     margin-left: auto;
-}
-
-.container-fluid {
-    padding-right: 2rem;
-    padding-left: 2rem;
 }
 
 .row {
@@ -1178,9 +1177,9 @@ select::-ms-expand {
     }
 }
 
-@media only screen and (min-width: 75em) {
+@media only screen and (min-width: 79em) {
     .container {
-        width: 76rem;
+        width: 80rem;
     }
 
     .col-lg,
