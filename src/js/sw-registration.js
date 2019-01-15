@@ -259,10 +259,8 @@ class SWRegistration {
      */
     handleVisibilityChange() {
         if (document.hidden) {
-            console.log('hidden');
             this._isVisible = false;
         } else {
-            console.log('visible');
             this._isVisible = true;
         }
     }

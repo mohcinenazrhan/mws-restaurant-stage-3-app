@@ -49,7 +49,6 @@ const controler = {
   listenerForSwMsg: function () {
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data === 'updateContent') {
-        console.log('updateContent');
         this.fillContent()
         SWRegistration.showMsg('Content Updated')
       }
@@ -156,9 +155,7 @@ const controler = {
     });
   },
   submitReviewListener: function () {
-    console.log('submitReviewListener');
     document.getElementById('form-review').addEventListener('submit', (e) => {
-    console.log('form-review');
       e.preventDefault();    //stop form from submitting
       e.stopImmediatePropagation();
       this.postReview();

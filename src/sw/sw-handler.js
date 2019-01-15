@@ -211,20 +211,13 @@ self.addEventListener('fetch', function (event) {
 
         let idFromSearch = requestUrl.search !== '' ? getUrlParameter(requestUrl.search, 'id', false) : null;
         idFromSearch !== null && idFromSearch !== undefined ? idFromSearch.id = parseInt(idFromSearch.id) : idFromSearch;
-        // console.log('idFromSearch', idFromSearch);
 
         const idFromUrl = urlParams[1] !== '' && urlParams[1] !== undefined ? {
           index: null,
           id: parseInt(urlParams[1])
         } : null;
-        // console.log('idFromUrl', idFromUrl);
 
-        const keyValue = idFromUrl || idFromSearch || null
-        // if (requestUrl.port !== '1337') return
-        // console.log('requestUrl', requestUrl);
-        // console.log('urlParams', urlParams);
-        // console.log('idFromUrl', idFromUrl);
-        // return
+        const keyValue = idFromUrl || idFromSearch || null;
         event.respondWith(idbResponse(request, store, keyValue));
         return;
       }
@@ -239,8 +232,6 @@ self.addEventListener('fetch', function (event) {
         requestUrl.pathname === '/browser-sync/socket.io/' ||
         requestUrl.href.includes('browser-sync/browser-sync-client.js')) return
 
-      //  console.log('fetch', requestUrl);
-
       event.respondWith((async () => {
         const cachedResponse = await caches.match(request);
         if (cachedResponse) return cachedResponse;
@@ -248,12 +239,12 @@ self.addEventListener('fetch', function (event) {
         try {
           const response = await fetch(request);
           const cache = await caches.open(cacheName);
-          // console.log('Add to cache & return response from NET');
+          // Add to cache & return response from NET
           cache.put(request, response.clone()); // put clone in cache
           return response;
         } catch (error) {
-          console.log('fetch error ', error);
-          console.log('fallback ', request.url);
+          // console.log('fetch error ', error);
+          // console.log('fallback ', request.url);
           if (requestUrl.pathname.startsWith('/img/')) {
             return serveRestaurantImgs(event.request);
           }
@@ -271,12 +262,10 @@ async function serveRestaurantImgs(request) {
   // as: 5-800_2x.jpg
   const imageUrl = request.url;
   let storageUrl = imageUrl.replace(regexToReplaceWithWhite, ''); // as: 5.jpg
-  console.log('storageUrl', storageUrl);
 
   // search for original image without (size in name) 
   // not all the browsers support 'srcset'
   let cachedResponse = await caches.match(storageUrl);
-  console.log('cachedResponse', cachedResponse);
   if (cachedResponse) return cachedResponse;
 
   // loop over imgSiezs ['-800_2x', '-600_2x', '-400', '-300']
@@ -284,10 +273,8 @@ async function serveRestaurantImgs(request) {
   // return the first images founded
   for (let i = 0; i < imgSizes.length; i++) {
     storageUrl = imageUrl.replace(regexToReplaceWithWhite, imgSizes[i])
-    console.log('storageUrl', storageUrl);
 
     cachedResponse = await caches.match(storageUrl);
-    console.log('cachedResponse', cachedResponse);
     if (cachedResponse) return cachedResponse;
   }
 
@@ -302,10 +289,8 @@ async function serveRestaurantImgs(request) {
  * @param {String} dbStoreName
  */
 function idbResponse(req, dbStoreName, keyValue) {
-  // console.log(req, dbStoreName, keyValue);
 
   return IDBHelper.getDataFromIdb(dbStoreName, keyValue)
-    // .then((res) => res.json())
     .then((dbData) => {
       // retrieve object that have storageLocal property for a fair comparison with net
       const savedDbData = retrieveByProperty(dbData, 'storageLocal', 'object');
@@ -408,7 +393,6 @@ self.addEventListener('message', (event) => {
  * notification click
  */
 self.addEventListener('notificationclick', function (event) {
-  console.log(event.notification.tag);
   const referrer = event.notification.tag;
   event.notification.close();
   event.waitUntil(clients.openWindow(referrer));

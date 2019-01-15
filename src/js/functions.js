@@ -2,7 +2,6 @@
  * favorite OnClick
  */
 export const favoriteOnClick = async function (DBHelper, event) {
-    console.log(DBHelper, event);
     const _this = event.target
 
     _this.disabled = true // disable the button

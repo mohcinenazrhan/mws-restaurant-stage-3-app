@@ -44,7 +44,6 @@ const controler = {
   listenerForSwMsg: function () {
     navigator.serviceWorker.addEventListener('message', async (event) => {
       if (event.data === 'updateContent') {
-        console.log('updateContent');
         await this.dbHelper.updateInmemoryRestaurantsData();
           this.fillContent();
           SWRegistration.showMsg('Content Updated');
