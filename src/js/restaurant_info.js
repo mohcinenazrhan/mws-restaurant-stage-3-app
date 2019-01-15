@@ -160,7 +160,9 @@ const controler = {
     document.getElementById('form-review').addEventListener('submit', (e) => {
     console.log('form-review');
       e.preventDefault();    //stop form from submitting
+      e.stopImmediatePropagation();
       this.postReview();
+      return false;
     });
   },
   /**
