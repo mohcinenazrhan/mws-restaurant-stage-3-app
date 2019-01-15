@@ -53,7 +53,7 @@ export const favoriteOnClick = async function (DBHelper, event) {
  */
 export const favoriteClickListener = (DBHelper) => {
     const favoriteBtnList = document.getElementsByClassName('favorite-icon');
-    Array.from(favoriteBtnList).forEach(function (favoriteBtn) {
+    Array.from(favoriteBtnList).map(function (favoriteBtn) {
         favoriteBtn.addEventListener('click', favoriteOnClick.bind(null, DBHelper));
     });
 }

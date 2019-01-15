@@ -205,10 +205,10 @@ class IDBHelper {
                 const tx = db.transaction(dbStoreName, 'readwrite');
                 const store = tx.objectStore(dbStoreName);
 
-                savedDbData.forEach((obj) => {
+                savedDbData.map((obj) => {
                     if (!newIds.includes(obj.id))
                         store.delete(obj.id);
-                });
+                })
             }
 
             this.saveDataToIdb(neWdata, dbStoreName);
