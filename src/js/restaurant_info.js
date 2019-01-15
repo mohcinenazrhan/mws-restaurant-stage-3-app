@@ -49,7 +49,6 @@ const controler = {
   listenerForSwMsg: function () {
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data === 'updateContent') {
-        console.log('updateContent');
         this.fillContent()
         SWRegistration.showMsg('Content Updated')
       }
@@ -149,16 +148,14 @@ const controler = {
   checkedRatingListener: function () {
     const ratingRadioList = document.querySelectorAll('#frating input[name="rating"]');
     if (ratingRadioList.length === 0) return
-    Array.from(ratingRadioList).forEach(function (ratingRadio) {
+    Array.from(ratingRadioList).map(function (ratingRadio) {
       ratingRadio.addEventListener('click', function () {
         this.checked = true
       })
     });
   },
   submitReviewListener: function () {
-    console.log('submitReviewListener');
     document.getElementById('form-review').addEventListener('submit', (e) => {
-    console.log('form-review');
       e.preventDefault();    //stop form from submitting
       e.stopImmediatePropagation();
       this.postReview();
@@ -389,7 +386,7 @@ const view = {
 
     if (reviews.length > 1) {
       const frag = document.createDocumentFragment();
-      reviews.forEach(review => {
+      reviews.map(review => {
         frag.appendChild(this.createReviewHTML(review));
       });
       ul.appendChild(frag);

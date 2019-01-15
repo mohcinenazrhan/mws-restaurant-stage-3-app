@@ -44,7 +44,6 @@ const controler = {
   listenerForSwMsg: function () {
     navigator.serviceWorker.addEventListener('message', async (event) => {
       if (event.data === 'updateContent') {
-        console.log('updateContent');
         await this.dbHelper.updateInmemoryRestaurantsData();
           this.fillContent();
           SWRegistration.showMsg('Content Updated');
@@ -140,7 +139,7 @@ const controler = {
     model.restaurants = [];
     // Remove all map markers
     if (model.markers) {
-      model.markers.forEach(marker => marker.remove());
+      model.markers.map((marker) => marker.remove());
     }
     model.markers = [];
     // view.initContent();
@@ -169,7 +168,7 @@ const view = {
    * Set neighborhoods HTML.
    */
   fillNeighborhoodsHTML: function (neighborhoods) {
-    neighborhoods.forEach(neighborhood => {
+    neighborhoods.map((neighborhood) => {
       const option = document.createElement('option');
       option.innerHTML = neighborhood;
       option.value = neighborhood;
@@ -180,7 +179,7 @@ const view = {
    * Set cuisines HTML.
    */
   fillCuisinesHTML: function (cuisines) {
-    cuisines.forEach(cuisine => {
+    cuisines.map((cuisine) => {
       const option = document.createElement('option');
       option.innerHTML = cuisine;
       option.value = cuisine;
@@ -278,7 +277,7 @@ const view = {
     }
 
     const frag = document.createDocumentFragment();
-    restaurants.forEach(restaurant => {
+    restaurants.map((restaurant) => {
       frag.appendChild(this.createRestaurantHTML(restaurant))
     });
     this.restaurantsList.append(frag);
@@ -291,14 +290,14 @@ const view = {
 
       if (model.markers.length > 0) {
         const restaurantsListIds = restaurants.map(res => `marker-${res.id}`);
-        model.markers.forEach(marker => {
+        model.markers.map((marker) => {
           if (!restaurantsListIds.includes(marker.options.id)) marker.remove()
           else marker.addTo(model.newMap)
         });
         return
       }
 
-      restaurants.forEach(restaurant => {
+      restaurants.map((restaurant) => {
         // Add marker to the map
         const marker = controler.dbHelper.mapMarkerForRestaurant(restaurant, model.newMap);
         marker.on('click', onClick);

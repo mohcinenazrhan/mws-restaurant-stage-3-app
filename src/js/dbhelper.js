@@ -327,7 +327,7 @@ class DBHelper {
       // Get value (json) from fetch response 
       return await this.fetchAndGetJsonData(this.getDbUrl(`restaurants/${id}/`), options);
     } catch (error) {
-      console.log('Request failed', error);
+      // console.log('Request failed', error);
       return Promise.reject('rollback');
     }
   }

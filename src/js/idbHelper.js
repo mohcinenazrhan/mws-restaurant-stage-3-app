@@ -49,7 +49,7 @@ export default class IDBHelper {
         
         const isEmpty = await this.isDataDbEmpty(dbStoreName);
         if (isEmpty) {
-            console.log('saveDataToIdb client side', dbStoreName);
+            // console.log('saveDataToIdb client side', dbStoreName);
             try {
                 const db = await this.idbPromise;
                 if (!db) throw ('DB undefined');

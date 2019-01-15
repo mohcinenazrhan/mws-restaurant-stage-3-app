@@ -99,7 +99,7 @@ class BgSyncManager {
         data = Object.assign(data, {
             id: ID
         })
-        console.log('saveRequest', data);
+        // console.log('saveRequest', data);
         
         return await Promise.all([
             this.IDBHelper.saveDataToIdb(serRequest, this.TAG_TO_STORE[params.syncTagName].reqs),
@@ -186,8 +186,6 @@ class BgSyncManager {
     }
 
     pushNotification(subject, syncRequests) {
-        console.log('syncRequests', syncRequests);
-
         let last = '' // for distinct notification
         syncRequests
             .sort((r1, r2) => r1.request.referrer > r2.request.referrer ? 1 : -1)

@@ -19,7 +19,7 @@ class IDBHelper {
      * @param {String} dbStoreName 
      */
     async saveDataToIdb(data, dbStoreName) {
-        console.log('saveDataToIdb', dbStoreName, data);
+        // console.log('saveDataToIdb', dbStoreName, data);
         try {
             const db = await this.idbPromise;
             if (!db) throw ('DB undefined');
@@ -61,9 +61,8 @@ class IDBHelper {
             return store.getAll()
                         .then(data => {
                             // just for debugging
-                            if (data.length === 0) console.log('DB: data is empty');
-
-                            console.log('Data served from DB');
+                            // if (data.length === 0) console.log('DB: data is empty');
+                            // console.log('Data served from DB');
                             return data;
                         }).catch((error) => error);
 
@@ -131,17 +130,17 @@ class IDBHelper {
             if (!db) throw ('DB undefined');
             const tx = db.transaction(storeName);
             const index = tx.objectStore(storeName).index(indexName);
-             console.log(
-                 `Getting all items from store'${storeName}' by index ${indexName} with ${key ||
-                    'no key'}`
-             );
+            //  console.log(
+            //      `Getting all items from store'${storeName}' by index ${indexName} with ${key ||
+            //         'no key'}`
+            //  );
             if (key) return index.getAll(key).then(data => {
-                if (data.length === 0) console.log(storeName + ' DB: data is empty');
+                // if (data.length === 0) console.log(storeName + ' DB: data is empty');
                 return data;
             }).catch((error) => console.log(error));
 
             return index.getAll().then(data => {
-                if (data.length === 0) console.log(storeName + ' DB: data is empty');
+                // if (data.length === 0) console.log(storeName + ' DB: data is empty');
                 return data;
             }).catch((error) => console.log(error));
 
@@ -157,15 +156,9 @@ class IDBHelper {
      */
     async updateOrSaveDatainIdb(newData, dbStoresName) {
         let data = await this.getDataFromIdbById(dbStoresName, newData.id)
-        
-        console.log('before', data);
-        console.log('newData.id', newData.id);
-        console.log('dbStoresName', dbStoresName);
 
         if (data === undefined) data = newData
         else data = Object.assign(data, newData)
-
-        console.log('updateOrSaveDatainIdb', data);
 
         return this.saveDataToIdb(data, dbStoresName);
     }
@@ -205,10 +198,10 @@ class IDBHelper {
                 const tx = db.transaction(dbStoreName, 'readwrite');
                 const store = tx.objectStore(dbStoreName);
 
-                savedDbData.forEach((obj) => {
+                savedDbData.map((obj) => {
                     if (!newIds.includes(obj.id))
                         store.delete(obj.id);
-                });
+                })
             }
 
             this.saveDataToIdb(neWdata, dbStoreName);

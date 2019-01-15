@@ -2,7 +2,6 @@
  * favorite OnClick
  */
 export const favoriteOnClick = async function (DBHelper, event) {
-    console.log(DBHelper, event);
     const _this = event.target
 
     _this.disabled = true // disable the button
@@ -53,7 +52,7 @@ export const favoriteOnClick = async function (DBHelper, event) {
  */
 export const favoriteClickListener = (DBHelper) => {
     const favoriteBtnList = document.getElementsByClassName('favorite-icon');
-    Array.from(favoriteBtnList).forEach(function (favoriteBtn) {
+    Array.from(favoriteBtnList).map(function (favoriteBtn) {
         favoriteBtn.addEventListener('click', favoriteOnClick.bind(null, DBHelper));
     });
 }
