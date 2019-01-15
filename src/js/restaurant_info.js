@@ -81,7 +81,7 @@ const controler = {
   fillReviewsContent: async function () {
     try {
       const reviews = await this.fetchReviewsFromURL();
-        if (reviews && reviews.length > 0) view.fillReviewsHTML(reviews);
+        if (reviews) view.fillReviewsHTML(reviews);
     } catch (error) {
       console.log(error);
     }
@@ -368,8 +368,11 @@ const view = {
    */
   fillReviewsHTML: function (reviews) {
     const container = document.getElementById('reviews-container');
+    if (!container) return;
 
     const ul = document.getElementById('reviews-list');
+    if (!ul) return;
+
     ul.innerHTML = ''
 
     if (reviews.length === 0 || !reviews) {
