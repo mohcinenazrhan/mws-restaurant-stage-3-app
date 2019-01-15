@@ -39,8 +39,9 @@ class DBHelper {
   async fetchAndGetJsonData(endpoint, options = {}) {
     try {
       const promiseResponse = await fetch(endpoint, options);
-      
-      if (promiseResponse.status === 200) {
+      const statusListForJson = [200, 201, 302];
+
+      if (statusListForJson.includes(promiseResponse.status)) {
 
         let data = null;
         const promiseResponseJson = promiseResponse.json();

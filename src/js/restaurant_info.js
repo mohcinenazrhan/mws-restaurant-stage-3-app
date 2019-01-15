@@ -9,7 +9,8 @@ import lazySizes from 'lazysizes';
 let model = {
   restaurantId: null,
   currentMarker: null,
-  swRegConfig: {}
+  swRegConfig: {},
+  postDelay: false
 };
 
 /* ======= Controler ======= */
@@ -80,7 +81,7 @@ const controler = {
   fillReviewsContent: async function () {
     try {
       const reviews = await this.fetchReviewsFromURL();
-        if (reviews && reviews.length > 0) view.fillReviewsHTML(reviews);
+        if (reviews) view.fillReviewsHTML(reviews);
     } catch (error) {
       console.log(error);
     }
@@ -156,15 +157,24 @@ const controler = {
   },
   submitReviewListener: function () {
     console.log('submitReviewListener');
-    document.querySelector('#form-review').addEventListener('submit', (e) => {
+    document.getElementById('form-review').addEventListener('submit', (e) => {
+    console.log('form-review');
       e.preventDefault();    //stop form from submitting
+      e.stopImmediatePropagation();
       this.postReview();
+      return false;
     });
   },
   /**
    * Post Review
    */
   postReview: async function () {
+
+    // Avoid successive posts
+    if (model.postDelay === true) {
+      view.showFormValidationMsg('Please, avoid successive reviews');
+      return
+    }
 
     // Validation inputs
     let formValidationMsg = null;
@@ -220,6 +230,13 @@ const controler = {
       const resReview = await this.dbHelper.postReview(options);
         view.createNewReview(resReview);
         view.initReviewForm();
+
+        // Avoid successive posts, enable post review after 20 seconds
+        model.postDelay = true;
+        setTimeout(() => {
+          model.postDelay = false;
+        }, 20000);
+
     } catch (error) {
       console.log(error);
     }
@@ -353,8 +370,11 @@ const view = {
    */
   fillReviewsHTML: function (reviews) {
     const container = document.getElementById('reviews-container');
+    if (!container) return;
 
     const ul = document.getElementById('reviews-list');
+    if (!ul) return;
+
     ul.innerHTML = ''
 
     if (reviews.length === 0 || !reviews) {
