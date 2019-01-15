@@ -212,6 +212,12 @@ gulp.task('pwafiles', function () {
     .pipe($.if(dev, gulp.dest('.temp/'), gulp.dest('dist/')))
 });
 
+// Move netlify files without its folder
+gulp.task('move-netlify-files', function () {
+    return gulp.src('src/netlify_files/*')
+        .pipe($.if(dev, gulp.dest('.temp/'), gulp.dest('dist/')))
+});
+
 // Clean temp directory
 gulp.task('clean', function () {
     return gulp.src(dev ? '.temp' : 'dist', {
@@ -283,7 +289,7 @@ gulp.task('default', () => {
     return new Promise(resolve => {
         dev = false;
         rootDir = dev ? '.temp' : 'dist';
-        runSequence('clean', 'build', 'bundles', 'fixbundles', 'service-worker', resolve);
+        runSequence('clean', 'build', 'bundles', 'fixbundles', 'service-worker', 'move-netlify-files', resolve);
     });
 });
 
