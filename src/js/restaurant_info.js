@@ -9,7 +9,8 @@ import lazySizes from 'lazysizes';
 let model = {
   restaurantId: null,
   currentMarker: null,
-  swRegConfig: {}
+  swRegConfig: {},
+  postDelay: false
 };
 
 /* ======= Controler ======= */
@@ -156,7 +157,8 @@ const controler = {
   },
   submitReviewListener: function () {
     console.log('submitReviewListener');
-    document.querySelector('#form-review').addEventListener('submit', (e) => {
+    document.getElementById('form-review').addEventListener('submit', (e) => {
+    console.log('form-review');
       e.preventDefault();    //stop form from submitting
       this.postReview();
     });
@@ -165,6 +167,12 @@ const controler = {
    * Post Review
    */
   postReview: async function () {
+
+    // Avoid successive posts
+    if (model.postDelay === true) {
+      view.showFormValidationMsg('Please, avoid successive reviews');
+      return
+    }
 
     // Validation inputs
     let formValidationMsg = null;
@@ -220,6 +228,13 @@ const controler = {
       const resReview = await this.dbHelper.postReview(options);
         view.createNewReview(resReview);
         view.initReviewForm();
+
+        // Avoid successive posts, enable post review after 20 seconds
+        model.postDelay = true;
+        setTimeout(() => {
+          model.postDelay = false;
+        }, 20000);
+
     } catch (error) {
       console.log(error);
     }
