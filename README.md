@@ -1,51 +1,148 @@
-# Mobile Web Specialist Certification Course
----
-#### _Three Stage Course Material Project - Restaurant Reviews_
+# MWS Restaurant Reviews
 
-## Project Overview: Stage 3
+Restaurant Reviews project is a capstone project in the Mobile Web Specialist program provided by Udacity.
+[Lighthouse test](https://lighthouse-dot-webdotdevsite.appspot.com/lh/html?url=https://flamboyant-ride-d09151.netlify.com/)
+[Page speed test](https://developers.google.com/speed/pagespeed/insights/?url=https%3A%2F%2Fflamboyant-ride-d09151.netlify.com%2F)
 
-Project Overview
-For the Restaurant Reviews projects, you will incrementally convert a static webpage to a mobile-ready web application. In Stage Three, you will take the connected application you built in Stage One and Stage Two and add additional functionality. You will add a form to allow users to create their own reviews. If the app is offline, your form will defer updating to the remote database until a connection is established. Finally, you’ll work to optimize your site to meet even stricter performance benchmarks than the previous project, and test again using Lighthouse.
+## Project Overview
+Restaurant Reviews project is a capstone project in the Mobile Web Specialist nanodegree program provided by Udacity divided into 3 stages, the idea is to improve an existing application at every step by adding new features and solving problems.
 
-Specification
-You will be provided code for an updated Node development server and a README for getting the server up and running locally on your computer. The README will also contain the API you will need to make JSON requests to the server. Once you have the server up, you will begin the work of improving your Stage Two project code.
+[The starter code](https://github.com/udacity/mws-restaurant-stage-1) (The existing application)
+“You have been provided the code for a restaurant reviews website. The code has a lot of issues. It’s barely usable on a desktop browser, much less a mobile device. It also doesn’t include any standard accessibility features, and it doesn’t work offline at all. Your job is to update the code to resolve these issues while still maintaining the included functionality.”
 
-This server is different than the server from stage 2, and has added capabilities. Make sure you are using the Stage Three server as you develop your project. Connecting to this server is the same as with Stage Two, however.
+Stages repository:
+[Stage 1](https://github.com/mohcinenazrhan/mws-restaurant-stage-1), [Stage 2](https://github.com/mohcinenazrhan/mws-restaurant-stage-2-app) and this is the [Stage 3](https://github.com/mohcinenazrhan/mws-restaurant-stage-3-app)
 
-You can find the documentation for the new server in the README file for the server.
+Project **stage-3** requirements: [The app live V1](https://goo.gl/c7Jq5h)
+ - add a form to allow users to submit their own reviews;
+ - add functionality to defer submission of the form until connection is re-established;
+ - achieve *Lighthouse* performance scores:
+    1. **Progressive Web App** score - at 90 or better.
+    2. **Performance** score  - at 90 or better.
+    3. **Accessibility** score - at 90 or better.
 
-Now that you’ve connected your application to an external database, it’s time to begin adding new features to your app.
+Project features implemented at the **stage-3**:
+ - the user can mark / unmark a restaurant as favorite;
+ - the user can submit a review for the restaurant (online / offline) and the review is displayed immediately;
+ - the app notifies the user, if there is no connection after the form submission;
+ - the user review is sent when the connection is re-established;
+ - pages accessed by the user online are available offline.
 
-Requirements
-Add a form to allow users to create their own reviews: In previous versions of the application, users could only read reviews from the database. You will need to add a form that adds new reviews to the database. The form should include the user’s name, the restaurant id, the user’s rating, and whatever comments they have. Submitting the form should update the server when the user is online.
+Addition improvement: [The app live V2](https://goo.gl/o6m8kY)
+-	The API is hosted in a free Heroku plan (SLEEPS AFTER 30 MINS OF INACTIVITY) so the response will take a long time and deny the app benefit from the local DB data.
+The solution is to change strategy of response data in service worker to adapt with API server when sleeps, the new strategy is to first response from local DB then go get updated data from API to compare it with the local DB data if there is a change the app updates the content automatically and update the local DB data.
+-	Refactor the app code to make clean and clear for future update and maintain by:
+o	Adopt ES2015  syntax and ES2017 async/await.
+o	Take advantage of OOP and MVC to improve the code structure.
+-	Make the app support IE 11.
+-	If reviews are posted offline and the user not in the website or the browser is closed, when the user back online push notification to let the user know that the reviews posted offline is successfully submitted to the server.
+-	Add notification button to display the blocked or authorized notifications status with instruction to enable or disable it.
+-	Add lazy loader for images (responsive and normal) to make the app load fast.
+-	Create background sync polyfill for browsers that does support service worker but does not support background sync yet exp: Mozilla Firefox
 
-Add functionality to defer updates until the user is connected: If the user is not online, the app should notify the user that they are not connected, and save the users' data to submit automatically when re-connected. In this case, the review should be deferred and sent to the server when connection is re-established (but the review should still be visible locally even before it gets to the server.)
+## Getting Started
 
-Meet the new performance requirements: In addition to adding new features, the performance targets you met in Stage Two have tightened. Using Lighthouse, you’ll need to measure your site performance against the new targets.
-
-Progressive Web App score should be at 90 or better.
-Performance score should be at 90 or better.
-Accessibility score should be at 90 or better.
-
-## Leaflet.js and Mapbox:
-
-This repository uses [leafletjs](https://leafletjs.com/) with [Mapbox](https://www.mapbox.com/). You need to replace `<your MAPBOX API KEY HERE>` with a token from [Mapbox](https://www.mapbox.com/). Mapbox is free to use, and does not require any payment information. 
-
-### Note about ES6
-
-Most of the code in this project has been written to the ES6 JavaScript specification for compatibility with modern web browsers and future proofing JavaScript code. As much as possible, try to maintain use of ES6 in any additional JavaScript you write. 
-
-
-## Quick start
+These instructions will get you a copy of the project up and running on your local machine for development.
 
 ### Prerequisites
 
-* [Node.js](https://nodejs.org) installed
+You first need a copy of the code in your local machine, make sure to fork and clone, you can clone by running this command.
 
-### Installation
+Create a directory where the app resides (name it whatever you'd like)
+```
+mkdir restaurant-app && cd restaurant-app
+```
 
-1. npm install
+Clone the app
+```
+git clone https://github.com/mohcinenazrhan/mws-restaurant-stage-3-app.git
+```
 
-2. gulp serve: for Dev Env => Folder: ./.temp
+The `restaurant-app/` app depends on tokens.js to get MAPBOX_TOKEN:
+```
+$ cd restaurant-app
+$ touch tokens.js
+```
+Open the file and fill it these variables:
+```
+# mapbox api key (required)
+export default {
+    MAPBOX_TOKEN: ''
+}
+```
 
-3. gulp : for Prod Env => Folder: ./dist 
+You also need to have the local dev server from which your app receives data. You can check the [dev server's docs](https://github.com/mohcinenazrhan/mws-restaurant-stage-3) for more information.
+The `restaurant-app/` app depends on env.json to get dev and prod API ORIGIN:
+```
+$ cd restaurant-app
+$ touch env.json
+```
+Open the file and fill it these variables:
+```
+# devAPIOrigin & prodAPIOrigin (required) Exp: http://localhost:1337
+{
+    "devAPIOrigin": "",
+    "prodAPIOrigin": ""
+}
+```
+
+### Installing
+
+#### Install dependencies
+
+To get up and running all you need to do is install the dependencies.
+
+```
+npm install
+```
+
+**Note**: Make sure you are inside the project directory.
+
+#### Quick Start
+
+To quickly generate the optimized assets and run server, run:
+```bash
+gulp prod
+then
+gulp serve-prod-only
+```
+
+More details in the following sections.
+
+#### Run task runner
+
+Run the default task to generate files for production
+
+```bash
+gulp prod
+```
+
+Run serve task to generate files + live editing (with browser-sync):
+
+```
+gulp
+```
+
+## Running the tests
+
+No tests available.
+
+## Built With
+
+* [npm](https://npmjs.com) - Dependency Management
+* [https://gulpjs.com/](Gulp) - Used task runner
+* [https://babeljs.io/](Babel) - Used to compile ES2015 to ES5
+
+## Starter Code Owners
+
+* [@forbiddenvoid](https://github.com/udacity/mws-restaurant-stage-1/commits?author=forbiddenvoid)
+* @hbkwong
+
+## License
+
+No license.
+
+## Acknowledgments
+
+* Thanks to ALC and Udacity for giving us the chance to learn new things
+* Thanks to instructors and reviewers for being helpful and patient with us
