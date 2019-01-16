@@ -251,7 +251,7 @@ gulp.task('serve-prod-only', function () {
 });
 
 
-gulp.task('build', ['scripts', 'styles', 'html', 'res-images', 'pwafiles'], () => {
+gulp.task('build', ['scripts', 'styles', 'html', 'res-images', 'offlineimgs', 'pwafiles'], () => {
     return gulp.src('dist/**/*').pipe($.size({
         title: 'build',
         gzip: true
