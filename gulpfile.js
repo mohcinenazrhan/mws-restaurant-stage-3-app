@@ -34,7 +34,7 @@ rootDir = dev ? '.temp' : 'dist';
 
 /////////////////////////////// Watch Mode : .temp ///////////////////////////////
 
-gulp.task('serve-only', function () {
+gulp.task('serve-dev-only', function () {
 
     browserSync.init({
         open: false,
@@ -225,13 +225,13 @@ gulp.task('clean', function () {
     }).pipe(clean())
 });
 
-gulp.task('serve', () => {
+gulp.task('default', () => {
     runSequence(['clean'], ['watch', 'res-images', 'offlineimgs', 'pwafiles'], ['service-worker'])
 })
 
 /////////////////////////////// Build for Prod : Dist ///////////////////////////////
 
-gulp.task('serve-prod', function () {
+gulp.task('serve-prod-only', function () {
 
     browserSync.init({
         open: false,
@@ -285,7 +285,7 @@ gulp.task('fixbundles', function () {
     fs.unlink('dist/rev-manifest.json')
 });
 
-gulp.task('default', () => {
+gulp.task('prod', () => {
     return new Promise(resolve => {
         dev = false;
         rootDir = dev ? '.temp' : 'dist';
