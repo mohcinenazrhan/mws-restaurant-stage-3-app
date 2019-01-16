@@ -1,0 +1,4 @@
+## A path:
+/sw/service-worker.js
+  # Headers for that path:
+  Service-Worker-Allowed: /
