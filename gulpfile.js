@@ -128,7 +128,7 @@ gulp.task('scripts', ['lint'], function () {
             .bundle()
             .pipe(source(`${file}.js`))
             .pipe(buffer()) // required to use stream w/ other plugins
-            .pipe($.if(dev, replace('APIORIGIN', devAPIOrigin), replace('APIORIGIN', prodAPIOrigin)))
+            .pipe($.if(dev, replace('<<-APIORIGIN->>', devAPIOrigin), replace('<<-APIORIGIN->>', prodAPIOrigin)))
             .pipe($.if(!dev, uglify()))
             .pipe($.if(dev, gulp.dest('.temp/js'), gulp.dest('dist/js')))
             .pipe(reload({
@@ -326,7 +326,7 @@ gulp.task('service-worker', ['prepare-sw'], function () {
         .bundle()
         .pipe(source('service-worker.js')) // get text stream w/ destination filename
         .pipe(buffer()) // required to use stream w/ other plugins
-        .pipe($.if(dev, replace('APIORIGIN', devAPIOrigin), replace('APIORIGIN', prodAPIOrigin)))
+        .pipe($.if(dev, replace('<<-APIORIGIN->>', devAPIOrigin), replace('<<-APIORIGIN->>', prodAPIOrigin)))
         .pipe($.if(!dev, uglify()))
         .pipe($.if(dev, gulp.dest('.temp/sw'), gulp.dest('dist/sw')))
 

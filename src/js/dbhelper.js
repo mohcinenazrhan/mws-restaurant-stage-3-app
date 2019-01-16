@@ -18,7 +18,7 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   getDbUrl(params = '') {
-    const API_ORIGIN = 'APIORIGIN'; // injected by gulp
+    const API_ORIGIN = '<<-APIORIGIN->>'; // injected by gulp
     return `${API_ORIGIN}/${params}`;
   }
 
