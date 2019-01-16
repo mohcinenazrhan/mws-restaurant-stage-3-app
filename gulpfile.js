@@ -24,10 +24,11 @@ const gulp         = require('gulp'),
       path         = require('path'),
       swPrecache   = require('sw-precache');
 
+const env = JSON.parse(fs.readFileSync('env.json'));
 const reload = browserSync.reload,
     $ = gulpLoadPlugins(),
-    devAPIOrigin = 'http://localhost:1337',
-    prodAPIOrigin = 'https://mnaz-restaurant-reviews-api.herokuapp.com';
+    devAPIOrigin = env['devAPIOrigin'],
+    prodAPIOrigin = env['prodAPIOrigin'];
 
 let dev = true,
 rootDir = dev ? '.temp' : 'dist';
