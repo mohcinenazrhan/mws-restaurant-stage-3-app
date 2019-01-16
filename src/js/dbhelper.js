@@ -27,7 +27,7 @@ class DBHelper {
    * TODO: fetch it from db
    */
   fetchMAPBOXToken() {
-    return atob(tokens.MAPBOX_TOKEN)
+    return tokens.MAPBOX_TOKEN;
   }
 
   /**
