@@ -71,7 +71,7 @@ var ignoreUrlParametersMatching = [/^utm_/];
 const navigateFallbackWhitelist = [/^\/restaurant/];
 const navigateFallback = '/404.html'; // Just to test this feature
 
-const BACKEND_API_ORIGIN = 'APIORIGIN';
+const BACKEND_API_ORIGIN = '<<-APIORIGIN->>';
 
 const imgSizes = ['-800_2x', '-600_2x', '-400', '-300'];
 const regexToReplaceWithWhite = /-\d+(_2x|)/g;

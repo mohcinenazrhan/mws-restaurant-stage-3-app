@@ -18,7 +18,7 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   getDbUrl(params = '') {
-    const API_ORIGIN = 'APIORIGIN'; // injected by gulp
+    const API_ORIGIN = '<<-APIORIGIN->>'; // injected by gulp
     return `${API_ORIGIN}/${params}`;
   }
 
@@ -27,7 +27,7 @@ class DBHelper {
    * TODO: fetch it from db
    */
   fetchMAPBOXToken() {
-    return atob(tokens.MAPBOX_TOKEN)
+    return tokens.MAPBOX_TOKEN;
   }
 
   /**

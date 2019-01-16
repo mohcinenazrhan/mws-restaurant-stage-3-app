@@ -24,17 +24,18 @@ const gulp         = require('gulp'),
       path         = require('path'),
       swPrecache   = require('sw-precache');
 
+const env = JSON.parse(fs.readFileSync('env.json'));
 const reload = browserSync.reload,
     $ = gulpLoadPlugins(),
-    devAPIOrigin = 'http://localhost:1337',
-    prodAPIOrigin = 'https://mnaz-restaurant-reviews-api.herokuapp.com';
+    devAPIOrigin = env['devAPIOrigin'],
+    prodAPIOrigin = env['prodAPIOrigin'];
 
 let dev = true,
 rootDir = dev ? '.temp' : 'dist';
 
 /////////////////////////////// Watch Mode : .temp ///////////////////////////////
 
-gulp.task('serve-only', function () {
+gulp.task('serve-dev-only', function () {
 
     browserSync.init({
         open: false,
@@ -127,7 +128,7 @@ gulp.task('scripts', ['lint'], function () {
             .bundle()
             .pipe(source(`${file}.js`))
             .pipe(buffer()) // required to use stream w/ other plugins
-            .pipe($.if(dev, replace('APIORIGIN', devAPIOrigin), replace('APIORIGIN', prodAPIOrigin)))
+            .pipe($.if(dev, replace('<<-APIORIGIN->>', devAPIOrigin), replace('<<-APIORIGIN->>', prodAPIOrigin)))
             .pipe($.if(!dev, uglify()))
             .pipe($.if(dev, gulp.dest('.temp/js'), gulp.dest('dist/js')))
             .pipe(reload({
@@ -225,13 +226,13 @@ gulp.task('clean', function () {
     }).pipe(clean())
 });
 
-gulp.task('serve', () => {
+gulp.task('default', () => {
     runSequence(['clean'], ['watch', 'res-images', 'offlineimgs', 'pwafiles'], ['service-worker'])
 })
 
 /////////////////////////////// Build for Prod : Dist ///////////////////////////////
 
-gulp.task('serve-prod', function () {
+gulp.task('serve-prod-only', function () {
 
     browserSync.init({
         open: false,
@@ -250,7 +251,7 @@ gulp.task('serve-prod', function () {
 });
 
 
-gulp.task('build', ['scripts', 'styles', 'html', 'res-images', 'pwafiles'], () => {
+gulp.task('build', ['scripts', 'styles', 'html', 'res-images', 'offlineimgs', 'pwafiles'], () => {
     return gulp.src('dist/**/*').pipe($.size({
         title: 'build',
         gzip: true
@@ -285,7 +286,7 @@ gulp.task('fixbundles', function () {
     fs.unlink('dist/rev-manifest.json')
 });
 
-gulp.task('default', () => {
+gulp.task('prod', () => {
     return new Promise(resolve => {
         dev = false;
         rootDir = dev ? '.temp' : 'dist';
@@ -325,7 +326,7 @@ gulp.task('service-worker', ['prepare-sw'], function () {
         .bundle()
         .pipe(source('service-worker.js')) // get text stream w/ destination filename
         .pipe(buffer()) // required to use stream w/ other plugins
-        .pipe($.if(dev, replace('APIORIGIN', devAPIOrigin), replace('APIORIGIN', prodAPIOrigin)))
+        .pipe($.if(dev, replace('<<-APIORIGIN->>', devAPIOrigin), replace('<<-APIORIGIN->>', prodAPIOrigin)))
         .pipe($.if(!dev, uglify()))
         .pipe($.if(dev, gulp.dest('.temp/sw'), gulp.dest('dist/sw')))
 
