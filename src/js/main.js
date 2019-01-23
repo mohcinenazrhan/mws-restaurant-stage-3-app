@@ -142,7 +142,7 @@ const controler = {
       model.markers.map((marker) => marker.remove());
     }
     model.markers = [];
-    // view.initContent();
+    view.initContent();
     model.restaurants = restaurants;
   }
 };
