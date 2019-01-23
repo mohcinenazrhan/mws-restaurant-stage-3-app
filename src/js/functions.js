@@ -64,7 +64,7 @@ export function showMainContent() {
     document.getElementById('maincontent').classList.remove('visibility-hidden');
     document.getElementById('maincontent').classList.add('fadein');
     document.getElementById('footer').classList.remove('fixed-bottom');
-    document.querySelector('.loader').setAttribute('hidden', true);
+    document.querySelector('.loader-container').setAttribute('hidden', true);
 }
 
 /**
