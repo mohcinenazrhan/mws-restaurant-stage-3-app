@@ -1638,86 +1638,60 @@ screen and (-webkit-min-device-pixel-ratio:2) {
 }
 
 /* ====================== loader ====================== */
-.loader {
-    left: 50%;
-    top: 50%;
-    text-align: center;
+.loader-container {
     position: fixed;
+    text-align: center;
+    top: 50%;
+    left: 50%;
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
-}
 
-.loader #spinner {
-    box-sizing: border-box;
-    stroke: $banner-color;
-    stroke-width: 3px;
-    -webkit-transform-origin: 50%;
-    transform-origin: 50%;
-    -webkit-animation: line 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite, rotate 1.6s linear infinite;
-    animation: line 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite, rotate 1.6s linear infinite;
-}
+    .loader {
+        height: 50px;
+        width: 50px;
+        display: inline-block;
+        vertical-align: middle;
+        position: relative;
+        border-radius: 50px;
+        border: 6px solid rgba(255, 255, 255, 0.4);
 
-@-webkit-keyframes rotate {
-    from {
-        -webkit-transform: rotate(0);
-        transform: rotate(0);
-    }
-
-    to {
-        -webkit-transform: rotate(450deg);
-        transform: rotate(450deg);
-    }
-}
-
-@keyframes rotate {
-    from {
-        -webkit-transform: rotate(0);
-        transform: rotate(0);
-    }
-
-    to {
-        -webkit-transform: rotate(450deg);
-        transform: rotate(450deg);
+        &:after {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: -6px;
+            right: -6px;
+            bottom: -6px;
+            border: 6px solid rgba(158, 158, 158, 0.2);
+            border-top-color: $main-color;
+            border-radius: 50px;
+            animation: spin 1s linear infinite;
+            -webkit-animation: spin 1s linear infinite;
+        }
     }
 }
 
-@-webkit-keyframes line {
+@-webkit-keyframes spin {
     0% {
-        stroke-dasharray: 2, 85.964;
-        -webkit-transform: rotate(0);
-        transform: rotate(0);
-    }
-
-    50% {
-        stroke-dasharray: 65.973, 21.9911;
-        stroke-dashoffset: 0;
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
     }
 
     100% {
-        stroke-dasharray: 2, 85.964;
-        stroke-dashoffset: -65.973;
-        -webkit-transform: rotate(90deg);
-        transform: rotate(90deg);
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
     }
 }
 
-@keyframes line {
+@keyframes spin {
     0% {
-        stroke-dasharray: 2, 85.964;
-        -webkit-transform: rotate(0);
-        transform: rotate(0);
-    }
-
-    50% {
-        stroke-dasharray: 65.973, 21.9911;
-        stroke-dashoffset: 0;
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
     }
 
     100% {
-        stroke-dasharray: 2, 85.964;
-        stroke-dashoffset: -65.973;
-        -webkit-transform: rotate(90deg);
-        transform: rotate(90deg);
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
     }
 }
 
