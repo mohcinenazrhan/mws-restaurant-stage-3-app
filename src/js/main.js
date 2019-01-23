@@ -168,23 +168,41 @@ const view = {
    * Set neighborhoods HTML.
    */
   fillNeighborhoodsHTML: function (neighborhoods) {
-    neighborhoods.map((neighborhood) => {
-      const option = document.createElement('option');
-      option.innerHTML = neighborhood;
-      option.value = neighborhood;
-      this.neighborhoodsSelect.append(option);
-    });
+    this.fillSelectOption(this.neighborhoodsSelect, 'Neighborhoods', neighborhoods);
   },
   /**
    * Set cuisines HTML.
    */
   fillCuisinesHTML: function (cuisines) {
-    cuisines.map((cuisine) => {
-      const option = document.createElement('option');
-      option.innerHTML = cuisine;
-      option.value = cuisine;
-      this.cuisinesSelect.append(option);
+    this.fillSelectOption(this.cuisinesSelect, 'Cuisines', cuisines);
+  },
+  /**
+   * Fill select html element with given options
+   * @param {HTMLElement} selectElement 
+   * @param {String} name 
+   * @param {Array} options 
+   */
+  fillSelectOption: function (selectElement, name, options) {
+    const frag = document.createDocumentFragment();
+    frag.appendChild(this.createOption(`All ${name}`, 'all'));
+
+    options.map((option) => {
+      frag.appendChild(this.createOption(option, option))
     });
+
+    selectElement.innerHTML = '';
+    selectElement.append(frag);
+  },
+  /**
+   * Create option of select HTML element
+   * @param {String} text
+   * @param {String} value
+   */
+  createOption: function (text, value) {
+    const option = document.createElement('option');
+    option.innerHTML = text;
+    option.value = value;
+    return option;
   },
   /**
    * Create restaurant HTML.
