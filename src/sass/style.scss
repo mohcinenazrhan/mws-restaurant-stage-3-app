@@ -1671,10 +1671,10 @@ screen and (-webkit-min-device-pixel-ratio:2) {
     transform: translate(-50%, -50%);
 
     .loader {
-        @include loader-mixin(50px, 50px, 6px);
+        @include loader-mixin(50px, 50px, 4px);
 
         &:after {
-            @include loader-after-mixin(6px);
+            @include loader-after-mixin(4px);
         }
     }
 }
