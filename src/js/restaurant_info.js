@@ -363,6 +363,12 @@ const view = {
     }
   },
   /**
+   * Hide loading container of reviews section
+   */
+  hideReviewsSectionLoading: function () {
+      document.querySelector('.loader-content-container').setAttribute('hidden', true);    
+  },
+  /**
    * Create all reviews HTML and add them to the webpage.
    */
   fillReviewsHTML: function (reviews) {
@@ -381,6 +387,7 @@ const view = {
       reviewsMsgContainer.id = 'reviewsMsgContainer'
       container.appendChild(reviewsMsgContainer);
       container.appendChild(ul);
+      this.hideReviewsSectionLoading();
       return;
     }
 
@@ -395,6 +402,7 @@ const view = {
     }
 
     container.appendChild(ul);
+    this.hideReviewsSectionLoading();
   },
   /**
    * Create review HTML and add it to the webpage.
