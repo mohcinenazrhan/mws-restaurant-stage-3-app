@@ -74,7 +74,7 @@ class SWRegistration {
                 // if there's an updated worker already waiting, call
                 // updateReady()
                 if (reg.waiting) {
-                    this.updateReady(reg);
+                    this.updateReady(reg.waiting);
                     return Promise.resolve();
                 }
 
