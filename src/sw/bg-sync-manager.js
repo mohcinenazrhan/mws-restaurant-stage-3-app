@@ -130,7 +130,7 @@ class BgSyncManager {
             await this.reSubmitRequests(tagStore.reqs, tagStore.data);
             await this.msgSwToClients.send('isVisible')
                 .then((isVisible) => {
-                    if (isVisible === false)
+                    if (isVisible === false || isVisible === undefined || isVisible === null)
                         this.pushNotification(tagStore.data, this.syncRequests);
                     else
                         this.msgSwToClients.send('reloadThePageForMAJ');
