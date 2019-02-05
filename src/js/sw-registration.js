@@ -5,7 +5,6 @@ class SWRegistration {
             
             // Config variables & default values
             this._refreshing = false;
-            this._isVisible = true;
             this._isOffline = false;
             this._timeoutMsg = null;
 
@@ -204,7 +203,7 @@ class SWRegistration {
         navigator.serviceWorker.addEventListener('message', (event) => {
             if (event.data === 'reloadThePageForMAJ') this.showMsg(this._config.msgWhenUpdate);
             if (event.data === 'NotifyUserReqSaved') this.showMsg(this._config.msgSync);
-            if (event.data === 'isVisible') event.ports[0].postMessage(this._isVisible);
+            if (event.data === 'isVisible') event.ports[0].postMessage(this.getVisibilityState());
         });
     }
 
@@ -255,21 +254,11 @@ class SWRegistration {
     }
 
     /**
-     * handle Visibility Change for the page
+     * Get visibility state
      */
-    handleVisibilityChange() {
-        if (document.hidden) {
-            this._isVisible = false;
-        } else {
-            this._isVisible = true;
-        }
-    }
-
-    /**
-     * listen to visibility change
-     */
-    listenVisibilityChange() {
-        document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+    getVisibilityState() {
+        if (document.hidden) return false;
+        else return true;
     }
 
     /**
@@ -312,7 +301,6 @@ class SWRegistration {
                   this.callFuncsWhenDOMContentLoaded();
             await this.serviceWorkerRegistration();
                   this.listenToMessages();
-                  this.listenVisibilityChange();
                   this.updateNetworkState();
             return Promise.resolve();
         } catch (error) {
