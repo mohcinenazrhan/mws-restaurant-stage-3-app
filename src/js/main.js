@@ -18,7 +18,7 @@ const controler = {
   init: function () {
     this.swRegistration();
     Notificationbtn.create();
-    
+
     this.dbHelper = new DBHelper();
     this.initMap();
     view.init();
@@ -35,8 +35,12 @@ const controler = {
    * sw registration
    */
   swRegistration: async function () {
-    await SWRegistration.fire(model.swRegConfig);
+    try {
+      await SWRegistration.fire(model.swRegConfig);
       this.listenerForSwMsg();
+    } catch (error) {
+      console.log(error);
+    }
   },
   /**
   * update content automatically when receive message from service worker
