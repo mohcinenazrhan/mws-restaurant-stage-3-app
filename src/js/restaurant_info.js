@@ -17,7 +17,8 @@ let model = {
 const controler = {
   init: function () {
     this.swRegistration();
-                  
+    Notificationbtn.create();
+
     this.dbHelper = new DBHelper();
     funcsHelpers.favoriteClickListener(this.dbHelper);
 
@@ -38,7 +39,6 @@ const controler = {
     try {
       await SWRegistration.fire(model.swRegConfig);
         this.listenerForSwMsg();
-        Notificationbtn.create();
     } catch (error) {
       console.log(error);
     }

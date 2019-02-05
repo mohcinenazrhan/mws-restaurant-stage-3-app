@@ -17,7 +17,8 @@ let model = {
 const controler = {
   init: function () {
     this.swRegistration();
-
+    Notificationbtn.create();
+    
     this.dbHelper = new DBHelper();
     this.initMap();
     view.init();
@@ -36,7 +37,6 @@ const controler = {
   swRegistration: async function () {
     await SWRegistration.fire(model.swRegConfig);
       this.listenerForSwMsg();
-      Notificationbtn.create();
   },
   /**
   * update content automatically when receive message from service worker
