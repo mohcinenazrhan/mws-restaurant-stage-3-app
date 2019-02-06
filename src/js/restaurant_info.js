@@ -16,8 +16,6 @@ let model = {
 /* ======= Controler ======= */
 const controler = {
   init: function () {
-    this.swRegistration();
-    Notificationbtn.create();
 
     this.dbHelper = new DBHelper();
     funcsHelpers.favoriteClickListener(this.dbHelper);
@@ -29,7 +27,12 @@ const controler = {
      * Initialize map as soon as the page is loaded.
      */
     document.addEventListener('DOMContentLoaded', () => {
-      this.fillContent()  
+      this.fillContent();
+      // defer to optimise loading
+      setTimeout(() => {
+        Notificationbtn.create();
+        this.swRegistration();
+      }, 2000);
     });
   },
   /**
