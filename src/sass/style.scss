@@ -246,6 +246,18 @@ select::-ms-expand {
 
 /* ====================== Restaurant Listing ====================== */
 
+#no-restaurants-msg {
+    display: none;
+    width: 80%;
+    margin: 50px auto;
+
+    .msg-text{
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+    }
+}
+
 #restaurants-list {
     list-style: outside none none;
     padding: 0;

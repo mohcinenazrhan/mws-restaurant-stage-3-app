@@ -129,6 +129,10 @@ const controler = {
     try {
       const restaurants = await this.dbHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood)
       this.resetRestaurants(restaurants);
+      if (restaurants.length === 0) {
+        view.showNoRestaurantsMsg();
+        return;
+      }
       view.fillRestaurantsHTML(restaurants);
       view.addMarkersToMap(restaurants);
     } catch (error) {
@@ -157,9 +161,11 @@ const view = {
     this.restaurantsList = document.getElementById('restaurants-list');
     this.cuisinesSelect = document.getElementById('cuisines-select');
     this.neighborhoodsSelect = document.getElementById('neighborhoods-select');
+    this.noRestaurantsMsg = document.getElementById('no-restaurants-msg')
   },
   initContent: function () {
     this.restaurantsList.innerHTML = '';
+    this.hideNoRestaurantsMsg();
   },
   getSelectValue: function (selectName) {
     if (selectName === 'cuisines') {
@@ -167,6 +173,12 @@ const view = {
     } else if (selectName === 'neighborhoods') {
       return this.neighborhoodsSelect[this.neighborhoodsSelect.selectedIndex].value;
     }
+  },
+  showNoRestaurantsMsg: function () {
+    this.noRestaurantsMsg.style.display = 'block';
+  },
+  hideNoRestaurantsMsg: function () {
+    this.noRestaurantsMsg.style.display = 'none';
   },
   /**
    * Set neighborhoods HTML.
