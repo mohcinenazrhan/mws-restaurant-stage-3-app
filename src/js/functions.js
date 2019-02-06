@@ -62,7 +62,6 @@ export const favoriteClickListener = (DBHelper) => {
  */
 export function showMainContent() {
     document.getElementById('maincontent').classList.remove('visibility-hidden');
-    document.getElementById('maincontent').classList.add('fadein');
     document.getElementById('footer').classList.remove('fixed-bottom');
     document.querySelector('.loader-container').setAttribute('hidden', true);
 }
