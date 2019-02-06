@@ -26,6 +26,7 @@ const controler = {
     // Fetch neighborhoods and cuisines as soon as the page is loaded.
     document.addEventListener('DOMContentLoaded', () => {
       this.fillContent();
+      this.listenerOnFilterChange();
       // defer to optimise loading
       setTimeout(() => {
         Notificationbtn.create();
@@ -59,10 +60,9 @@ const controler = {
   fillContent: async function () {
     await this.updateRestaurants();
 
+      funcsHelpers.showMainContent();
       this.fetchNeighborhoods();
       this.fetchCuisines();
-      this.listenerOnFilterChange();
-      funcsHelpers.showMainContent();
       funcsHelpers.favoriteClickListener(this.dbHelper);
   },
   /**
@@ -135,8 +135,8 @@ const controler = {
         view.showNoRestaurantsMsg();
         return;
       }
-      view.fillRestaurantsHTML(restaurants);
       view.addMarkersToMap(restaurants);
+      view.fillRestaurantsHTML(restaurants);
     } catch (error) {
       console.log(error);
     }
