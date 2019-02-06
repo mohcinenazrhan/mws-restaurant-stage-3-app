@@ -299,7 +299,9 @@ function scrollToAddReview() {
  * Auto invoked functions
  */
 export default (function () {
-    aboutModal();
-    scrollToTop();
-    scrollToAddReview();
+    window.addEventListener('load', () => {
+        aboutModal();
+        scrollToTop();
+        scrollToAddReview();
+    })
 })()
