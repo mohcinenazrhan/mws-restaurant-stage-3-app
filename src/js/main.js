@@ -16,9 +16,6 @@ let model = {
 /* ======= Controler ======= */
 const controler = {
   init: function () {
-    this.swRegistration();
-    Notificationbtn.create();
-
     this.dbHelper = new DBHelper();
     this.initMap();
     view.init();
@@ -28,7 +25,12 @@ const controler = {
     
     // Fetch neighborhoods and cuisines as soon as the page is loaded.
     document.addEventListener('DOMContentLoaded', () => {
-      this.fillContent()
+      this.fillContent();
+      // defer to optimise loading
+      setTimeout(() => {
+        Notificationbtn.create();
+        this.swRegistration();
+      }, 2000);
     });
   },
   /**
