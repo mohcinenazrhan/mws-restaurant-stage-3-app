@@ -3,6 +3,7 @@ import * as funcsHelpers from './functions';
 import DBHelper from './dbhelper';
 import SWRegistration from './sw-registration';
 import Notificationbtn from './Notificationbtn';
+import 'whatwg-fetch';
 
 /* ======= Model ======= */
 let model = {

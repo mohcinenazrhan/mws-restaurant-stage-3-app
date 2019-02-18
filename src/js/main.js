@@ -4,6 +4,7 @@ import DBHelper from './dbhelper';
 import SWRegistration from './sw-registration';
 import Notificationbtn from './Notificationbtn';
 import lazySizes from 'lazysizes';
+import 'whatwg-fetch';
 
 /* ======= Model ======= */
 let model = {
