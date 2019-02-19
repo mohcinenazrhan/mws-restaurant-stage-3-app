@@ -50,10 +50,11 @@ export const favoriteOnClick = async function (DBHelper, event) {
 /**
  * favorite Click Listener
  */
-export const favoriteClickListener = (DBHelper) => {
-    const favoriteBtnList = document.getElementsByClassName('favorite-icon');
-    Array.from(favoriteBtnList).map(function (favoriteBtn) {
-        favoriteBtn.addEventListener('click', favoriteOnClick.bind(null, DBHelper));
+export const favoriteClickListener = (DBHelper, element = null) => {
+    const elementListenTo = element !== null ? element : document.querySelector('.favorite-icon');
+    elementListenTo.addEventListener('click', function (e) {
+        if (e.target.classList.contains('favorite-icon'))
+            favoriteOnClick(DBHelper, e);
     });
 }
 

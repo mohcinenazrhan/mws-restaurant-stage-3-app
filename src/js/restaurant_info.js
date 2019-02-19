@@ -18,8 +18,6 @@ const controler = {
   init: function () {
 
     this.dbHelper = new DBHelper();
-    funcsHelpers.favoriteClickListener(this.dbHelper);
-
     view.init();
 
     /**
@@ -61,6 +59,8 @@ const controler = {
     this.fillRestaurantContent();
     // Fill reviews content
     this.fillReviewsContent();
+    // Listener for favorite restaurant
+    funcsHelpers.favoriteClickListener(this.dbHelper);
     // Listener for rating stars
     this.checkedRatingListener();
     // Listener for submit review

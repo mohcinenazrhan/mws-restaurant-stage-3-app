@@ -64,7 +64,7 @@ const controler = {
       funcsHelpers.showMainContent();
       this.fetchNeighborhoods();
       this.fetchCuisines();
-      funcsHelpers.favoriteClickListener(this.dbHelper);
+      funcsHelpers.favoriteClickListener(this.dbHelper, view.restaurantsList);
   },
   /**
    * Listen for select elements and update Restaurants
