@@ -4,6 +4,7 @@ import DBHelper from './dbhelper';
 import SWRegistration from './sw-registration';
 import Notificationbtn from './Notificationbtn';
 import lazySizes from 'lazysizes';
+import 'whatwg-fetch';
 
 /* ======= Model ======= */
 let model = {
@@ -16,9 +17,6 @@ let model = {
 /* ======= Controler ======= */
 const controler = {
   init: function () {
-    this.swRegistration();
-    Notificationbtn.create();
-
     this.dbHelper = new DBHelper();
     this.initMap();
     view.init();
@@ -28,7 +26,13 @@ const controler = {
     
     // Fetch neighborhoods and cuisines as soon as the page is loaded.
     document.addEventListener('DOMContentLoaded', () => {
-      this.fillContent()
+      this.fillContent();
+      this.listenerOnFilterChange();
+      // defer to optimise loading
+      setTimeout(() => {
+        Notificationbtn.create();
+        this.swRegistration();
+      }, 2000);
     });
   },
   /**
@@ -57,11 +61,10 @@ const controler = {
   fillContent: async function () {
     await this.updateRestaurants();
 
+      funcsHelpers.showMainContent();
       this.fetchNeighborhoods();
       this.fetchCuisines();
-      this.listenerOnFilterChange();
-      funcsHelpers.showMainContent();
-      funcsHelpers.favoriteClickListener(this.dbHelper);
+      funcsHelpers.favoriteClickListener(this.dbHelper, view.restaurantsList);
   },
   /**
    * Listen for select elements and update Restaurants
@@ -133,8 +136,8 @@ const controler = {
         view.showNoRestaurantsMsg();
         return;
       }
-      view.fillRestaurantsHTML(restaurants);
       view.addMarkersToMap(restaurants);
+      view.fillRestaurantsHTML(restaurants);
     } catch (error) {
       console.log(error);
     }

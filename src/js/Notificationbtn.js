@@ -59,14 +59,12 @@ class Notificationbtn {
 
         this.init(options);
 
-        window.addEventListener('load', () => {
-            this.injectHtml();
-            this.setVariablesDom();
-            this.setPermissionBtn();
-            this.eventClickBtn();
-            this.eventMouseBtn();
-            this.listenToChangePermission();
-        });
+        this.injectHtml();
+        this.setVariablesDom();
+        this.setPermissionBtn();
+        this.eventClickBtn();
+        this.eventMouseBtn();
+        this.listenToChangePermission();
     }
 
     setVariablesDom() {

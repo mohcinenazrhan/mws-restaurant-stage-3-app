@@ -1764,15 +1764,15 @@ screen and (-webkit-min-device-pixel-ratio:2) {
 .fadein {
     visibility: visible;
     display: block;
-    -webkit-animation: fadein 1s;
+    -webkit-animation: fadein .5s;
     /* Safari, Chrome and Opera > 12.1 */
-    -moz-animation: fadein 1s;
+    -moz-animation: fadein .5s;
     /* Firefox < 16 */
-    -ms-animation: fadein 1s;
+    -ms-animation: fadein .5s;
     /* Internet Explorer */
-    -o-animation: fadein 1s;
+    -o-animation: fadein .5s;
     /* Opera < 12.1 */
-    animation: fadein 1s;
+    animation: fadein .5s;
 }
 
 @keyframes fadein {

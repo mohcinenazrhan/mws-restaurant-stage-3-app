@@ -3,7 +3,7 @@ import * as funcsHelpers from './functions';
 import DBHelper from './dbhelper';
 import SWRegistration from './sw-registration';
 import Notificationbtn from './Notificationbtn';
-import lazySizes from 'lazysizes';
+import 'whatwg-fetch';
 
 /* ======= Model ======= */
 let model = {
@@ -16,20 +16,20 @@ let model = {
 /* ======= Controler ======= */
 const controler = {
   init: function () {
-    this.swRegistration();
-    Notificationbtn.create();
 
     this.dbHelper = new DBHelper();
-    funcsHelpers.favoriteClickListener(this.dbHelper);
-
-    lazySizes.init();
     view.init();
 
     /**
      * Initialize map as soon as the page is loaded.
      */
     document.addEventListener('DOMContentLoaded', () => {
-      this.fillContent()  
+      this.fillContent();
+      // defer to optimise loading
+      setTimeout(() => {
+        Notificationbtn.create();
+        this.swRegistration();
+      }, 2000);
     });
   },
   /**
@@ -59,6 +59,8 @@ const controler = {
     this.fillRestaurantContent();
     // Fill reviews content
     this.fillReviewsContent();
+    // Listener for favorite restaurant
+    funcsHelpers.favoriteClickListener(this.dbHelper);
     // Listener for rating stars
     this.checkedRatingListener();
     // Listener for submit review
@@ -319,9 +321,10 @@ const view = {
 
     const image = document.getElementById('restaurant-img');
     image.setAttribute('alt', restaurant.name);
-    image.className = 'restaurant-img lazyload blur-up';
-    image.setAttribute('data-srcset', controler.dbHelper.srcsetImageUrlForRestaurant(restaurant));
-    image.setAttribute('data-src', controler.dbHelper.imageUrlForRestaurant(restaurant));
+
+    image.className = 'restaurant-img';
+    image.setAttribute('src', controler.dbHelper.imageUrlForRestaurant(restaurant));
+    image.setAttribute('srcset', controler.dbHelper.srcsetImageUrlForRestaurant(restaurant));
     image.setAttribute('data-sizes', '(max-width: 380px) 300px, (max-width: 480px) 400px, (max-width: 680px) 600px, (max-width: 768px) 800px, (max-width: 960px) 400px, (max-width: 1360px) 600px');
 
     const btnClassName = 'favorite-icon'
