@@ -342,6 +342,12 @@ select::-ms-expand {
     width: 100%;
 }
 
+.inside .ratio-container {
+    border-top-left-radius: 30px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
 #restaurant-name {
     color: $main-color;
     font-family: Arial, sans-serif;
@@ -355,7 +361,6 @@ select::-ms-expand {
 
 #restaurant-img {
     width: 100%; // for offline fallback small image to fit 100% space
-    border-top-left-radius: 30px;
 }
 
 #restaurant-address {
