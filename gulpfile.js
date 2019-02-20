@@ -140,6 +140,7 @@ gulp.task('scripts', ['lint'], function () {
 // Copy html files
 gulp.task('html', function () {
     return gulp.src('src/*.html')
+        .pipe($.if(dev, replace('<<-APIORIGIN->>', devAPIOrigin), replace('<<-APIORIGIN->>', prodAPIOrigin)))
         .pipe($.if(!dev, htmlmin({
             collapseWhitespace: true,
             minifyCSS: true,
