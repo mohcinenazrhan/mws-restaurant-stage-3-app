@@ -114,6 +114,10 @@ class DBHelper {
     try {
       // Get value (json) from fetch response 
       const restaurant = await this.fetchAndGetJsonData(this.getDbUrl(`restaurants/${id}`));
+      
+      // since we get data from local storage first via SW
+      // if restaurant data is empty we return a reject promise with msg
+      if (restaurant.length === 0 || Object.keys(restaurant).length === 0) throw 404;
 
       // Save Data To Local Db (client side persistent data)
       // Save Data if empty (first visit) without await SW to do that in the second visit
