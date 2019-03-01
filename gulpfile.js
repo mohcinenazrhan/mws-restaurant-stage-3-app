@@ -278,13 +278,14 @@ gulp.task('fixbundles', function () {
     for (const rev in revs) {
         src.pipe(replace(rev, revs[rev]))
     }
-    src.pipe(gulp.dest('dist/'))
 
     for (const rev in revs) {
         fs.unlink(`dist/${rev}`)
     }
-    
+
     fs.unlink('dist/rev-manifest.json')
+
+    return src.pipe(gulp.dest('dist/'));
 });
 
 gulp.task('prod', () => {
