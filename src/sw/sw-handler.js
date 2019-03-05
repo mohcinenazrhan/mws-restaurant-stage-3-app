@@ -62,7 +62,7 @@ const TAG_TO_STORE = {
     data: 'reviews'
   }
 };
-const notificationIcon = 'http://icons.iconarchive.com/icons/graphicloads/100-flat/256/home-icon.png';
+const notificationIcon = location.origin + '/pwaicons/icon-128x128.png';
 
 const _bgSyncManager = new BgSyncManager(TAG_TO_STORE, IDBHelper, msgSwToClients, notificationIcon);
 
