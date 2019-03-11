@@ -297,6 +297,15 @@ function scrollToAddReview() {
 }
 
 /**
+ * Add the given text to the current document title.
+ * @param {String} placehoder 
+ * @param {String} text 
+ */
+export function addToDocTitle(text) {
+    document.title = text + ' | ' + document.title;
+}
+
+/**
  * Auto invoked functions
  */
 export default (function () {

@@ -72,6 +72,7 @@ const controler = {
 
       this.initMap(restaurant);
       view.fillBreadcrumb(restaurant.name);
+      funcsHelpers.addToDocTitle(restaurant.name);
       view.fillRestaurantHTML(restaurant);
     } catch (error) {
       view.showMsgInMainContent(error);
