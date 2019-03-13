@@ -1,6 +1,6 @@
 {
   "name": "stage3-app",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "",
   "main": "app.js",
   "scripts": {
