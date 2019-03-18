@@ -306,6 +306,31 @@ export function addToDocTitle(text) {
 }
 
 /**
+ * Toggle display header on scroll
+ */
+function toggleDisplayHeaderOnScroll() {
+    const toggleDisplayHeader = document.getElementById('toggle-display-header');
+    if (toggleDisplayHeader === null) return;
+
+    const headerPosition = toggleDisplayHeader.offsetHeight;
+    let currentPosition = 0;
+    window.addEventListener('scroll', function () {
+        
+        if (window.matchMedia('(max-width: 768px)').matches) {
+            if (window.pageYOffset > headerPosition) {
+                toggleDisplayHeader.classList.add('hide-header');
+            } 
+            
+            if (window.pageYOffset < currentPosition) {
+                toggleDisplayHeader.classList.remove('hide-header');
+            }
+
+            currentPosition = window.pageYOffset;
+        }
+    })
+}
+
+/**
  * Auto invoked functions
  */
 export default (function () {
@@ -313,5 +338,6 @@ export default (function () {
         aboutModal();
         scrollToTop();
         scrollToAddReview();
+        toggleDisplayHeaderOnScroll();
     })
 })()

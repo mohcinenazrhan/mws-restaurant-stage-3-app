@@ -327,7 +327,13 @@ select::-ms-expand {
     position: fixed;
     top: 0;
     width: 100%;
+    height: 136px;
     z-index: 10000;
+    transition: all 400ms ease;
+}
+
+.hide-header {
+    transform: translateY(-136px);
 }
 
 .inside #map-container {
