@@ -297,6 +297,40 @@ function scrollToAddReview() {
 }
 
 /**
+ * Scroll to filter section
+ */
+function scrollToFilterSection() {
+    if (!window.matchMedia('(max-width: 768px)').matches) return;
+
+    const scrollButton = document.querySelector('.btn-scroll-to-filter');
+    const destination = document.querySelector('.filter-options');
+    if (scrollButton === null || destination === null) return;
+
+    const destinationPosition = destination.offsetTop;
+    scrollButton.addEventListener('click', () => scrollIt(destinationPosition));
+
+    function toggleFixScrollButton(mode = 'scroll') {
+        let scrollButtonPosition = null;
+
+        if (mode === 'load') {
+            scrollButtonPosition = window.pageYOffset + window.innerHeight - (scrollButton.offsetHeight / 2);
+        } else {
+            scrollButtonPosition = window.pageYOffset + window.innerHeight + scrollButton.offsetHeight;            
+        }
+
+        if (scrollButtonPosition >= destinationPosition) {
+            scrollButton.classList.remove('btn-scroll-to-filter--fixed');
+        } else if (scrollButtonPosition < destinationPosition) {
+            scrollButton.classList.add('btn-scroll-to-filter--fixed');
+        }
+    }
+
+    toggleFixScrollButton('load');
+    
+    window.addEventListener('scroll', toggleFixScrollButton);
+}
+
+/**
  * Add the given text to the current document title.
  * @param {String} placehoder 
  * @param {String} text 
@@ -339,5 +373,6 @@ export default (function () {
         scrollToTop();
         scrollToAddReview();
         toggleDisplayHeaderOnScroll();
+        scrollToFilterSection();
     })
 })()
