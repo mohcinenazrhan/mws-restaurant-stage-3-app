@@ -315,7 +315,7 @@ function scrollToFilterSection() {
         if (mode === 'load') {
             scrollButtonPosition = window.pageYOffset + window.innerHeight - (scrollButton.offsetHeight / 2);
         } else {
-            scrollButtonPosition = window.pageYOffset + window.innerHeight + scrollButton.offsetHeight;            
+            scrollButtonPosition = window.pageYOffset + window.innerHeight + (scrollButton.offsetHeight / 2);
         }
 
         if (scrollButtonPosition >= destinationPosition) {
