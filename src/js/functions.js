@@ -293,7 +293,7 @@ function scrollToAddReview() {
     const destination = document.getElementById('add-reviews-container');
     if (scrollButton === null || destination === null) return;
 
-    scrollButton.addEventListener('click', () => scrollIt(destination.offsetTop - 140));
+    scrollButton.addEventListener('click', () => scrollIt(destination.offsetTop));
 }
 
 /**
