@@ -194,12 +194,20 @@ class BgSyncManager {
                 last = obj.request.referrer
                 if (obj.request.referrer === lastreferrer) return;
 
-                self.registration.showNotification(`Your ${subject} are submited`, {
-                    body: `Ckeck your ${subject}`,
-                    icon: this.notificationIcon,
-                    vibrate: [200, 100, 200, 100, 200, 100, 200],
-                    tag: obj.request.referrer
-                });
+                if (('showNotification' in ServiceWorkerRegistration.prototype)) {
+                    try {
+                        self.registration.showNotification(`Your ${subject} are submited`, {
+                            body: `Ckeck your ${subject}`,
+                            icon: this.notificationIcon,
+                            vibrate: [100, 50, 100, 50, 200],
+                            tag: obj.request.referrer
+                        });
+                    } catch (error) {
+                        console.warn(error);
+                    }
+                } else {
+                    console.warn('Notifications aren\'t supported in Service Workers.');
+                }
             });
     }
 }
