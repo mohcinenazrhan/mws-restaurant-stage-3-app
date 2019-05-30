@@ -8,6 +8,7 @@ class SWRegistration {
             this._isOffline = false;
             this._timeoutMsg = null;
             this._msgHolder = null;
+            this._deferredPrompt = null;
 
             this._config = {
                 swUrl: 'sw/service-worker.js',
@@ -299,6 +300,81 @@ class SWRegistration {
     }
 
     /**
+	 * Add To Home Screen
+	 */
+	addToHomeScreen() {
+		this.hideMsg();
+		this._deferredPrompt.prompt(); // Wait for the user to respond to the prompt
+		this._deferredPrompt.userChoice
+		.then((choiceResult) => {
+			if (choiceResult.outcome === 'accepted') {
+				console.log('User accepted the A2HS prompt');
+			} else {
+				console.log('User dismissed the A2HS prompt');
+				this.delayA2HSprompt();
+			}
+			this._deferredPrompt = null;
+		});
+	}
+
+	/**
+	 * Delay A2HSprompt By given nbr of day(s)
+	 */
+	delayA2HSprompt(days = 2) {
+		// Set Local Storage A2HSprompt value
+		// current date + 2 days
+		let dt = new Date();
+		dt.setDate(dt.getDate() + days);
+		localStorage.setItem('A2HSprompt', dt);
+	}
+
+	/**
+	 * Show Add To Home Screen
+	 */
+	showAddToHomeScreen() {
+		const button = `<div class="btn-container"><button class="btn-install" id="install-btn">Installer</button>
+		<button class="btn-install--cancel" id="cancel-btn">Plus tard</button>`
+		const content = `Ajouter à l'écran d'accueil ${button}</div>`;
+        this.showMsg(
+            content,
+            null,
+            false,
+            (function (_this) {
+                return function () {
+                    document.getElementById('install-btn').addEventListener('click', _this.addToHomeScreen.bind(_this));
+                    document.getElementById('cancel-btn').addEventListener('click', () => {
+                        _this.delayA2HSprompt();
+                        _this.hideMsg();
+                    });
+                }
+            })(this)
+        )
+	}
+
+    /**
+     * listen To Install Prompt
+     */
+    listenToInstallPrompt() {
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            this._deferredPrompt = e;
+
+            if (!this._isOffline && new Date(localStorage.getItem('A2HSprompt')) <= new Date())
+                this.showAddToHomeScreen();
+        });
+    }
+        
+	/**
+	 * Install prompt manager for all browsers
+	 */
+	installPromptManager() {
+        // if the browser support add to home screen
+		this.listenToInstallPrompt();
+    }
+    
+    /**
      * fire sw
      * @param {*} config 
      */
@@ -315,6 +391,7 @@ class SWRegistration {
             await this.serviceWorkerRegistration();
                   this.listenToMessages();
                   this.updateNetworkState();
+                  this.installPromptManager();
             return Promise.resolve();
         } catch (error) {
             console.log(error);
