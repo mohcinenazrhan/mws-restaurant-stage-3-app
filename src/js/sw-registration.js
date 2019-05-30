@@ -7,6 +7,7 @@ class SWRegistration {
             this._refreshing = false;
             this._isOffline = false;
             this._timeoutMsg = null;
+            this._msgHolder = null;
 
             this._config = {
                 swUrl: 'sw/service-worker.js',
@@ -146,26 +147,23 @@ class SWRegistration {
      * set contianer html to show sw message for user
      */
     setSwMsgContianer() {
-        const container = document.createElement('div');
-        container.className = 'snackbar';
+		const container = document.createElement('div');
+		container.className = 'snackbar';
 
-        const parag = document.createElement('p');
-        parag.id = 'msgOffline';
-        container.appendChild(parag);
+		const parag = document.createElement('p');
+		parag.id = 'msgOffline';
+		container.appendChild(parag);
 
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'snackbar-close';
-        button.setAttribute('aria-label', 'snackbar-close');
-        button.addEventListener('click', this.hideMsg);
+		const button = document.createElement('button');
+		button.type = 'button';
+		button.className = 'snackbar-close';
+		button.setAttribute('aria-label', 'snackbar-close');
+		button.addEventListener('click', this.hideMsg.bind(this));
+		button.innerHTML = '&times;';
 
-        const span = document.createElement('span');
-        span.innerHTML = '&times;';
+		container.appendChild(button);
 
-        button.appendChild(span);
-        container.appendChild(button);
-
-        document.body.appendChild(container);
+		document.body.appendChild(container);
 
         window.addEventListener('online', this.updateNetworkState.bind(this));
         window.addEventListener('offline', this.updateNetworkState.bind(this));
@@ -176,7 +174,7 @@ class SWRegistration {
         });
         container.addEventListener('mouseout', () => {
             if (this._timeoutMsg !== null) 
-                this._timeoutMsg = setTimeout(this.hideMsg, 2000);
+                this._timeoutMsg = setTimeout(this.hideMsg.bind(this), 2000);
         });
     }
 
@@ -230,28 +228,43 @@ class SWRegistration {
         });
     }
 
-    /**
-     * show the given message
-     * @param {*} msg 
-     * @param {*} timeToHide // in milliseconds
-     */
-    showMsg(msg = '', timeToHide = 4500) {
-        if (msg === '') return
+	/**
+	 * Show the given message in the snackbar
+	 * @param {String} msg 
+	 * @param {Number} timeToHide // in milliseconds
+	 * @param {Boolean} priority
+	 * @param {Function} callback
+	 */
+	showMsg(msg = '', timeToHide = 4500, priority = true, callback = null) {		
+		if (msg === '') return
 
-        document.getElementById('msgOffline').innerHTML = msg;
-        document.body.classList.add('snackbar--show');
+		if (priority === false && document.body.classList.contains('snackbar--show')) {
+			this._msgHolder = { msg, timeToHide, priority, callback };
+			return;
+		}
 
-        if (this._timeoutMsg !== null) clearTimeout(this._timeoutMsg);
-        if (timeToHide !== null) this._timeoutMsg = setTimeout(this.hideMsg, timeToHide);
-        else this._timeoutMsg = null
-    }
+		document.getElementById('msgOffline').innerHTML = msg;
+		document.body.classList.add('snackbar--show');
 
-    /**
-     * hide Msg bar
-     */
-    hideMsg() {
-        document.body.classList.remove('snackbar--show');
-    }
+		if (callback !== null) callback();
+
+		if (this._timeoutMsg !== null) clearTimeout(this._timeoutMsg);
+		if (timeToHide !== null) this._timeoutMsg = setTimeout(this.hideMsg.bind(this), timeToHide);
+		else this._timeoutMsg = null
+	}
+
+	/**
+	 * Hide snackbar
+	 */
+	hideMsg() {
+		document.body.classList.remove('snackbar--show');
+
+		if (this._msgHolder !== null) {
+			const { msg, timeToHide, priority, callback } = this._msgHolder;
+			this.showMsg(msg, timeToHide, priority, callback);
+			this._msgHolder = null;
+		}
+	}
 
     /**
      * Get visibility state
