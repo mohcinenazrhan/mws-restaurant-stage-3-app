@@ -389,9 +389,9 @@ class SWRegistration {
         try {
                   this.callFuncsWhenDOMContentLoaded();
             await this.serviceWorkerRegistration();
+                  this.installPromptManager();
                   this.listenToMessages();
                   this.updateNetworkState();
-                  this.installPromptManager();
             return Promise.resolve();
         } catch (error) {
             console.log(error);
