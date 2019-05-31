@@ -332,9 +332,9 @@ class SWRegistration {
 	 * Show Add To Home Screen
 	 */
 	showAddToHomeScreen() {
-		const button = `<div class="btn-container"><button class="btn-install" id="install-btn">Installer</button>
-		<button class="btn-install--cancel" id="cancel-btn">Plus tard</button>`
-		const content = `Ajouter à l'écran d'accueil ${button}</div>`;
+        const button = `<div class="btn-container"><button class="btn-install" id="install-btn">Install</button>
+		<button class="btn-install--cancel" id="cancel-btn">Later</button>`
+        const content = `Add to home screen ${button}</div>`;
         this.showMsg(
             content,
             null,
