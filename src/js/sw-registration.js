@@ -318,14 +318,14 @@ class SWRegistration {
 	}
 
 	/**
-	 * Delay A2HSprompt By given nbr of day(s)
+	 * Delay A2HS prompt By given nbr of day(s)
 	 */
 	delayA2HSprompt(days = 2) {
-		// Set Local Storage A2HSprompt value
+		// Set Local Storage A2HSPromptDate value
 		// current date + 2 days
 		let dt = new Date();
 		dt.setDate(dt.getDate() + days);
-		localStorage.setItem('A2HSprompt', dt);
+		localStorage.setItem('A2HSPromptDate', dt);
 	}
 
 	/**
@@ -361,7 +361,7 @@ class SWRegistration {
             // Stash the event so it can be triggered later.
             this._deferredPrompt = e;
 
-            if (!this._isOffline && new Date(localStorage.getItem('A2HSprompt')) <= new Date())
+            if (!this._isOffline && new Date(localStorage.getItem('A2HSPromptDate')) <= new Date())
                 this.showAddToHomeScreen();
         });
     }
