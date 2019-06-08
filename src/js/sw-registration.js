@@ -16,6 +16,9 @@ class SWRegistration {
                 msgOffline: 'You\'re currently offline',
                 msgOnline: 'You\'re back online <a href="javascript:location.reload()">refresh</a>',
                 msgWhenUpdate: 'The contents of this page have been updated. Please <a href="javascript:location.reload()">reload</a>',
+                msgAndroidA2HSPrompt: 'Add to the home screen',
+                installBtnText: 'Install',
+                laterBtnText: 'Later',
                 askUserWhenSwUpdated: true,
                 msgSync: 'Your submit is saved and will auto-submit when you\'re online',
                 classIdBtnSwUpdate: 'btn-updatesw',
@@ -332,9 +335,10 @@ class SWRegistration {
 	 * Show Add To Home Screen
 	 */
 	showAddToHomeScreen() {
-        const button = `<div class="btn-container"><button class="btn-install" id="install-btn">Install</button>
-		<button class="btn-install--cancel" id="cancel-btn">Later</button>`
-        const content = `Add to home screen ${button}</div>`;
+        const buttons = `<button class="btn-install" id="install-btn">${this._config.installBtnText}</button>
+		<button class="btn-install--cancel" id="cancel-btn">${this._config.laterBtnText}</button>`;
+        const content = `<div class="btn-container">${this._config.msgAndroidA2HSPrompt} ${buttons}</div>`;
+
         this.showMsg(
             content,
             null,
