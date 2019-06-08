@@ -21,6 +21,7 @@ class SWRegistration {
                 laterBtnText: 'Later',
                 msgIosA2HSPrompt:
                     'To install this site on your iPhone / iPad, press share <shareImgHtml>, then on <addHomeScreenImgHtml> add to the home screen.',
+                msgToShowWhenAppInstalled: 'Thank you for installing our app!',
                 askUserWhenSwUpdated: true,
                 msgSync: 'Your submit is saved and will auto-submit when you\'re online',
                 classIdBtnSwUpdate: 'btn-updatesw',
@@ -374,7 +375,7 @@ class SWRegistration {
 
         // Show a msg to let the user know that the app is successfully installed
         window.addEventListener('appinstalled', () => {
-            this.showMsg('Thank you for installing our app!', null, false);
+            this.showMsg(this._config.msgToShowWhenAppInstalled, null, false);
         });
 	}
 
