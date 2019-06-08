@@ -371,6 +371,11 @@ class SWRegistration {
                 }
             })(this)
         )
+
+        // Show a msg to let the user know that the app is successfully installed
+        window.addEventListener('appinstalled', () => {
+            this.showMsg('Thank you for installing our app!', null, false);
+        });
 	}
 
     /**
