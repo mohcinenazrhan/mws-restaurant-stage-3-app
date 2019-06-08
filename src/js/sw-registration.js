@@ -331,6 +331,16 @@ class SWRegistration {
 		localStorage.setItem('A2HSPromptDate', dt);
 	}
 
+    /**
+     * Check if A2HSprompt's delay locally stored is expired
+     */
+    cancelA2HSprompt(_this) {
+        document.getElementById('cancel-btn').addEventListener('click', () => {
+            _this.delayA2HSprompt();
+            _this.hideMsg();
+        });
+    }
+
 	/**
 	 * Show Add To Home Screen
 	 */
@@ -346,10 +356,7 @@ class SWRegistration {
             (function (_this) {
                 return function () {
                     document.getElementById('install-btn').addEventListener('click', _this.addToHomeScreen.bind(_this));
-                    document.getElementById('cancel-btn').addEventListener('click', () => {
-                        _this.delayA2HSprompt();
-                        _this.hideMsg();
-                    });
+                    _this.cancelA2HSprompt(_this);
                 }
             })(this)
         )
