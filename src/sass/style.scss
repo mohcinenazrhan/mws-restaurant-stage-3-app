@@ -1874,6 +1874,7 @@ body.snackbar--show .snackbar {
     margin: 0;
     color: #fff;
     text-align: center;
+    line-height: 40px;
 }
 
 .snackbar .snackbar-close {
@@ -1948,6 +1949,7 @@ body.snackbar--show .snackbar {
     height: auto;
     border-radius: 2px;
     margin: 0 10px;
+    vertical-align: middle;
 }
 /*-------------------------------Notificationbtn-------------------------------*/
 .notificationbtn-reset,

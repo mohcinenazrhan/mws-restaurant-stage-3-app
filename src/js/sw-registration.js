@@ -19,6 +19,8 @@ class SWRegistration {
                 msgAndroidA2HSPrompt: 'Add to the home screen',
                 installBtnText: 'Install',
                 laterBtnText: 'Later',
+                msgIosA2HSPrompt:
+                    'To install this site on your iPhone / iPad, press share <shareImgHtml>, then on <addHomeScreenImgHtml> add to the home screen.',
                 askUserWhenSwUpdated: true,
                 msgSync: 'Your submit is saved and will auto-submit when you\'re online',
                 classIdBtnSwUpdate: 'btn-updatesw',
@@ -370,6 +372,21 @@ class SWRegistration {
 	}
 
     /**
+	 * Detects if site run into a iOS device
+	 */
+	isIos() {
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        return /iphone|ipad|ipod/.test(userAgent);
+    }
+
+    /**
+     * Detects if device is in standalone mode
+     */
+    isInStandaloneMode() {
+        return 'standalone' in window.navigator && window.navigator.standalone;
+    }
+
+    /**
      * listen To Install Prompt
      */
     listenToInstallPrompt() {
@@ -384,12 +401,38 @@ class SWRegistration {
         });
     }
         
-	/**
-	 * Install prompt manager for all browsers
-	 */
-	installPromptManager() {
-        // if the browser support add to home screen
-		this.listenToInstallPrompt();
+    /**
+     * Install prompt manager for all devices
+     */
+    installPromptManager() {
+        // Checks if should display install popup notification for iOS
+        if (this.isIos()) {
+            if (!this.isInStandaloneMode() && this.isA2HSpromptDelayExpired()) {
+                const shareImgHtml = '<img class="img-icon" src="./pwaicons/ios-share-icon.png">';
+                const addHomeScreenImgHtml = '<img class="img-icon" src="./pwaicons/ios-add-new-icon.png">';
+                const buttons = `<div class="btn-container"><button class="btn-install" id="install-btn">Ok</button>
+            <button class="btn-install--cancel" id="cancel-btn">${this._config.laterBtnText}</button>`;
+
+                const msgContent =
+                    this._config.msgIosA2HSPrompt
+                        .replace('<shareImgHtml>', shareImgHtml)
+                        .replace('<addHomeScreenImgHtml>', addHomeScreenImgHtml) + buttons;
+
+                this.showMsg(
+                    msgContent,
+                    null,
+                    false,
+                    (function (_this) {
+                        return function () {
+                            document.getElementById('install-btn').addEventListener('click', _this.hideMsg.bind(_this));
+                            _this.cancelA2HSprompt(_this);
+                        }
+                    })(this)
+                );
+            }
+        } else {
+            this.listenToInstallPrompt();
+        }
     }
     
     /**
