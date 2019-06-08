@@ -358,7 +358,7 @@ class SWRegistration {
 	showAddToHomeScreen() {
         const buttons = `<button class="btn-install" id="install-btn">${this._config.installBtnText}</button>
 		<button class="btn-install--cancel" id="cancel-btn">${this._config.laterBtnText}</button>`;
-        const content = `<div class="btn-container">${this._config.msgAndroidA2HSPrompt} ${buttons}</div>`;
+        const content = `${this._config.msgAndroidA2HSPrompt} <div class="btn-container">${buttons}</div>`;
 
         this.showMsg(
             content,
