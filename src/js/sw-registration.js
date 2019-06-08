@@ -332,6 +332,13 @@ class SWRegistration {
 	}
 
     /**
+	 * Check if A2HSprompt's delay locally stored is expired
+	 */
+	isA2HSpromptDelayExpired() {
+        return new Date(localStorage.getItem('A2HSPromptDate')) <= new Date();
+    }
+
+    /**
      * Check if A2HSprompt's delay locally stored is expired
      */
     cancelA2HSprompt(_this) {
@@ -372,7 +379,7 @@ class SWRegistration {
             // Stash the event so it can be triggered later.
             this._deferredPrompt = e;
 
-            if (!this._isOffline && new Date(localStorage.getItem('A2HSPromptDate')) <= new Date())
+            if (!this._isOffline && this.isA2HSpromptDelayExpired())
                 this.showAddToHomeScreen();
         });
     }
