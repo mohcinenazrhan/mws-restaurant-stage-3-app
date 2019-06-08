@@ -265,11 +265,13 @@ class SWRegistration {
 	hideMsg() {
 		document.body.classList.remove('snackbar--show');
 
-		if (this._msgHolder !== null) {
-			const { msg, timeToHide, priority, callback } = this._msgHolder;
-			this.showMsg(msg, timeToHide, priority, callback);
-			this._msgHolder = null;
-		}
+        setTimeout(() => {
+            if (this._msgHolder !== null) {
+                const { msg, timeToHide, priority, callback } = this._msgHolder;
+                this.showMsg(msg, timeToHide, priority, callback);
+                this._msgHolder = null;
+            }
+        }, 400);
 	}
 
     /**
