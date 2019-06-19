@@ -28,10 +28,10 @@ const controler = {
     document.addEventListener('DOMContentLoaded', () => {
       this.fillContent();
       this.listenerOnFilterChange();
+      this.swRegistration();
       // defer to optimise loading
       setTimeout(() => {
         Notificationbtn.create();
-        this.swRegistration();
       }, 2000);
     });
   },

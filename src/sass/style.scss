@@ -1845,33 +1845,36 @@ body.snackbar--show .snackbar {
 }
 
 .snackbar {
-    background-color: rgb(18, 18, 19);
+    box-sizing: border-box;
+    background-color: #121213;
     color: #fff;
-    padding: 10px 48px 10px 10px;
+    padding: 10px 55px 10px 10px;
     position: fixed;
     z-index: 9999999999999999;
     left: 15px;
     bottom: 15px;
-    border-radius: 5px;
+    border-radius: 5px 8px 8px 5px;
     max-width: 90%;
     min-height: 48px;
+    line-height: 28px;
+    font-size: 16px;
     -webkit-transform: translateY(150%);
-    -moz-transform: translateY(150%);
-    -ms-transform: translateY(150%);
-    -o-transform: translateY(150%);
     transform: translateY(150%);
     will-change: transform;
     -webkit-transition: -webkit-transform 200ms ease-in-out;
+    -webkit-transition-delay: 0s;
     transition-delay: 0s;
-    -moz-transition: -moz-transform 200ms ease-in-out;
-    -o-transition: -o-transform 200ms ease-in-out;
+    -webkit-transition: -webkit-transform 200ms ease-in-out false;
+    transition: -webkit-transform 200ms ease-in-out false;
     transition: transform 200ms ease-in-out false;
+    transition: transform 200ms ease-in-out false, -webkit-transform 200ms ease-in-out false;
 }
 
 .snackbar p {
-    margin: 0 40px 0 0;
+    margin: 0;
     color: #fff;
     text-align: center;
+    line-height: 40px;
 }
 
 .snackbar .snackbar-close {
@@ -1881,12 +1884,13 @@ body.snackbar--show .snackbar {
     width: 45px;
     height: 100%;
     padding: 0;
-    background: #000;
+    background: $main-color;
     border: none;
-    font-size: 27px;
+    font-size: 28px;
     font-weight: normal;
     border-radius: 0 5px 5px 0;
     color: #FFF;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .snackbar .snackbar-close:hover,
@@ -1900,12 +1904,52 @@ body.snackbar--show .snackbar {
     text-decoration: underline;
 }
 
-.btn-updatesw {
+.snackbar button {
+    font-size: 14px;
+}
+
+.snackbar .btn-container {
+    margin-top: 10px;
+    display: block;
+}
+
+@media only screen and (min-width: 736px) {
+    .snackbar .btn-container {
+        margin-top: 0;
+        display: inline-block;
+    }
+}
+
+.snackbar .btn-updatesw,
+.snackbar .btn-install {
     background: #ffffff;
     color: #000;
     font-weight: bold;
     border: none;
     border-radius: 5px;
+    margin: 0 10px;
+    min-width: 48px;
+    min-height: 48px;
+}
+
+.snackbar .btn-install--cancel {
+    background: #252222;
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    margin: 0 10px;
+    min-width: 48px;
+    min-height: 48px;
+}
+
+.snackbar .img-icon {
+    background-color: #fff;
+    max-width: 35px;
+    height: auto;
+    border-radius: 2px;
+    margin: 0 10px;
+    vertical-align: middle;
 }
 /*-------------------------------Notificationbtn-------------------------------*/
 .notificationbtn-reset,

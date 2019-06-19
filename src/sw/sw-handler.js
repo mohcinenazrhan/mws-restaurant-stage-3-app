@@ -4,6 +4,12 @@
 //! support : Cache/Background Sync/IndexedDB
 
 /**
+ * Enable Offline Google Analytics
+ */
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js');
+workbox.googleAnalytics.initialize();
+
+/**
  * send msg from Sw To Clients and response promise Helper
  */
 const msgSwToClients = {

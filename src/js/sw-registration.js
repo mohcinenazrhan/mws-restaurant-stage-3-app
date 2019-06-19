@@ -7,6 +7,8 @@ class SWRegistration {
             this._refreshing = false;
             this._isOffline = false;
             this._timeoutMsg = null;
+            this._msgHolder = null;
+            this._deferredPrompt = null;
 
             this._config = {
                 swUrl: 'sw/service-worker.js',
@@ -14,6 +16,12 @@ class SWRegistration {
                 msgOffline: 'You\'re currently offline',
                 msgOnline: 'You\'re back online <a href="javascript:location.reload()">refresh</a>',
                 msgWhenUpdate: 'The contents of this page have been updated. Please <a href="javascript:location.reload()">reload</a>',
+                msgAndroidA2HSPrompt: 'Add to the home screen',
+                installBtnText: 'Install',
+                laterBtnText: 'Later',
+                msgIosA2HSPrompt:
+                    'To install this site on your iPhone / iPad, press share <shareImgHtml>, then on <addHomeScreenImgHtml> add to the home screen.',
+                msgToShowWhenAppInstalled: 'Thank you for installing our app!',
                 askUserWhenSwUpdated: true,
                 msgSync: 'Your submit is saved and will auto-submit when you\'re online',
                 classIdBtnSwUpdate: 'btn-updatesw',
@@ -146,26 +154,23 @@ class SWRegistration {
      * set contianer html to show sw message for user
      */
     setSwMsgContianer() {
-        const container = document.createElement('div');
-        container.className = 'snackbar';
+		const container = document.createElement('div');
+		container.className = 'snackbar';
 
-        const parag = document.createElement('p');
-        parag.id = 'msgOffline';
-        container.appendChild(parag);
+		const parag = document.createElement('p');
+		parag.id = 'msgOffline';
+		container.appendChild(parag);
 
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'snackbar-close';
-        button.setAttribute('aria-label', 'snackbar-close');
-        button.addEventListener('click', this.hideMsg);
+		const button = document.createElement('button');
+		button.type = 'button';
+		button.className = 'snackbar-close';
+		button.setAttribute('aria-label', 'snackbar-close');
+		button.addEventListener('click', this.hideMsg.bind(this));
+		button.innerHTML = '&times;';
 
-        const span = document.createElement('span');
-        span.innerHTML = '&times;';
+		container.appendChild(button);
 
-        button.appendChild(span);
-        container.appendChild(button);
-
-        document.body.appendChild(container);
+		document.body.appendChild(container);
 
         window.addEventListener('online', this.updateNetworkState.bind(this));
         window.addEventListener('offline', this.updateNetworkState.bind(this));
@@ -176,7 +181,7 @@ class SWRegistration {
         });
         container.addEventListener('mouseout', () => {
             if (this._timeoutMsg !== null) 
-                this._timeoutMsg = setTimeout(this.hideMsg, 2000);
+                this._timeoutMsg = setTimeout(this.hideMsg.bind(this), 2000);
         });
     }
 
@@ -230,28 +235,45 @@ class SWRegistration {
         });
     }
 
-    /**
-     * show the given message
-     * @param {*} msg 
-     * @param {*} timeToHide // in milliseconds
-     */
-    showMsg(msg = '', timeToHide = 4500) {
-        if (msg === '') return
+	/**
+	 * Show the given message in the snackbar
+	 * @param {String} msg 
+	 * @param {Number} timeToHide // in milliseconds
+	 * @param {Boolean} priority
+	 * @param {Function} callback
+	 */
+	showMsg(msg = '', timeToHide = 4500, priority = true, callback = null) {		
+		if (msg === '') return
 
-        document.getElementById('msgOffline').innerHTML = msg;
-        document.body.classList.add('snackbar--show');
+		if (priority === false && document.body.classList.contains('snackbar--show')) {
+			this._msgHolder = { msg, timeToHide, priority, callback };
+			return;
+		}
 
-        if (this._timeoutMsg !== null) clearTimeout(this._timeoutMsg);
-        if (timeToHide !== null) this._timeoutMsg = setTimeout(this.hideMsg, timeToHide);
-        else this._timeoutMsg = null
-    }
+		document.getElementById('msgOffline').innerHTML = msg;
+		document.body.classList.add('snackbar--show');
 
-    /**
-     * hide Msg bar
-     */
-    hideMsg() {
-        document.body.classList.remove('snackbar--show');
-    }
+		if (callback !== null) callback();
+
+		if (this._timeoutMsg !== null) clearTimeout(this._timeoutMsg);
+		if (timeToHide !== null) this._timeoutMsg = setTimeout(this.hideMsg.bind(this), timeToHide);
+		else this._timeoutMsg = null
+	}
+
+	/**
+	 * Hide snackbar
+	 */
+	hideMsg() {
+		document.body.classList.remove('snackbar--show');
+
+        setTimeout(() => {
+            if (this._msgHolder !== null) {
+                const { msg, timeToHide, priority, callback } = this._msgHolder;
+                this.showMsg(msg, timeToHide, priority, callback);
+                this._msgHolder = null;
+            }
+        }, 400);
+	}
 
     /**
      * Get visibility state
@@ -286,6 +308,142 @@ class SWRegistration {
     }
 
     /**
+	 * Add To Home Screen
+	 */
+	addToHomeScreen() {
+		this.hideMsg();
+		this._deferredPrompt.prompt(); // Wait for the user to respond to the prompt
+		this._deferredPrompt.userChoice
+		.then((choiceResult) => {
+			if (choiceResult.outcome === 'accepted') {
+				console.log('User accepted the A2HS prompt');
+			} else {
+				console.log('User dismissed the A2HS prompt');
+				this.delayA2HSprompt();
+			}
+			this._deferredPrompt = null;
+		});
+	}
+
+	/**
+	 * Delay A2HS prompt By given nbr of day(s)
+	 */
+	delayA2HSprompt(days = 2) {
+		// Set Local Storage A2HSPromptDate value
+		// current date + 2 days
+		let dt = new Date();
+		dt.setDate(dt.getDate() + days);
+		localStorage.setItem('A2HSPromptDate', dt);
+	}
+
+    /**
+	 * Check if A2HSprompt's delay locally stored is expired
+	 */
+	isA2HSpromptDelayExpired() {
+        return new Date(localStorage.getItem('A2HSPromptDate')) <= new Date();
+    }
+
+    /**
+     * Check if A2HSprompt's delay locally stored is expired
+     */
+    cancelA2HSprompt(_this) {
+        document.getElementById('cancel-btn').addEventListener('click', () => {
+            _this.delayA2HSprompt();
+            _this.hideMsg();
+        });
+    }
+
+	/**
+	 * Show Add To Home Screen
+	 */
+	showAddToHomeScreen() {
+        const buttons = `<button class="btn-install" id="install-btn">${this._config.installBtnText}</button>
+		<button class="btn-install--cancel" id="cancel-btn">${this._config.laterBtnText}</button>`;
+        const content = `${this._config.msgAndroidA2HSPrompt} <div class="btn-container">${buttons}</div>`;
+
+        this.showMsg(
+            content,
+            null,
+            false,
+            (function (_this) {
+                return function () {
+                    document.getElementById('install-btn').addEventListener('click', _this.addToHomeScreen.bind(_this));
+                    _this.cancelA2HSprompt(_this);
+                }
+            })(this)
+        )
+
+        // Show a msg to let the user know that the app is successfully installed
+        window.addEventListener('appinstalled', () => {
+            this.showMsg(this._config.msgToShowWhenAppInstalled, null, false);
+        });
+	}
+
+    /**
+	 * Detects if site run into a iOS device
+	 */
+	isIos() {
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        return /iphone|ipad|ipod/.test(userAgent);
+    }
+
+    /**
+     * Detects if device is in standalone mode
+     */
+    isInStandaloneMode() {
+        return 'standalone' in window.navigator && window.navigator.standalone;
+    }
+
+    /**
+     * listen To Install Prompt
+     */
+    listenToInstallPrompt() {
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            this._deferredPrompt = e;
+
+            if (!this._isOffline && this.isA2HSpromptDelayExpired())
+                this.showAddToHomeScreen();
+        });
+    }
+        
+    /**
+     * Install prompt manager for all devices
+     */
+    installPromptManager() {
+        // Checks if should display install popup notification for iOS
+        if (this.isIos()) {
+            if (!this.isInStandaloneMode() && this.isA2HSpromptDelayExpired()) {
+                const shareImgHtml = '<img class="img-icon" src="./pwaicons/ios-share-icon.png">';
+                const addHomeScreenImgHtml = '<img class="img-icon" src="./pwaicons/ios-add-new-icon.png">';
+                const buttons = `<div class="btn-container"><button class="btn-install" id="install-btn">Ok</button>
+            <button class="btn-install--cancel" id="cancel-btn">${this._config.laterBtnText}</button>`;
+
+                const msgContent =
+                    this._config.msgIosA2HSPrompt
+                        .replace('<shareImgHtml>', shareImgHtml)
+                        .replace('<addHomeScreenImgHtml>', addHomeScreenImgHtml) + buttons;
+
+                this.showMsg(
+                    msgContent,
+                    null,
+                    false,
+                    (function (_this) {
+                        return function () {
+                            document.getElementById('install-btn').addEventListener('click', _this.hideMsg.bind(_this));
+                            _this.cancelA2HSprompt(_this);
+                        }
+                    })(this)
+                );
+            }
+        } else {
+            this.listenToInstallPrompt();
+        }
+    }
+    
+    /**
      * fire sw
      * @param {*} config 
      */
@@ -300,6 +458,7 @@ class SWRegistration {
         try {
                   this.callFuncsWhenDOMContentLoaded();
             await this.serviceWorkerRegistration();
+                  this.installPromptManager();
                   this.listenToMessages();
                   this.updateNetworkState();
             return Promise.resolve();
